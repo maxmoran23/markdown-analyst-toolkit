@@ -1,0 +1,393 @@
+{
+  "slug": "correspondent-banking",
+  "title": "Correspondent Banking",
+  "summary": "Review respondent-bank relationships, nested access and payment-information gaps using a bounded, risk-based evidence record.",
+  "audience": "Analysts preparing generic correspondent relationship review materials",
+  "decision": "Which relationship-specific transparency and due-diligence gaps need authorized follow-up before a human disposition?",
+  "palette": "teal",
+  "report_sections": [
+    "Correspondent relationship decision brief",
+    "Scope, legal applicability and payment population",
+    "Material relationship and transparency findings",
+    "Respondent relationship assessment",
+    "Payment transparency and nested access",
+    "Evidence and criterion provenance",
+    "Proposed relationship-specific actions",
+    "Limitations, quality checks and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "RelationshipReview",
+      "columns": [
+        "respondent_id",
+        "respondent_name",
+        "services",
+        "nested_declared",
+        "physical_presence",
+        "regulated_affiliate",
+        "control_evidence",
+        "assessment",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "CB01",
+          "Cedar Basin Bank",
+          "Commercial payments and NB-01 nested access",
+          "YES",
+          "DOCUMENTED",
+          "NOT_ASSESSED",
+          "Policy and limited operating test supplied",
+          "LIMITED_SUPPORT",
+          "SYN-001;SYN-005;SYN-006"
+        ],
+        [
+          "CB02",
+          "Delta Reach Bank",
+          "Commercial and remittance payments; no declared nested access",
+          "NO",
+          "UNKNOWN",
+          "UNKNOWN",
+          "Questionnaire only; operating test absent",
+          "FOLLOW_UP",
+          "SYN-002;SYN-005"
+        ],
+        [
+          "CB03",
+          "Islet Digital Bank",
+          "Own treasury payments",
+          "NO",
+          "NONE_REPORTED",
+          "DOCUMENTED",
+          "Affiliation and consolidated-supervision statement supplied",
+          "LEGAL_CLASSIFICATION_REVIEW",
+          "SYN-003;SYN-005"
+        ],
+        [
+          "CB04",
+          "Orchard Plain Bank",
+          "Own treasury payments",
+          "NO",
+          "DOCUMENTED",
+          "NOT_ASSESSED",
+          "Scoped control test supplied",
+          "LIMITED_SUPPORT",
+          "SYN-004;SYN-005"
+        ]
+      ]
+    },
+    {
+      "name": "PaymentReview",
+      "columns": [
+        "payment_id",
+        "respondent_id",
+        "underlying_bank_id",
+        "amount",
+        "currency",
+        "initial_missing",
+        "cutoff_missing",
+        "nested_state",
+        "review_state",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "P01",
+          "CB01",
+          "NONE_DECLARED",
+          100000,
+          "USD",
+          "NONE",
+          "NONE",
+          "NOT_INDICATED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P02",
+          "CB01",
+          "NB-01",
+          50000,
+          "USD",
+          "originator_identifier",
+          "NONE",
+          "DISCLOSED",
+          "REPAIRED",
+          "SYN-005;SYN-006"
+        ],
+        [
+          "P03",
+          "CB01",
+          "NB-01",
+          25000,
+          "USD",
+          "NONE",
+          "NONE",
+          "DISCLOSED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P04",
+          "CB01",
+          "NONE_DECLARED",
+          25000,
+          "USD",
+          "NONE",
+          "NONE",
+          "NOT_INDICATED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P05",
+          "CB02",
+          "NB-02",
+          60000,
+          "USD",
+          "originator_identifier",
+          "originator_identifier",
+          "UNDECLARED_OBSERVED",
+          "GAP_OPEN",
+          "SYN-005"
+        ],
+        [
+          "P06",
+          "CB02",
+          "NB-02",
+          40000,
+          "USD",
+          "NONE",
+          "NONE",
+          "UNDECLARED_OBSERVED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P07",
+          "CB02",
+          "NONE_DECLARED",
+          20000,
+          "USD",
+          "beneficiary_identifier",
+          "beneficiary_identifier",
+          "NOT_INDICATED",
+          "GAP_OPEN",
+          "SYN-005"
+        ],
+        [
+          "P08",
+          "CB03",
+          "NONE_DECLARED",
+          30000,
+          "USD",
+          "NONE",
+          "NONE",
+          "NOT_INDICATED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P09",
+          "CB03",
+          "NONE_DECLARED",
+          70000,
+          "USD",
+          "NONE",
+          "NONE",
+          "NOT_INDICATED",
+          "COMPLETE",
+          "SYN-005"
+        ],
+        [
+          "P10",
+          "CB04",
+          "NONE_DECLARED",
+          80000,
+          "USD",
+          "NONE",
+          "NONE",
+          "NOT_INDICATED",
+          "COMPLETE",
+          "SYN-005"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "CB-F01",
+      "title": "CB02 has undeclared nested access and open field gaps",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-002",
+        "SYN-005"
+      ],
+      "detail": "Two NB-02 payments total USD 100,000; P05 and P07 retain missing illustrative identity fields totaling USD 80,000 at cutoff.",
+      "recommendation": "Clarify NB-02 access authority and obtain missing fields through an authorized process."
+    },
+    {
+      "id": "CB-F02",
+      "title": "CB01 historical field gap is repaired",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-005",
+        "SYN-006"
+      ],
+      "detail": "P02 initially lacked originator identifier; a linked Sep 09 repair supplies it before cutoff.",
+      "recommendation": "Preserve the initial defect and review whether the repair process needs further testing."
+    },
+    {
+      "id": "CB-F03",
+      "title": "CB03 requires scoped legal classification",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-003"
+      ],
+      "detail": "No separate physical presence is reported, but affiliation and consolidated-supervision support are supplied.",
+      "recommendation": "Assess the applicable regulated-affiliate definition; do not infer prohibition or approval."
+    },
+    {
+      "id": "CB-F04",
+      "title": "CB04 provides a supported ordinary-activity control",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-004",
+        "SYN-005"
+      ],
+      "detail": "P10 is a complete own-treasury payment within the stated service scope.",
+      "recommendation": "Retain in the population and seek ordinary human disposition."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional respondent profile CB01",
+      "locator": "10-worked-example.md, profile CB01",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional respondent profile CB02",
+      "locator": "10-worked-example.md, profile CB02",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional respondent profile CB03",
+      "locator": "10-worked-example.md, profile CB03",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional respondent profile CB04",
+      "locator": "10-worked-example.md, profile CB04",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional complete initial payment population",
+      "locator": "10-worked-example.md, payment rows P01 through P10 and role note",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional P02 repair",
+      "locator": "10-worked-example.md, repair R01",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-FATF-CB",
+      "title": "FATF correspondent banking guidance, October 2016",
+      "locator": "https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-Correspondent-Banking-Services.pdf; paragraphs 1\u20134, 9",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-SHELL",
+      "title": "FFIEC foreign shell-bank manual section",
+      "locator": "https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/12; applicability in 02",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Payments reviewed",
+      "value": 10,
+      "method": "Ten distinct payment IDs P01\u2013P10."
+    },
+    {
+      "label": "Reviewed value USD",
+      "value": 500000,
+      "format": "$#,##0.00",
+      "method": "Sum all ten USD payment amounts."
+    },
+    {
+      "label": "Cutoff gap count rate",
+      "value": 20.0,
+      "format": "0.0\"%\"",
+      "method": "P05 and P07 / 10 payments \u00d7 100."
+    },
+    {
+      "label": "Cutoff gap value USD",
+      "value": 80000,
+      "format": "$#,##0.00",
+      "method": "P05 60,000 + P07 20,000; 16.0% of USD 500,000."
+    }
+  ],
+  "limitations": [
+    "All respondent profiles, payments and repairs are fictional.",
+    "The four-field criterion is illustrative and does not establish legal message compliance.",
+    "CB02 physical presence and control operation are not established.",
+    "No relationship approval, restriction, communication or human disposition is recorded.",
+    "Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification."
+  ],
+  "metadata": {
+    "conclusion": "CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control."
+  },
+  "report_narrative": [
+    [
+      "CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control."
+    ],
+    [
+      "The fictional review covers four respondents and ten USD payments totaling USD 500,000 through Sep 10, 2026 5:00 PM ET. The four-field criterion is an analytic convention, not a full legal compliance test."
+    ],
+    [
+      "CB-F01 identifies two distinct questions at CB02: service authority and current message fields. CB-F02 preserves an initial defect after repair. CB-F03 keeps regulated-affiliate classification open. CB-F04 retains ordinary treasury activity."
+    ],
+    [
+      "RelationshipReview separates unknown presence at CB02 from reported absence plus affiliate support at CB03. Neither condition produces an automatic shell-bank or exit conclusion."
+    ],
+    [
+      "PaymentReview records three initial gaps, USD 130,000 and 30.0% by count. After the P02 repair, two gaps remain, USD 80,000 and 20.0% by count. Four nested payments total USD 175,000; USD 100,000 was undeclared at the relevant dates.",
+      "The separate P06 role-uncertainty variation in file 10 leaves baseline metrics unchanged until explicitly selected; its UNRESOLVED state is distinct from field completeness and from confirmed nested activity."
+    ],
+    [
+      "SYN-001 through SYN-004 support the four relationship profiles. SYN-005 supplies every initial payment and its role; SYN-006 supplies the single pre-cutoff repair. The two REF sources provide bounded methodological context."
+    ],
+    [
+      "Propose CB02 access clarification and field completion, CB01 process review, CB03 legal classification and ordinary CB04 review. No action has been issued or executed."
+    ],
+    [
+      "All respondent profiles, payments and repairs are fictional.",
+      "The four-field criterion is illustrative and does not establish legal message compliance.",
+      "CB02 physical presence and control operation are not established.",
+      "No relationship approval, restriction, communication or human disposition is recorded.",
+      "Actual QA outcomes and a named human disposition remain to be recorded.",
+      "Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification."
+    ]
+  ],
+  "as_of": "2026-09-10 5:00 PM ET",
+  "scope": "Four fictional respondent profiles, ten USD payments and one linked repair through Sep 10, 2026 5:00 PM ET. Four-field completeness is an illustrative analytic criterion."
+}

@@ -9,6 +9,8 @@ import re
 
 ROOT = Path(__file__).resolve().parents[1]
 HERE = ROOT / '_maintainer'
+RELEASE = json.loads((HERE / 'release.json').read_text())
+VERSION, RELEASE_DATE, REPOSITORY = RELEASE['version'], RELEASE['date'], RELEASE['repository']
 PALETTES = {
     'slate': ('#315c75', '#b0d3e6'),
     'teal': ('#276357', '#a7d8c7'),
@@ -26,8 +28,9 @@ COMMON = {
 
 def prepare(catalog):
     data = dict(catalog)
-    data.update(suite_id=data['slug'], version='1.0.0', as_of='2026-10-09',
+    data.update(suite_id=data['slug'], version=VERSION,
                 notice='Synthetic worked example. Fictional records. Not a completed operational review.')
+    data.setdefault('as_of', data.get('metadata', {}).get('as_of') or RELEASE_DATE)
     data.setdefault('scope', 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.')
     data.setdefault('conclusion', data.get('metadata', {}).get('conclusion') or f"The fictional review records {len(data['findings'])} findings for human assessment. Read the finding-specific evidence and unresolved limitations before making a disposition.")
     data['metrics'] = [dict(metric, format=metric.get('format') or ('$#,##0.00' if metric['label'].endswith('USD') else '#,##0.00' if isinstance(metric['value'], float) else '#,##0')) for metric in data['metrics']]
@@ -57,7 +60,7 @@ def prepare(catalog):
     return data
 
 def python_template(name, data):
-    return (HERE/'templates'/name).read_text().replace('DATA = None  # __DATA__', 'DATA = '+repr(data))
+    return (HERE/'templates'/name).read_text().replace('# __CASE_VALIDATION__', (HERE/'schema.py').read_text() + '\nrequire_case(DATA)\n').replace('DATA = None  # __DATA__', 'DATA = '+repr(data))
 
 def dashboard(data):
     light, dark = PALETTES[data['palette']]
@@ -68,7 +71,7 @@ def report_md(data):
     sections='\n'.join(f'{i}. **{heading}**' for i,heading in enumerate(data['report_sections'],1))
     text=f'''# {data['title']} — fixed report template
 
-Version 1.0.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version {VERSION}. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -125,7 +128,7 @@ def workbook_md(data):
     rows='\n'.join('| '+name+' | `'+ '`, `'.join(cols)+'` |' for name,cols in schemas.items())
     return f'''# {data['title']} — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version {VERSION}. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -167,6 +170,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 {python_template('workbook.py',data)}
 ```
@@ -180,7 +189,7 @@ def dashboard_md(data):
     light,dark=PALETTES[data['palette']]
     return f'''# {data['title']} — complete dashboard template
 
-Version 1.0.0. Use the complete HTML below to create a single downloadable `.html` file in the current session. It includes all style and interaction code. No hosted assets, fonts, CDN, installation, repository access, API key or local server is needed. Where a file tool is unavailable, return the complete HTML as copy-ready text and explicitly state that no file was created.
+Version {VERSION}. Use the complete HTML below to create a single downloadable `.html` file in the current session. It includes all style and interaction code. No hosted assets, fonts, CDN, installation, repository access, API key or local server is needed. Where a file tool is unavailable, return the complete HTML as copy-ready text and explicitly state that no file was created.
 
 ## Design and behavior contract
 
@@ -224,7 +233,7 @@ def build_record(data, metrics):
     rows='\n'.join(f'| `{name}` | `{digest}` |' for name,digest in m['hashes'].items())
     return f'''# {data['title']} — build record
 
-Version 1.0.0. Build date: 2026-10-09. This file documents the suite and is not required as a chat attachment.
+Version {VERSION}. Build date: {RELEASE_DATE}. This file documents the suite and is not required as a chat attachment.
 
 ## Measured content and estimated resources
 
@@ -254,7 +263,7 @@ The build-budget range is intentionally an estimate of resources one might reser
 | 5. Review | Defined falsifiable analytical and delivery checks | File 09; actual release checks are listed in the root verification record |
 | 6. Package | Measured files, embedded renderers and created checksummed bundles | This record, release assets and root verification record |
 
-Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.0.0/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
+Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification]({REPOSITORY}/blob/v{VERSION}/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
 
 ## Instructional file integrity
 
@@ -295,9 +304,9 @@ def generate(check=False):
 
 The ten instructional files contain **{m['words']:,} words** and approximately **{m['tokens']:,} attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **{m['tokens']*4:,}–{m['tokens']*10:,} tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
 
-Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.0.0/docs/VERIFICATION.md) records what was actually tested.
+Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification]({REPOSITORY}/blob/v{VERSION}/docs/VERIFICATION.md) records what was actually tested.
 
-[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.0.0/{data['slug']}.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.'''
+[Download this 12-file Markdown suite]({REPOSITORY}/releases/download/v{VERSION}/{data['slug']}.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.'''
             put(readme,replace_block(readme.read_text(),'BUILD',block))
     if changed:
         print(('STALE: ' if check else 'Generated: ')+', '.join(changed))

@@ -23,6 +23,19 @@ system has been implemented or validated.
 | New-product risk | Product approval and risk assessment prompts | Funds/data flows, control dependencies, unresolved mandatory conditions and human launch decisions |
 | Trade surveillance | Trade and communications surveillance prompts | Event-time normalization, market context, manipulative-pattern alternatives and bounded escalation |
 
+## Added in 1.1.0
+
+| Suite | Related analytical function | Added attachment-focused depth |
+| --- | --- | --- |
+| Customer risk review | Customer risk assessment and periodic review | Explicit factor weights, missing-factor restrictions, overrides and human rating authority |
+| Jurisdiction risk | Geographic exposure and country-risk analysis | Dated source status, distinct legal and analytical factors, complete exposure denominators and deduplicated unions |
+| Source of wealth and funds | Enhanced diligence and funding review | Wealth-stock bridge, specific funding trace, evidence coverage and unexplained differences |
+| Adverse media | Negative-news and public-source research | Entity match, originating source families, allegation/procedural-status separation and search limits |
+| Correspondent banking | Respondent due diligence and nested exposure | Relationship scope, payable-through/nested distinctions, payment transparency and bounded legal applicability |
+| Trade finance review | Documentary trade and trade-based laundering indicators | Goods/documents/payment reconciliation, unit-price and route alternatives, identity and evidence restrictions |
+| Sampling assurance | Control-testing sample design and evaluation | Frozen population, reproducible selection, finite-population limits, judgmental exclusions and unresolved evidence |
+| Issue remediation | Findings management and closure validation | Implementation versus effectiveness, dependent closure conditions, retesting and explicit human disposition |
+
 ## Deliberate exclusions
 
 Mailbox administration, calendar indexing, scheduling, agent hosting, connector setup,

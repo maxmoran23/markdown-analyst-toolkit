@@ -1,12 +1,13 @@
 """Emit task-specific context estimates from actual instructional file contents."""
 import math
+import argparse
 from pathlib import Path
 from build import ROOT, instruction_metrics, replace_block
 
 def tokens(paths):
     return math.ceil(sum(len(p.read_text()) for p in paths)/4)
 
-def build():
+def build(check=False):
     rows=[];total_words=0;total_tokens=0
     for folder in sorted((ROOT/'suites').iterdir()):
         m=instruction_metrics(folder)
@@ -44,12 +45,18 @@ Build-token budgets in suite READMEs use 4–10× final context as an illustrati
 reproduction planning assumption. They do not report actual generation consumption,
 billed tokens or monetary cost. No fixed multiplier can establish those values.
 '''
-    (ROOT/'docs/CONTENT-BUDGET.md').write_text(content)
+    outputs = {ROOT/'docs/CONTENT-BUDGET.md': content}
     readme=ROOT/'README.md'
     if readme.exists():
         block=f'''**Measured instructional library:** {len(rows)} suites, {len(rows)*12} suite Markdown files, **{total_words:,} words** in files 01–10. Each suite has ten instructional attachments. [Per-suite context budgets](docs/CONTENT-BUDGET.md) separate the full package, analysis stage and rendering stages. Word counts include code; repeated renderers are intentional.'''
-        readme.write_text(replace_block(readme.read_text(),'METRICS',block))
+        outputs[readme] = replace_block(readme.read_text(),'METRICS',block)
+    changed = [p for p, value in outputs.items() if not p.exists() or p.read_text()!=value]
+    if not check:
+        for p in changed:p.write_text(outputs[p])
+    if changed and check:print('STALE: '+', '.join(str(p.relative_to(ROOT)) for p in changed))
     print(f'Content budgets: {len(rows)} suites / {total_words:,} instructional words / {total_tokens:,} estimated tokens')
 
+    return bool(changed and check)
+
 if __name__=='__main__':
-    build()
+    parser=argparse.ArgumentParser();parser.add_argument('--check',action='store_true');raise SystemExit(build(parser.parse_args().check))

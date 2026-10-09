@@ -1,8 +1,15 @@
 # How this library was built
 
-Release 1.0.0 was developed on 2026-10-09 as a companion to two existing public
+The initial release was developed on 2026-10-09 as a companion to two existing public
 reference libraries. The aim was to preserve substantial analytical guidance within
 small topic folders that a person can attach manually to an AI chat.
+
+Release 1.1.0 adds eight suites, an offline selection guide and practical session/handoff
+guides. It also adds shared structural preflight inside the distributed Office renderers,
+tests that execute code extracted from the Markdown, and a per-file release manifest.
+The baseline below records the original adaptation; the new domain methods were reviewed
+against their own linked primary sources. See the [release notes](RELEASE-NOTES.md) and
+[current verification record](VERIFICATION.md) for the evidence and remaining limits.
 
 ## Source baseline
 

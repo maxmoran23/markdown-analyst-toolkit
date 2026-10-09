@@ -8,6 +8,16 @@ const build=path.join(root,'build','browser');
 fs.mkdirSync(build,{recursive:true});
 function luminance(rgb){return rgb.map(v=>v/255).map(v=>v<=0.04045?v/12.92:((v+0.055)/1.055)**2.4).reduce((s,v,i)=>s+v*[0.2126,0.7152,0.0722][i],0);}
 function contrast(a,b){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+0.05)/(Math.min(x,y)+0.05);}
+function parseCsv(text){
+ const rows=[];let row=[],field='',quoted=false;const input=text.replace(/^\uFEFF/,'');
+ for(let i=0;i<input.length;i++){const c=input[i];
+  if(c==='"'){if(quoted&&input[i+1]==='"'){field+='"';i++;}else quoted=!quoted;}
+  else if(c===','&&!quoted){row.push(field);field='';}
+  else if((c==='\r'||c==='\n')&&!quoted){if(c==='\r'&&input[i+1]==='\n')i++;row.push(field);rows.push(row);row=[];field='';}
+  else field+=c;
+ }
+ assert.equal(quoted,false);if(field.length||row.length){row.push(field);rows.push(row);}return rows;
+}
 async function main(){
  const browser=await chromium.launch({channel:process.env.TOOLKIT_BROWSER_CHANNEL||'chrome',headless:true});
  const context=await browser.newContext({viewport:{width:1440,height:1100},acceptDownloads:true});
@@ -23,6 +33,8 @@ async function main(){
   const output=path.join(build,slug+'.html');fs.writeFileSync(output,html);
   await page.goto('file://'+output);await page.waitForSelector('#finding-table table');
   const data=await page.locator('#report-data').textContent().then(JSON.parse);
+  assert.equal(await page.evaluate(()=>formatted(1.2345,'0.0000')),'1.2345');
+  assert.equal(await page.evaluate(()=>formatted(1.2,'0.0000')),'1.2000');
   assert.equal(await page.locator('main section').count(),10);
   assert.equal(await page.locator('#finding-table tbody tr').count(),data.findings.length);
   for(const [i,suffix] of ['one','two'].entries()){
@@ -34,7 +46,10 @@ async function main(){
   assert.equal(await page.locator('#finding-table tbody tr').count(),high);
   const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#export').click()]);
   const csvPath=path.join(build,slug+'-filtered.csv');await download.saveAs(csvPath);
-  const csv=fs.readFileSync(csvPath,'utf8');assert(csv.includes('severity'));
+  const csv=fs.readFileSync(csvPath,'utf8');const csvRows=parseCsv(csv);
+  assert.deepEqual(csvRows[0],['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation']);
+  assert.deepEqual(csvRows.slice(1).map(r=>r[0]),data.findings.filter(f=>f.severity==='HIGH').map(f=>f.id));
+  assert(csvRows.slice(1).every(r=>r[2]==='HIGH'));
   await page.evaluate(()=>window.dispatchEvent(new Event('beforeprint')));
   assert.equal(await page.locator('#finding-table tbody tr').count(),data.findings.length);
   await page.evaluate(()=>window.dispatchEvent(new Event('afterprint')));

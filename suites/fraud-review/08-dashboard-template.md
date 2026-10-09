@@ -1,6 +1,6 @@
 # Fraud Incident Review — complete dashboard template
 
-Version 1.0.0. Use the complete HTML below to create a single downloadable `.html` file in the current session. It includes all style and interaction code. No hosted assets, fonts, CDN, installation, repository access, API key or local server is needed. Where a file tool is unavailable, return the complete HTML as copy-ready text and explicitly state that no file was created.
+Version 1.1.0. Use the complete HTML below to create a single downloadable `.html` file in the current session. It includes all style and interaction code. No hosted assets, fonts, CDN, installation, repository access, API key or local server is needed. Where a file tool is unavailable, return the complete HTML as copy-ready text and explicitly state that no file was created.
 
 ## Design and behavior contract
 
@@ -367,9 +367,9 @@ Serialize `<`, `>` and `&` in JSON as `\u003c`, `\u003e`, `\u0026` before embedd
     ]
   ],
   "suite_id": "fraud-review",
-  "version": "1.0.0",
-  "as_of": "2026-10-09",
+  "version": "1.1.0",
   "notice": "Synthetic worked example. Fictional records. Not a completed operational review.",
+  "as_of": "2026-10-09",
   "scope": "Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.",
   "methods": [
     "Confirm the question, authorized scope, period, population and available capabilities.",
@@ -439,7 +439,7 @@ const data=JSON.parse(document.getElementById('report-data').textContent);
 const byId=id=>document.getElementById(id);
 const write=(id,value)=>{byId(id).textContent=value;};
 const show=value=>value===null||value===undefined?'Not provided':Array.isArray(value)?value.join('; '):String(value);
-function formatted(value,format){if(typeof value!=='number'||!format)return show(value);if(format==='0.0%')return(value*100).toFixed(1)+'%';if(format==='0.0"%"')return value.toFixed(1)+'%';const places=format.includes('.00')?2:format.includes('.0')?1:0;return(format.includes('$')?'$':'')+value.toLocaleString('en-US',{minimumFractionDigits:places,maximumFractionDigits:places});}
+function formatted(value,format){if(typeof value!=='number'||!format)return show(value);if(format==='0.0%')return(value*100).toFixed(1)+'%';if(format==='0.0"%"')return value.toFixed(1)+'%';const decimals=format.match(/\.([0#]+)/);const places=decimals?decimals[1].length:0;return(format.includes('$')?'$':'')+value.toLocaleString('en-US',{minimumFractionDigits:places,maximumFractionDigits:places});}
 function table(target,columns,rows,caption,formats={}){
   const host=byId(target);host.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='empty';p.textContent='No records in this view. This does not establish absence in the underlying population.';host.append(p);return;}

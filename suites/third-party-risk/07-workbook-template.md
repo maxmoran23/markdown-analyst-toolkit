@@ -1,6 +1,6 @@
 # Third-Party Service and Assurance Review — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'third-party-risk', 'title': 'Third-Party Service and Assurance Review', 'summary': 'Assess a defined service relationship, trace outsourced dependencies, and test whether supplied assurance supports the controls being relied upon.', 'audience': 'Third-party reviewers, service owners, and risk decision forums', 'decision': 'Does the evidence support reliance on the proposed service, and what must be resolved before a human acceptance decision?', 'palette': 'teal', 'report_sections': ['Service reliance recommendation and restrictions', 'Relationship scope and assessment method', 'Material assurance findings', 'Service and fourth-party dependencies', 'Assurance evidence and test outcomes', 'Source provenance and coverage limitations', 'Remediation exit and review proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'ServiceDependencies', 'columns': ['service_id', 'provider_role', 'service_function', 'data_access', 'dependency_id', 'substitutability', 'evidence_ids'], 'rows': [['SV01', 'Primary provider', 'Review decision service', 'Customer attributes', 'SV02;SV03', 'No immediate substitute', 'SYN-001'], ['SV02', 'Storage subcontractor', 'Hosted records', 'Stored customer attributes', None, 'Shared dependency', 'SYN-001'], ['SV03', 'Reference supplier', 'Reference data feed', 'Reference dataset', None, 'Alternative untested', 'SYN-001'], ['SV04', 'Support subcontractor', 'Incident support', 'Privileged support access', 'SV01', 'Alternative untested', 'SYN-001'], ['SV05', 'Proposed fallback provider', 'Fallback review service', 'Customer attributes', 'SV02', 'Shares storage dependency', 'SYN-001']]}, {'name': 'AssuranceReview', 'columns': ['review_id', 'domain', 'criterion', 'critical', 'result', 'evidence_ids'], 'rows': [['AR01', 'Service scope', 'Confirm service boundaries and accountable roles', False, 'SUPPORTED', 'SYN-001'], ['AR02', 'Assurance coverage', 'Evidence required controls for relevant period and subcontractor', True, 'PARTIAL', 'SYN-001'], ['AR03', 'Recovery', 'Demonstrate recovery within 4 hours and lag<=15 minutes', True, 'FAILED', 'SYN-001'], ['AR04', 'Exit', 'Reconcile complete export of 1000 test records', True, 'FAILED', 'SYN-001'], ['AR05', 'User controls', 'Evidence required customer-side access review', True, 'UNVERIFIED', 'SYN-001'], ['AR06', 'Contract', 'Confirm executed incident-notification terms', True, 'PARTIAL', 'SYN-001']]}], 'findings': [{'id': 'TP-F01', 'title': 'Assurance scope does not cover the entire relied-on service', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'The supplied report ends 2025-12-31 and excludes the storage subcontractor; a provider assertion does not extend independent testing.', 'recommendation': 'Obtain current and subcontractor-relevant evidence or propose an explicitly restricted reliance decision.'}, {'id': 'TP-F02', 'title': 'Recovery rehearsal misses the illustrative service criteria', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'Recovery takes6 hours against 4; observed replication lag20 minutes exceeds 15.', 'recommendation': 'Address the failure mechanism and retest service, data, and dependent controls.'}, {'id': 'TP-F03', 'title': 'Exit export has an unexplained record shortfall', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '985 of 1000 fixture records are returned;15 remain unexplained.', 'recommendation': 'Reconcile missing IDs and repeat an end-to-end exit test before relying on portability.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional service relationship and six assurance checks', 'locator': '10-worked-example.md, dependency inventory and assurance evidence', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'Federal Reserve SR 23-4 Interagency Guidance on Third-Party Relationships', 'locator': 'https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'OCC 2024-11 Third-Party Relationships: A Guide for Community Banks', 'locator': 'https://www.occ.gov/news-issuances/bulletins/2024/bulletin-2024-11.html', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'OCC 2026-46 Proposed Third-Party Risk Management Guidance', 'locator': 'https://occ.gov/news-issuances/bulletins/2026/bulletin-2026-46.html', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Mapped service dependencies', 'value': '5', 'method': 'Count SV01–SV05; fallback and primary share SV02.', 'format': '#,##0'}, {'label': 'Supported review criteria', 'value': '1 of 6 (16.7%)', 'method': 'SUPPORTED / six specified fixture criteria; no weighted acceptance score.', 'format': '#,##0'}, {'label': 'Exit record return', 'value': '985 of 1000 (98.5%)', 'method': 'Returned records / expected fixture population;15 unreconciled prevents completeness claim.', 'format': '#,##0'}], 'limitations': ['All providers, service facts, records, contract clauses, and tests are fictional.', 'An assurance report is limited by scope, period, exceptions, and user responsibilities.', 'A report period ending does not by itself mean the report has expired.', 'No onboarding, contracting, termination, or data transfer is authorized.'], 'conclusion': 'The fictional service review has unresolved assurance, recovery, exit, user-control, and contract conditions. The evidence does not support unrestricted reliance; remediation, retest, and an authorized human disposition are required.', 'report_narrative': [['The fixture does not support unrestricted reliance on the service. Assurance coverage, recovery, exit completeness, user-control evidence, and contract support remain unresolved and require human disposition.'], ['The unit of review is a fictional decision service and its five mapped dependencies. The six review criteria include five critical reliance conditions; targets are illustrative and tailored to this fixture.'], ['The assurance report leaves a later coverage interval and excludes storage. Recovery and data-lag tests miss their criteria, while the exit export omits fifteen expected records. Missing user-control evidence and unsigned contract terms remain additional conditions.'], ['The primary provider SV01 and proposed fallback SV05 share storage dependency SV02. The fallback therefore cannot be treated as independent protection from that storage failure without further architecture and recovery evidence.'], ['AssuranceReview contains one SUPPORTED, two PARTIAL, two FAILED, and one UNVERIFIED result. Recovery takes six hours against four, data lag is twenty minutes against fifteen, and export returns 985 of 1,000 expected records, or 98.5%.'], ['SYN-001 defines the complete fictional service and test package. A report period ending is not an invented expiry, and a management bridge assertion is not independent testing. The September 2026 third-party guidance source is a proposal, separately labelled from existing final references.'], ['Propose relevant assurance coverage, a recovery retest including shared storage, full exit reconciliation, inspection of customer-side access review, and executed-term verification. Any conditional reliance requires feasible interim measures and authorized acceptance.'], ['QA rejects unsupported permanent-loss claims, blanket certification reliance, and averaging away critical failures. No onboarding, renewal, contract acceptance, termination, or data transfer occurred.']], 'suite_id': 'third-party-risk', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'TP-F01', 'proposal': 'Obtain current and subcontractor-relevant evidence or propose an explicitly restricted reliance decision.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'TP-F02', 'proposal': 'Address the failure mechanism and retest service, data, and dependent controls.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'TP-F03', 'proposal': 'Reconcile missing IDs and repeat an end-to-end exit test before relying on portability.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'third-party-risk', 'title': 'Third-Party Service and Assurance Review', 'summary': 'Assess a defined service relationship, trace outsourced dependencies, and test whether supplied assurance supports the controls being relied upon.', 'audience': 'Third-party reviewers, service owners, and risk decision forums', 'decision': 'Does the evidence support reliance on the proposed service, and what must be resolved before a human acceptance decision?', 'palette': 'teal', 'report_sections': ['Service reliance recommendation and restrictions', 'Relationship scope and assessment method', 'Material assurance findings', 'Service and fourth-party dependencies', 'Assurance evidence and test outcomes', 'Source provenance and coverage limitations', 'Remediation exit and review proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'ServiceDependencies', 'columns': ['service_id', 'provider_role', 'service_function', 'data_access', 'dependency_id', 'substitutability', 'evidence_ids'], 'rows': [['SV01', 'Primary provider', 'Review decision service', 'Customer attributes', 'SV02;SV03', 'No immediate substitute', 'SYN-001'], ['SV02', 'Storage subcontractor', 'Hosted records', 'Stored customer attributes', None, 'Shared dependency', 'SYN-001'], ['SV03', 'Reference supplier', 'Reference data feed', 'Reference dataset', None, 'Alternative untested', 'SYN-001'], ['SV04', 'Support subcontractor', 'Incident support', 'Privileged support access', 'SV01', 'Alternative untested', 'SYN-001'], ['SV05', 'Proposed fallback provider', 'Fallback review service', 'Customer attributes', 'SV02', 'Shares storage dependency', 'SYN-001']]}, {'name': 'AssuranceReview', 'columns': ['review_id', 'domain', 'criterion', 'critical', 'result', 'evidence_ids'], 'rows': [['AR01', 'Service scope', 'Confirm service boundaries and accountable roles', False, 'SUPPORTED', 'SYN-001'], ['AR02', 'Assurance coverage', 'Evidence required controls for relevant period and subcontractor', True, 'PARTIAL', 'SYN-001'], ['AR03', 'Recovery', 'Demonstrate recovery within 4 hours and lag<=15 minutes', True, 'FAILED', 'SYN-001'], ['AR04', 'Exit', 'Reconcile complete export of 1000 test records', True, 'FAILED', 'SYN-001'], ['AR05', 'User controls', 'Evidence required customer-side access review', True, 'UNVERIFIED', 'SYN-001'], ['AR06', 'Contract', 'Confirm executed incident-notification terms', True, 'PARTIAL', 'SYN-001']]}], 'findings': [{'id': 'TP-F01', 'title': 'Assurance scope does not cover the entire relied-on service', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'The supplied report ends 2025-12-31 and excludes the storage subcontractor; a provider assertion does not extend independent testing.', 'recommendation': 'Obtain current and subcontractor-relevant evidence or propose an explicitly restricted reliance decision.'}, {'id': 'TP-F02', 'title': 'Recovery rehearsal misses the illustrative service criteria', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'Recovery takes6 hours against 4; observed replication lag20 minutes exceeds 15.', 'recommendation': 'Address the failure mechanism and retest service, data, and dependent controls.'}, {'id': 'TP-F03', 'title': 'Exit export has an unexplained record shortfall', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '985 of 1000 fixture records are returned;15 remain unexplained.', 'recommendation': 'Reconcile missing IDs and repeat an end-to-end exit test before relying on portability.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional service relationship and six assurance checks', 'locator': '10-worked-example.md, dependency inventory and assurance evidence', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'Federal Reserve SR 23-4 Interagency Guidance on Third-Party Relationships', 'locator': 'https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'OCC 2024-11 Third-Party Relationships: A Guide for Community Banks', 'locator': 'https://www.occ.gov/news-issuances/bulletins/2024/bulletin-2024-11.html', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'OCC 2026-46 Proposed Third-Party Risk Management Guidance', 'locator': 'https://occ.gov/news-issuances/bulletins/2026/bulletin-2026-46.html', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Mapped service dependencies', 'value': '5', 'method': 'Count SV01–SV05; fallback and primary share SV02.', 'format': '#,##0'}, {'label': 'Supported review criteria', 'value': '1 of 6 (16.7%)', 'method': 'SUPPORTED / six specified fixture criteria; no weighted acceptance score.', 'format': '#,##0'}, {'label': 'Exit record return', 'value': '985 of 1000 (98.5%)', 'method': 'Returned records / expected fixture population;15 unreconciled prevents completeness claim.', 'format': '#,##0'}], 'limitations': ['All providers, service facts, records, contract clauses, and tests are fictional.', 'An assurance report is limited by scope, period, exceptions, and user responsibilities.', 'A report period ending does not by itself mean the report has expired.', 'No onboarding, contracting, termination, or data transfer is authorized.'], 'conclusion': 'The fictional service review has unresolved assurance, recovery, exit, user-control, and contract conditions. The evidence does not support unrestricted reliance; remediation, retest, and an authorized human disposition are required.', 'report_narrative': [['The fixture does not support unrestricted reliance on the service. Assurance coverage, recovery, exit completeness, user-control evidence, and contract support remain unresolved and require human disposition.'], ['The unit of review is a fictional decision service and its five mapped dependencies. The six review criteria include five critical reliance conditions; targets are illustrative and tailored to this fixture.'], ['The assurance report leaves a later coverage interval and excludes storage. Recovery and data-lag tests miss their criteria, while the exit export omits fifteen expected records. Missing user-control evidence and unsigned contract terms remain additional conditions.'], ['The primary provider SV01 and proposed fallback SV05 share storage dependency SV02. The fallback therefore cannot be treated as independent protection from that storage failure without further architecture and recovery evidence.'], ['AssuranceReview contains one SUPPORTED, two PARTIAL, two FAILED, and one UNVERIFIED result. Recovery takes six hours against four, data lag is twenty minutes against fifteen, and export returns 985 of 1,000 expected records, or 98.5%.'], ['SYN-001 defines the complete fictional service and test package. A report period ending is not an invented expiry, and a management bridge assertion is not independent testing. The September 2026 third-party guidance source is a proposal, separately labelled from existing final references.'], ['Propose relevant assurance coverage, a recovery retest including shared storage, full exit reconciliation, inspection of customer-side access review, and executed-term verification. Any conditional reliance requires feasible interim measures and authorized acceptance.'], ['QA rejects unsupported permanent-loss claims, blanket certification reliance, and averaging away critical failures. No onboarding, renewal, contract acceptance, termination, or data transfer occurred.']], 'suite_id': 'third-party-risk', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'TP-F01', 'proposal': 'Obtain current and subcontractor-relevant evidence or propose an explicitly restricted reliance decision.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'TP-F02', 'proposal': 'Address the failure mechanism and retest service, data, and dependent controls.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'TP-F03', 'proposal': 'Reconcile missing IDs and repeat an end-to-end exit test before relying on portability.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

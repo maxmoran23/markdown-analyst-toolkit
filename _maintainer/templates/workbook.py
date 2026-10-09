@@ -9,6 +9,7 @@ from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
 DATA = None  # __DATA__
+# __CASE_VALIDATION__
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -26,6 +27,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

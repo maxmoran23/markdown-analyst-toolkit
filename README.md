@@ -19,8 +19,16 @@ workbook or dashboard using a fixed method and template.
   rendering guidance; normal use requires no terminal, connector, scheduled job or
   repository integration.
 
-[Start here](docs/START-HERE.md) · [Download suites](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/tag/v1.0.0)
+[Start here](docs/START-HERE.md) · [Download suites](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/tag/v1.1.0)
 · [What was verified](docs/VERIFICATION.md) · [How the library was built](docs/BUILD-PROCESS.md)
+
+**New to the library?** Follow the [fictional first-session walkthrough](docs/FIRST-SESSION.md),
+or [choose by the question you need to answer](docs/CHOOSE-A-SUITE.md).
+Download the [offline suite finder](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/suite-finder.html)
+and open the saved HTML file in a browser to search topics and copy the right attachment
+prompt. Its search and prompts work offline; downloading a suite requires internet access.
+
+![Offline suite finder with search and task cards](docs/previews/suite-finder.png)
 
 ## Choose the decision you need to support
 
@@ -42,6 +50,14 @@ workbook or dashboard using a fixed method and template.
 | [Third-party risk](suites/third-party-risk/) | Which service dependencies and assurance gaps require action? | Service dependencies and control reliance |
 | [New-product risk](suites/new-product-risk/) | What must be resolved before the proposed activity can be considered for approval? | Product flows and launch conditions |
 | [Trade surveillance](suites/trade-surveillance/) | Which market-event patterns merit review after context and alternatives are tested? | Event chronology and surveillance hypotheses |
+| [Customer risk review](suites/customer-risk-review/) | Which customer factors are supported, missing or subject to an explicit override? | Risk factors and review outcomes |
+| [Jurisdiction risk](suites/jurisdiction-risk/) | Which dated country factors apply to the actual exposure? | Jurisdiction factors and exposure mapping |
+| [Source of wealth and funds](suites/source-wealth-funds/) | How was wealth accumulated, and what supports the origin of this funding? | Wealth bridge and funding trace |
+| [Adverse media](suites/adverse-media/) | Does the reporting concern the right subject, and what does its procedural status support? | Source families and allegation assessment |
+| [Correspondent banking](suites/correspondent-banking/) | Which relationships and nested activity require further evidence or review? | Relationship assessment and payment transparency |
+| [Trade finance review](suites/trade-finance-review/) | Do the trade documents, goods and payments reconcile, and what explains anomalies? | Trade-document reconciliation and anomaly review |
+| [Sampling assurance](suites/sampling-assurance/) | What can this sample establish about its defined population? | Sample design and selection results |
+| [Issue remediation](suites/issue-remediation/) | What evidence supports implementation, effectiveness and a closure decision? | Issue conditions and validation evidence |
 
 These are analytical functions. Administrative inbox management, calendar indexing,
 routine scheduling and external delivery are outside this library's scope.
@@ -67,6 +83,11 @@ The ten instructional files carry the full method. Each folder contains twelve M
 files in total. Attachment count alone does not establish that the content fits a
 particular model's context; per-suite estimates and a staged workflow are provided.
 Do not attach the whole repository to one chat.
+
+For work spanning multiple sessions, use the [case handoff guide](docs/CASE-HANDOFF.md).
+When adopting a new release, follow the [version update checklist](docs/UPDATING-SUITES.md)
+and retain the prior example check and case record. [Release notes](docs/RELEASE-NOTES.md)
+describe the additions and limits of each version.
 
 ## Fixed outputs with a restrained visual system
 
@@ -125,5 +146,5 @@ Licensed under [MIT](LICENSE). Sources linked inside the suites retain their own
 the repository paraphrases methods and does not redistribute source publications.
 
 <!-- METRICS:START -->
-**Measured instructional library:** 16 suites, 192 suite Markdown files, **225,141 words** in files 01–10. Each suite has ten instructional attachments. [Per-suite context budgets](docs/CONTENT-BUDGET.md) separate the full package, analysis stage and rendering stages. Word counts include code; repeated renderers are intentional.
+**Measured instructional library:** 24 suites, 288 suite Markdown files, **392,963 words** in files 01–10. Each suite has ten instructional attachments. [Per-suite context budgets](docs/CONTENT-BUDGET.md) separate the full package, analysis stage and rendering stages. Word counts include code; repeated renderers are intentional.
 <!-- METRICS:END -->

@@ -42,7 +42,7 @@ const data=JSON.parse(document.getElementById('report-data').textContent);
 const byId=id=>document.getElementById(id);
 const write=(id,value)=>{byId(id).textContent=value;};
 const show=value=>value===null||value===undefined?'Not provided':Array.isArray(value)?value.join('; '):String(value);
-function formatted(value,format){if(typeof value!=='number'||!format)return show(value);if(format==='0.0%')return(value*100).toFixed(1)+'%';if(format==='0.0"%"')return value.toFixed(1)+'%';const places=format.includes('.00')?2:format.includes('.0')?1:0;return(format.includes('$')?'$':'')+value.toLocaleString('en-US',{minimumFractionDigits:places,maximumFractionDigits:places});}
+function formatted(value,format){if(typeof value!=='number'||!format)return show(value);if(format==='0.0%')return(value*100).toFixed(1)+'%';if(format==='0.0"%"')return value.toFixed(1)+'%';const decimals=format.match(/\.([0#]+)/);const places=decimals?decimals[1].length:0;return(format.includes('$')?'$':'')+value.toLocaleString('en-US',{minimumFractionDigits:places,maximumFractionDigits:places});}
 function table(target,columns,rows,caption,formats={}){
   const host=byId(target);host.replaceChildren();
   if(!rows.length){const p=document.createElement('p');p.className='empty';p.textContent='No records in this view. This does not establish absence in the underlying population.';host.append(p);return;}

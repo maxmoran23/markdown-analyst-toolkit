@@ -1,0 +1,292 @@
+{
+  "slug": "issue-remediation",
+  "title": "Issue Remediation and Closure Review",
+  "summary": "Assess causal corrective actions, implementation evidence, effectiveness testing, recurrence, and independent closure gates at a fixed reference date.",
+  "audience": "Issue owners, assurance reviewers, and remediation coordinators",
+  "decision": "Which issues are ready for independent closure review, and which evidence, overdue obligations, or residual-risk gates remain unresolved?",
+  "palette": "umber",
+  "report_sections": [
+    "Closure readiness and unresolved decisions",
+    "Issue population and review reference date",
+    "Findings and remediation barriers",
+    "Issue lifecycle and closure gates",
+    "Action evidence and effectiveness results",
+    "Evidence causal alternatives and recurrence",
+    "Proposed actions and independent review",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "IssueRegister",
+      "columns": [
+        "issue_id",
+        "severity",
+        "root_cause_status",
+        "disposition",
+        "approved_due_date",
+        "days_overdue",
+        "closure_gate",
+        "evidence_ids"
+      ],
+      "formats": {
+        "approved_due_date": "yyyy-mm-dd",
+        "days_overdue": "0"
+      },
+      "rows": [
+        [
+          "I01",
+          "HIGH",
+          "Supported",
+          "Reopened",
+          "2026-10-02",
+          7,
+          "Blocked: effectiveness failed",
+          "SYN-001"
+        ],
+        [
+          "I02",
+          "MEDIUM",
+          "Supported",
+          "Validation pending",
+          "2026-10-10",
+          0,
+          "Blocked: retest evidence incomplete",
+          "SYN-001"
+        ],
+        [
+          "I03",
+          "MEDIUM",
+          "Supported",
+          "Closure review pending",
+          "2026-10-07",
+          2,
+          "Ready for independent closure review",
+          "SYN-001"
+        ],
+        [
+          "I04",
+          "HIGH",
+          "Provisional",
+          "Acceptance expired",
+          "2026-09-30",
+          9,
+          "Blocked: acceptance expired and replacement absent",
+          "SYN-001"
+        ]
+      ]
+    },
+    {
+      "name": "ActionEvidence",
+      "columns": [
+        "action_id",
+        "issue_id",
+        "action_type",
+        "approved_due_date",
+        "evidence_status",
+        "completion_date",
+        "days_overdue",
+        "retest_result",
+        "evidence_ids"
+      ],
+      "formats": {
+        "approved_due_date": "yyyy-mm-dd",
+        "completion_date": "yyyy-mm-dd",
+        "days_overdue": "0"
+      },
+      "rows": [
+        [
+          "A01",
+          "I01",
+          "Implementation",
+          "2026-09-25",
+          "Verified",
+          "2026-09-28",
+          0,
+          "Not applicable",
+          "SYN-001"
+        ],
+        [
+          "A02",
+          "I01",
+          "Effectiveness",
+          "2026-10-02",
+          "Failed",
+          null,
+          7,
+          "FAIL",
+          "SYN-001"
+        ],
+        [
+          "A03",
+          "I02",
+          "Implementation",
+          "2026-10-03",
+          "Verified",
+          "2026-10-03",
+          0,
+          "Not applicable",
+          "SYN-001"
+        ],
+        [
+          "A04",
+          "I02",
+          "Effectiveness",
+          "2026-10-10",
+          "Unresolved",
+          null,
+          0,
+          "UNABLE TO CONCLUDE",
+          "SYN-001"
+        ],
+        [
+          "A05",
+          "I03",
+          "Implementation and effectiveness",
+          "2026-09-26",
+          "Verified",
+          "2026-09-26",
+          0,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "A06",
+          "I04",
+          "Replacement",
+          "2026-09-30",
+          "Not evidenced",
+          null,
+          9,
+          "Not tested",
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "IR-F01",
+      "title": "I01 failed post-change retest after historical recurrence",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "R06 records a missed daily review on Oct 06 despite the implemented backup roster. A02 failed; the existing action plan also placed its deadline before the end of its six-day window.",
+      "recommendation": "Investigate roster adoption and coverage execution, address the failed mechanism, and propose a feasible fresh validation plan."
+    },
+    {
+      "id": "IR-F02",
+      "title": "Missing R10 evidence prevents complete archive validation",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "A04 has three PASS and one UNABLE TO CONCLUDE result among four opportunities. The supplied retrieval failure does not establish whether the original artifact exists.",
+      "recommendation": "Recover R10 or establish its retention status; retain the four-unit denominator and unresolved gate."
+    },
+    {
+      "id": "IR-F03",
+      "title": "Technical closure readiness awaits authorized approval",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "I03 has implementation evidence and four passing fresh retest opportunities, but no current final approval; it is two calendar days overdue at Oct 09.",
+      "recommendation": "Submit the complete I03 record to the independent closure reviewer and preserve pending status until a decision is recorded."
+    },
+    {
+      "id": "IR-F04",
+      "title": "Temporary acceptance expired without replacement evidence",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "I04 acceptance expired Sep 30. Its Oct 31 extension is only proposed; no replacement artifact is supplied. I04 and A06 are nine days overdue.",
+      "recommendation": "Obtain an authorized residual-risk and replacement decision, preserving the expired acceptance and original deadline history."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Complete fictional issue chronology, action criteria, decision history and fourteen retest records",
+      "locator": "10-worked-example.md, original issues, complete deadline history, action evidence, and raw retest ledger",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "GAO 2025 Green Book, principle 17, paragraphs 17.05–17.08; retrieved 2026-10-09",
+      "locator": "https://www.gao.gov/assets/gao-25-107721.pdf",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "FFIEC BSA/AML Independent Testing; retrieved 2026-10-09",
+      "locator": "https://bsaaml.ffiec.gov/manual/AssessingTheBSAAMLComplianceProgram/03",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Evidenced action completions",
+      "value": "3 of 6 (50.0%)",
+      "method": "A01, A03 and A05 meet individual acceptance criteria; action completion is not issue closure."
+    },
+    {
+      "label": "Current authorized closures",
+      "value": "0 of 4 (0.0%)",
+      "method": "No current final issue approval exists in the complete fictional decision register."
+    },
+    {
+      "label": "Overdue active issues",
+      "value": "3 of 4 (75.0%)",
+      "method": "I01 7, I03 2, I04 9 calendar days past approved due dates at end-of-day Oct 09, 2026 ET."
+    },
+    {
+      "label": "Ready for closure review",
+      "value": "1 of 4 (25.0%)",
+      "method": "I03 meets technical gates; independent human approval remains pending."
+    }
+  ],
+  "limitations": [
+    "All issues, actions, authority records and retest observations are fictional.",
+    "The miniature retest windows do not support a future or institution-wide effectiveness claim.",
+    "I02 has one unresolved retest artifact; I04 has a provisional causal explanation.",
+    "I03 is ready for review, not closed; the assistant cannot supply independent approval.",
+    "Dates are evaluated at the saved Oct 09, 2026 snapshot, not renderer execution time."
+  ],
+  "conclusion": "Three of six actions are evidenced complete, but no issue is currently closed. I03 is technically ready for independent closure review; I01 failed retest, I02 has an unresolved retest record, and I04’s acceptance expired without evidenced replacement. Three of four active issues are overdue at Oct 09, 2026.",
+  "report_narrative": [
+    [
+      "Three of six existing actions meet their own acceptance criteria, while all four issues remain active. I03 is ready for independent closure review. I01, I02 and I04 have distinct effectiveness, evidence and acceptance blockers."
+    ],
+    [
+      "The complete fictional snapshot contains four issues and six existing actions at end-of-day Oct 09, 2026 ET. Calendar-day differences use approved current deadlines; proposed extensions do not reset the clock. Fourteen retest opportunities are fully listed."
+    ],
+    [
+      "I01’s R06 retest fails despite roster implementation. I02’s R10 is unresolved. I03 lacks final approval despite technical readiness. I04’s Sep 30 acceptance expired, and its proposed Oct 31 extension has no authorization."
+    ],
+    [
+      "IssueRegister shows overdue days of 7, 0, 2 and 9 for I01–I04. I01 remains Reopened after its Aug 31 closure and Sep 12 recurrence; I03 remains Closure review pending. Three active issues are overdue, or 75.0%."
+    ],
+    [
+      "ActionEvidence contains three Verified actions, one Failed, one Unresolved and one Not evidenced. Current overdue days are 0, 7, 0, 0, 0 and 9. A01’s three historical late days remain separate. A02 retest has 5 PASS and 1 FAIL; A04 has 3 PASS and 1 unresolved; A05 has 4 PASS."
+    ],
+    [
+      "SYN-001 preserves the causal facts, decision history and every retest ID. The backup roster did not establish effective coverage on Oct 06; the mechanism needs further assessment. R10 retrieval failure does not prove nonexistence. I04’s dependency explanation remains provisional. Public guidance supplies method context only."
+    ],
+    [
+      "Proposed follow-ups address failed coverage, recover R10, submit I03 for an actual independent decision, and resolve I04’s expired disposition and replacement plan. A02’s Oct 02 deadline preceded the end of its Oct 01–06 observation window and requires a feasible revised plan without erasing the breach."
+    ],
+    [
+      "QA reconciles 6 actions, 4 active issues and 14 retest units, preserving all missing outcomes. Negative controls reject proposed-date substitution, implementation-as-effectiveness and readiness-as-closure. No current final human closure decisions are supplied."
+    ]
+  ]
+}

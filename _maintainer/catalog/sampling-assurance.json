@@ -1,0 +1,274 @@
+{
+  "slug": "sampling-assurance",
+  "title": "Sampling Design and Assurance Review",
+  "summary": "Review a complete selection frame, probability design, missing assessments, and the assurance supported by exact finite-population calculations.",
+  "audience": "Reviewers, control testers, and analysts designing selections",
+  "decision": "What population conclusion does the selection support, and what evidence or design still blocks assurance?",
+  "palette": "slate",
+  "report_sections": [
+    "Assurance conclusion and restrictions",
+    "Population scope and selection design",
+    "Findings and inference barriers",
+    "Stratum coverage and bounds",
+    "Selected unit results",
+    "Evidence and competing interpretations",
+    "Further testing and reviewer decisions",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "SamplingStrata",
+      "columns": [
+        "stratum_id",
+        "population_count",
+        "probability_selected_count",
+        "pass_count",
+        "fail_count",
+        "unassessed_count",
+        "inclusion_probability",
+        "upper_bound",
+        "conclusion"
+      ],
+      "formats": {
+        "inclusion_probability": "0.0%",
+        "upper_bound": "0.0%"
+      },
+      "rows": [
+        [
+          "H",
+          4,
+          3,
+          1,
+          1,
+          1,
+          0.75,
+          null,
+          "H04 unresolved; no completed-outcome bound"
+        ],
+        [
+          "L",
+          8,
+          4,
+          4,
+          0,
+          0,
+          0.5,
+          0.375,
+          "95% finite upper bound 37.5%; 25.0% assurance threshold not demonstrated"
+        ]
+      ]
+    },
+    {
+      "name": "SampleResults",
+      "columns": [
+        "sample_id",
+        "stratum_id",
+        "population_id",
+        "selection_basis",
+        "inclusion_probability",
+        "result",
+        "evidence_ids"
+      ],
+      "formats": {
+        "inclusion_probability": "0.0%"
+      },
+      "rows": [
+        [
+          "S01",
+          "H",
+          "H01",
+          "Probability",
+          0.75,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "S02",
+          "H",
+          "H03",
+          "Probability",
+          0.75,
+          "FAIL",
+          "SYN-001"
+        ],
+        [
+          "S03",
+          "H",
+          "H04",
+          "Probability",
+          0.75,
+          "UNABLE TO CONCLUDE",
+          "SYN-001"
+        ],
+        [
+          "S04",
+          "L",
+          "L02",
+          "Probability",
+          0.5,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "S05",
+          "L",
+          "L04",
+          "Probability",
+          0.5,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "S06",
+          "L",
+          "L06",
+          "Probability",
+          0.5,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "S07",
+          "L",
+          "L08",
+          "Probability",
+          0.5,
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "S08",
+          "L",
+          "L07",
+          "Judgmental supplement",
+          null,
+          "FAIL",
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "SA-F01",
+      "title": "Two observed approval-separation failures in distinct selection categories",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "H03 fails in the seven-unit original probability selection; targeted L07 adds a separate observed failure. Both use the preparer role as reviewer.",
+      "recommendation": "Investigate the separation failure mechanism and assess the affected scope without pooling targeted results into the probability sample."
+    },
+    {
+      "id": "SA-F02",
+      "title": "H04 missing evidence prevents a completed-outcome H assessment",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "The original H sample contains one pass, one fail, and one unresolved assessment. The owner statement does not establish execution.",
+      "recommendation": "Recover contemporaneous H04 evidence or retain the missingness restriction and obtain an approved treatment."
+    },
+    {
+      "id": "SA-F03",
+      "title": "L upper bound does not demonstrate the requested assurance threshold",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001",
+        "REF-002"
+      ],
+      "detail": "For N=8, n=4, x=0, the largest D with hypergeometric lower-tail probability above 0.05 is 3. The one-sided 95% finite upper bound is 37.5%, exceeding the illustrative 25.0% criterion.",
+      "recommendation": "Have an authorized reviewer approve a further design or accept the restricted conclusion; the result does not prove the true rate exceeds 25.0%."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Complete fictional frame, recorded draw ranks, criteria, and selected evidence",
+      "locator": "10-worked-example.md, complete frame, selection replay, and complete selected outcomes",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "NIST confidence intervals for proportions; retrieved 2026-10-09",
+      "locator": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "NIST hypergeometric cumulative distribution; retrieved 2026-10-09, pp. 1–2",
+      "locator": "https://itl.nist.gov/div898/software/dataplot/refman2/ch8/hypcdf.pdf",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-003",
+      "title": "FFIEC Risk-Focused BSA/AML Supervision; retrieved 2026-10-09",
+      "locator": "https://bsaaml.ffiec.gov/manual/ScopingAndPlanning/02",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Original probability sample",
+      "value": "7 of 12 (58.3%)",
+      "method": "Original distinct selections / eligible frame; excludes L07 supplement."
+    },
+    {
+      "label": "Primary unresolved assessment",
+      "value": "1 of 7 (14.3%)",
+      "method": "H04 UNABLE TO CONCLUDE / all original selections."
+    },
+    {
+      "label": "L finite upper bound",
+      "value": 0.375,
+      "format": "0.0%",
+      "method": "One-sided 95%; N=8,n=4,x=0; largest D with C(8-D,4)/C(8,4)>0.05 is 3; bound 3/8."
+    },
+    {
+      "label": "Distinct reviewed units",
+      "value": "8 of 12 (66.7%)",
+      "method": "Seven original plus one targeted; descriptive coverage, not an eight-unit probability sample."
+    }
+  ],
+  "limitations": [
+    "Fictional uniform draw ranks permit conditional replay but do not prove real-world randomization.",
+    "H04 is unresolved; H and overall completed-outcome confidence bounds are withheld.",
+    "L07 is targeted and remains outside the original probability inference.",
+    "The 11.1% and 22.2% weighted completion scenarios are point-estimate sensitivity results, not confidence limits.",
+    "No independent human approval or live frame validation is supplied."
+  ],
+  "conclusion": "The seven-unit probability sample contains one confirmed exception and one unresolved assessment; a separate targeted review adds one exception. L’s one-sided 95% finite upper bound is 37.5%, above the illustrative 25.0% assurance criterion. H and overall inference remain restricted; human review is pending.",
+  "report_narrative": [
+    [
+      "One confirmed exception and one unresolved assessment occur in the seven-unit probability selection; targeted L07 adds a second observed exception. L’s conditional 95% upper bound is 37.5%, so this exercise does not demonstrate the requested 25.0% assurance."
+    ],
+    [
+      "The complete fictional September frame contains four H and eight L approval opportunities. Zero-based lexicographic combination ranks 2 and 49 select three H and four L units under stipulated independent uniform draws. Inclusion probabilities are 0.75 and 0.5.",
+      "The complete SYN-001 frame is H01 (Sep 02, 2026; Probability; prep P1/review Q1 before release), H02 (Sep 08; unselected; not inspected), H03 (Sep 16; Probability; prep P3/review P3 before release), H04 (Sep 24; Probability; owner assertion only, execution artifact missing); L01 (Sep 01; unselected; not inspected), L02 (Sep 04; Probability; prep P2/review Q2 before release), L03 (Sep 09; unselected; not inspected), L04 (Sep 11; Probability; prep P4/review Q4 before release), L05 (Sep 17; unselected; not inspected), L06 (Sep 21; Probability; prep P6/review Q6 before release), L07 (Sep 25; Judgmental supplement; prep P7/review P7 before release), and L08 (Sep 29; Probability; prep P8/review Q8 before release). All abbreviated dates are in 2026. H02, L01, L03 and L05 outcomes remain unknown; unselected is not passed. The fixture stipulates this twelve-unit frame matches its master schedule with no duplicates or exclusions."
+    ],
+    [
+      "H03 and targeted L07 use the same role to prepare and approve. H04 has only an owner assertion and no execution artifact. The L assurance restriction is a statistical decision outcome, not proof that its true failure fraction exceeds 25.0%."
+    ],
+    [
+      "SamplingStrata reconciles H as 3=1+1+1 and L as 4=4+0+0. H’s bound is null. For L, D=3 gives a zero-failure tail of 5/70 and D=4 gives 1/70; the strict alpha=0.05 inversion produces U=3 and U/8=37.5%."
+    ],
+    [
+      "SampleResults contains seven Probability rows and one Judgmental supplement row. Primary confirmed failure share is 1/7=14.3%; all reviewed failures are 2/8=25.0%, a descriptive mixed-selection share. Neither replaces a properly weighted population estimate."
+    ],
+    [
+      "SYN-001 preserves every frame ID and selected observation. H04 could reflect missing retention or missing execution; neither explanation is resolved. NIST supplies method context. The binomial contrast 1-0.05^(1/4)=52.7% uses a different model and is not the finite bound."
+    ],
+    [
+      "Recover H04 evidence, investigate the approval-separation mechanism, and have an authorized reviewer decide whether further testing is warranted. Weighted hypothetical completion estimates are 1/9=11.1% if H04 passes and 2/9=22.2% if it fails; sampling uncertainty remains."
+    ],
+    [
+      "QA must preserve 12 frame units, 7 original selections, and 8 distinct reviewed units, with L07 kept separate. Negative controls reject unweighted pooling, missing-as-pass, and a 95% judgmental claim. Human method approval and final disposition remain unrecorded."
+    ]
+  ]
+}

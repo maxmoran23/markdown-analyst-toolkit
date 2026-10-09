@@ -1,0 +1,379 @@
+{
+  "slug": "trade-finance-review",
+  "title": "Trade Finance Review",
+  "summary": "Reconcile trade invoices, units, exchange rates, shipment records and finance allocations without treating anomalies as proof of illicit trade.",
+  "audience": "Analysts preparing generic transaction-level trade finance review materials",
+  "decision": "Which trade-document and financing discrepancies remain unexplained after comparable-unit and legitimate-business checks?",
+  "palette": "umber",
+  "report_sections": [
+    "Trade review decision brief",
+    "Scope, economic trades and calculation basis",
+    "Material anomalies and legitimate alternatives",
+    "Invoice-line price and shipment reconciliation",
+    "Trade totals and financing reconciliation",
+    "Evidence and document lineage",
+    "Proposed trade clarification actions",
+    "Limitations, quality checks and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "InvoiceReview",
+      "columns": [
+        "line_id",
+        "trade_id",
+        "currency",
+        "quantity_unit",
+        "invoice_quantity",
+        "shipped_quantity",
+        "shipment_gap_quantity",
+        "shipment_state",
+        "unit_price_native",
+        "invoice_amount_native",
+        "fx_to_usd",
+        "invoice_usd",
+        "comparable_unit_usd",
+        "benchmark_unit_usd",
+        "price_variance_pct",
+        "price_state",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "T01-L01",
+          "T01",
+          "USD",
+          "unit",
+          100,
+          100,
+          0,
+          "COMPLETE",
+          10,
+          1000,
+          1,
+          1000,
+          10,
+          10,
+          0,
+          "WITHIN_ILLUSTRATION",
+          "SYN-001;SYN-004;SYN-002"
+        ],
+        [
+          "T02-L01",
+          "T02",
+          "USD",
+          "unit",
+          100,
+          100,
+          0,
+          "COMPLETE",
+          30,
+          3000,
+          1,
+          3000,
+          30,
+          10,
+          200,
+          "REVIEW",
+          "SYN-001;SYN-004;SYN-002"
+        ],
+        [
+          "T03-L01",
+          "T03",
+          "EUR",
+          "unit",
+          200,
+          200,
+          0,
+          "COMPLETE",
+          8,
+          1600,
+          1.25,
+          2000,
+          10,
+          10,
+          0,
+          "WITHIN_ILLUSTRATION",
+          "SYN-001;SYN-004;SYN-005;SYN-002"
+        ],
+        [
+          "T04-L01",
+          "T04",
+          "USD",
+          "unit",
+          100,
+          60,
+          40,
+          "PARTIAL_SUPPORTED",
+          20,
+          2000,
+          1,
+          2000,
+          20,
+          20,
+          0,
+          "WITHIN_ILLUSTRATION",
+          "SYN-001;SYN-004;SYN-002;SYN-006"
+        ],
+        [
+          "T05-L01",
+          "T05",
+          "USD",
+          "unit",
+          50,
+          50,
+          0,
+          "COMPLETE",
+          40,
+          2000,
+          1,
+          2000,
+          40,
+          40,
+          0,
+          "WITHIN_ILLUSTRATION",
+          "SYN-001;SYN-004;SYN-002"
+        ]
+      ],
+      "formats": {
+        "unit_price_native": "#,##0.00",
+        "invoice_amount_native": "#,##0.00",
+        "fx_to_usd": "0.0000",
+        "invoice_usd": "$#,##0.00",
+        "comparable_unit_usd": "$#,##0.00",
+        "benchmark_unit_usd": "$#,##0.00",
+        "price_variance_pct": "0.0\"%\""
+      }
+    },
+    {
+      "name": "ShipmentFinance",
+      "columns": [
+        "trade_id",
+        "invoice_usd_total",
+        "finance_usd",
+        "finance_to_invoice_pct",
+        "overlap_state",
+        "review_rationale",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "T01",
+          1000,
+          800,
+          80,
+          "SINGLE_FUNDING",
+          "Ordinary supported control",
+          "SYN-001;SYN-002;SYN-003"
+        ],
+        [
+          "T02",
+          3000,
+          2400,
+          80,
+          "SINGLE_FUNDING",
+          "Price explanation unresolved; shipping and finance arithmetic reconcile",
+          "SYN-001;SYN-002;SYN-003;SYN-004"
+        ],
+        [
+          "T03",
+          2000,
+          1500,
+          75,
+          "SINGLE_FUNDING",
+          "EUR normalization explains apparent USD benchmark difference",
+          "SYN-001;SYN-002;SYN-003;SYN-005"
+        ],
+        [
+          "T04",
+          2000,
+          1600,
+          80,
+          "SINGLE_FUNDING",
+          "Remaining 40 units scheduled after cutoff under supplied amendment",
+          "SYN-001;SYN-002;SYN-003;SYN-006"
+        ],
+        [
+          "T05",
+          2000,
+          2500,
+          125,
+          "OVERLAP_REVIEW",
+          "Two distinct advances; participation and other allocation evidence absent",
+          "SYN-001;SYN-002;SYN-003"
+        ]
+      ],
+      "formats": {
+        "finance_usd": "$#,##0.00",
+        "finance_to_invoice_pct": "0.0\"%\"",
+        "invoice_usd_total": "$#,##0.00"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "TF-F01",
+      "title": "T02 comparable price needs explanation",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-004"
+      ],
+      "detail": "USD 30.00 per unit versus a supplied comparable USD 10.00 benchmark gives a 200.0% deviation; illicit intent is not established.",
+      "recommendation": "Obtain support for product specification and any commercial price components."
+    },
+    {
+      "id": "TF-F02",
+      "title": "T05 overlapping funded allocations need reconciliation",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-003"
+      ],
+      "detail": "Two distinct outstanding advances total USD 2,500.00 against a USD 2,000.00 invoice, or 125.0%; the USD 500.00 difference is not established loss or laundering.",
+      "recommendation": "Reconcile allocation, participation, facility terms and repayments."
+    },
+    {
+      "id": "TF-F03",
+      "title": "T03 currency normalization removes the apparent price gap",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-004",
+        "SYN-005"
+      ],
+      "detail": "EUR 8.00 per unit at 1.25 USD/EUR equals the USD 10.00 benchmark.",
+      "recommendation": "Preserve quote direction and native-currency amounts."
+    },
+    {
+      "id": "TF-F04",
+      "title": "T04 partial shipment is explained at cutoff",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002",
+        "SYN-006"
+      ],
+      "detail": "Sixty of 100 units shipped; the remaining 40 are scheduled for Oct 05, after the Sep 30 cutoff.",
+      "recommendation": "Retain outstanding quantity and reassess when later evidence is available."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional invoice lines",
+      "locator": "10-worked-example.md, invoice lines T01-L01 through T05-L01",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional distinct shipments",
+      "locator": "10-worked-example.md, shipments S01\u2013S05 and their line_id allocations",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional outstanding funding ledger",
+      "locator": "10-worked-example.md, advances F01\u2013F05B and lifecycle statement",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional matched product benchmarks",
+      "locator": "10-worked-example.md, benchmarks B01\u2013B05 and their line_id comparability basis",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional FX quotation",
+      "locator": "10-worked-example.md, FX01 quote convention and date",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional T04 schedule amendment",
+      "locator": "10-worked-example.md, amendment A01",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-TBML",
+      "title": "FATF\u2013Egmont TBML Risk Indicators, March 2021",
+      "locator": "https://www.fatf-gafi.org/content/dam/fatf-gafi/reports/Trade-Based-Money-Laundering-Risk-Indicators.pdf.coredownload.inline.pdf; handling notes",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Economic trades",
+      "value": 5,
+      "method": "Distinct trade IDs T01\u2013T05."
+    },
+    {
+      "label": "Invoice value USD",
+      "value": 10000,
+      "format": "$#,##0.00",
+      "method": "1,000 + 3,000 + (1,600 EUR \u00d7 1.25) + 2,000 + 2,000."
+    },
+    {
+      "label": "Outstanding finance USD",
+      "value": 8800,
+      "format": "$#,##0.00",
+      "method": "800 + 2,400 + (1,200 EUR \u00d7 1.25) + 1,600 + 1,300 + 1,200."
+    },
+    {
+      "label": "T05 finance-to-invoice",
+      "value": 125.0,
+      "format": "0.0\"%\"",
+      "method": "(1,300 + 1,200) / 2,000 \u00d7 100; illustrative overlap measure."
+    }
+  ],
+  "limitations": [
+    "All trades, benchmarks, quotes and funding records are fictional.",
+    "Illustrative numerical triggers are not legal thresholds or proof of trade-based money laundering.",
+    "T02 commercial explanation and T05 financing structure remain unresolved.",
+    "No physical-goods inspection, operational action or human disposition is recorded."
+  ],
+  "metadata": {
+    "conclusion": "T02 needs a comparable-price explanation and T05 needs funding-allocation review. T03 reconciles after EUR conversion, and T04 has a supported partial-shipment schedule. The five-trade fixture does not establish illicit trade or fraudulent double financing."
+  },
+  "report_narrative": [
+    [
+      "T02 needs a comparable-price explanation and T05 needs funding-allocation review. T03 reconciles after EUR conversion, and T04 has a supported partial-shipment schedule. The five-trade fixture does not establish illicit trade or fraudulent double financing."
+    ],
+    [
+      "The fictional review covers five invoice lines, five distinct shipments, six funded advances, five matched benchmarks, one FX quote and one amendment through Sep 30, 2026 5:00 PM ET. Native amounts are retained before USD conversion."
+    ],
+    [
+      "TF-F01 records a 200.0% comparable-price deviation for T02. TF-F02 records a 125.0% finance-to-invoice ratio for T05. TF-F03 and TF-F04 preserve supported currency and timing explanations."
+    ],
+    [
+      "InvoiceReview preserves five uniquely identified invoice lines, their native quantities and line-specific shipment states. It reconciles USD 10,000.00 of baseline invoice value. T02-L01 has a 200.0% price deviation; T03-L01 has zero after EUR normalization. T04-L01 retains a 40-unit scheduled balance."
+    ],
+    [
+      "ShipmentFinance has one row per unique economic trade. It reconciles USD 10,000.00 of invoice totals and USD 8,800.00 of outstanding principal without joining finance onto each invoice line. T05 has USD 2,500.00 allocated against USD 2,000.00 invoice value; the aggregate 88.0% ratio does not remove its 125.0% exception.",
+      "The separate mixed-unit edge case in file 10 uses two line rows and one financing row; its amounts are excluded from baseline metrics."
+    ],
+    [
+      "SYN-001 through SYN-006 resolve to every raw invoice, shipment, advance, benchmark, quote and amendment in file 10. REF-TBML supports method context only. No goods inspection or authentic real-world trade evidence is claimed."
+    ],
+    [
+      "Propose T02 specification and cost-basis clarification and T05 allocation, participation and repayment reconciliation. Preserve the supported T03 and T04 explanations. No request or operational decision has been executed."
+    ],
+    [
+      "All trades, benchmarks, quotes and funding records are fictional.",
+      "Illustrative numerical triggers are not legal thresholds or proof of trade-based money laundering.",
+      "T02 commercial explanation and T05 financing structure remain unresolved.",
+      "No physical-goods inspection, operational action or human disposition is recorded.",
+      "Record actual QA and keep human disposition NOT REVIEWED until evidenced."
+    ]
+  ],
+  "as_of": "2026-09-30 5:00 PM ET",
+  "scope": "Five fictional baseline invoice lines with unique line IDs, five shipments, six funding advances, five benchmarks, one FX quote and one amendment through Sep 30, 2026 5:00 PM ET. No operational action is performed. The separate mixed-unit edge case is excluded from these baseline totals."
+}

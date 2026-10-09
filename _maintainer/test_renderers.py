@@ -33,7 +33,8 @@ class RendererTests(unittest.TestCase):
         for raw in self.catalogs:
             with self.subTest(suite=raw['slug']),tempfile.TemporaryDirectory() as tmp:
                 data=prepare(raw);folder=Path(tmp)
-                run_python(python_template('workbook.py',data),folder,'workbook.py')
+                embedded=(ROOT/'suites'/data['slug']/'07-workbook-template.md').read_text()
+                run_python(re.search(r'^```python\n(.*?)^```',embedded,re.M|re.S).group(1),folder,'workbook.py')
                 wb=load_workbook(folder/(data['slug']+'-review.xlsx'),data_only=False)
                 schemas={**COMMON,**{t['name']:t['columns'] for t in data['domain_tables']}}
                 self.assertEqual(wb.sheetnames,list(schemas))
@@ -53,7 +54,7 @@ class RendererTests(unittest.TestCase):
                                 self.assertEqual(actual, None if expected == "" else expected)
                     for column, fmt in t.get('formats', {}).items():
                         column_index = t['columns'].index(column) + 1
-                        for cells in wb[t['name']].iter_rows(min_row=2,min_col=column_index,max_col=column_index):
+                        for cells in wb[t['name']].iter_rows(min_row=2,max_row=len(t['rows'])+1,min_col=column_index,max_col=column_index):
                             if isinstance(cells[0].value,(int,float)):
                                 self.assertEqual(cells[0].number_format,fmt)
                 self.assertEqual(wb['Findings'].max_row,len(data['findings'])+1)
@@ -62,7 +63,8 @@ class RendererTests(unittest.TestCase):
                 for ws in wb:
                     self.assertTrue(ws.freeze_panes)
                     self.assertTrue(ws.print_title_rows)
-                run_python(python_template('report.py',data),folder,'report.py')
+                embedded=(ROOT/'suites'/data['slug']/'06-report-template.md').read_text()
+                run_python(re.search(r'^```python\n(.*?)^```',embedded,re.M|re.S).group(1),folder,'report.py')
                 doc=Document(folder/(data['slug']+'-report.docx'))
                 headings=[p.text for p in doc.paragraphs if p.style.name=='Heading 1']
                 self.assertEqual(headings,data['report_sections'])
@@ -70,6 +72,20 @@ class RendererTests(unittest.TestCase):
                 for f in data['findings']:
                     self.assertIn(f['id'],all_text)
                 self.assertIn(data['notice'],all_text)
+                evidence_tables=[t for t in doc.tables if [c.text for c in t.rows[0].cells]==['Evidence ID','Source or fixture','Exact locator','Claim class']]
+                self.assertEqual(len(evidence_tables),1)
+                self.assertEqual([[c.text for c in r.cells] for r in evidence_tables[0].rows[1:]],[[e['id'],e['title'],e['locator'],e['claim_class']] for e in data['evidence']])
+
+    def test_report_preserves_declared_fx_precision(self):
+        data=prepare(json.loads((ROOT/'_maintainer/catalog/source-wealth-funds.json').read_text()))
+        table=data['domain_tables'][0];index=table['columns'].index('fx_usd_per_unit')
+        table['rows'][0][index]=1.2345
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);run_python(python_template('report.py',data),folder,'report.py')
+            doc=Document(folder/(data['slug']+'-report.docx'))
+            values=[r.cells[1].text for t in doc.tables for r in t.rows if len(r.cells)==2 and r.cells[0].text=='fx_usd_per_unit']
+            self.assertEqual(values[0],'1.2345')
+            self.assertIn('1.2000',values)
 
     def test_injected_evidence_stays_literal_in_all_formats(self):
         data=prepare(copy.deepcopy(self.catalogs[0]))

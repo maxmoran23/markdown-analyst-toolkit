@@ -1,6 +1,6 @@
 # New Product Risk and Launch Readiness — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'new-product-risk', 'title': 'New Product Risk and Launch Readiness', 'summary': 'Map a proposed product’s funds, data, and service flows to control dependencies and testable launch conditions.', 'audience': 'Product reviewers, control owners, and launch decision forums', 'decision': 'Does the supplied evidence support consideration of launch, and which conditions remain unresolved?', 'palette': 'slate', 'report_sections': ['Launch recommendation and unresolved conditions', 'Product scope flow and assessment method', 'Material readiness findings', 'Funds data and service flow map', 'Launch condition verification', 'Evidence and dependency limitations', 'Remediation pilot and exit proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'FlowMap', 'columns': ['flow_id', 'flow_type', 'from_role', 'to_role', 'asset_or_data', 'control_dependency', 'evidence_ids'], 'rows': [['FL01', 'DATA', 'Applicant', 'Enrollment service', 'Identity attributes', 'Enrollment review', 'SYN-001'], ['FL02', 'SERVICE', 'User channel', 'Request service', 'Payment instruction', 'Authentication and limits', 'SYN-001'], ['FL03', 'DATA', 'Request service', 'Review queue', 'Instruction and risk fields', 'Screening and monitoring', 'SYN-001'], ['FL04', 'FUNDS', 'Payment provider', 'Recipient institution', 'Illustrative payment value', 'Approved instruction and settlement', 'SYN-001'], ['FL05', 'DATA', 'Payment provider', 'Reconciliation service', 'Status and ledger events', 'Reconciliation and exception handling', 'SYN-001']]}, {'name': 'LaunchConditions', 'columns': ['condition_id', 'flow_id', 'condition', 'critical', 'status', 'evidence_ids'], 'rows': [['LC01', 'FL04', 'Document primary funds and instruction flow', True, 'SATISFIED', 'SYN-001'], ['LC02', 'FL03', 'Evidence screening configuration and fixture tests', True, 'SATISFIED', 'SYN-001'], ['LC03', 'FL03', 'Evidence monitoring exception test', True, 'NOT VERIFIABLE', 'SYN-001'], ['LC04', 'FL05', 'Resolve reconciliation timing exception', True, 'PARTIAL', 'SYN-001'], ['LC05', 'FL02', 'Train all four pilot operators', False, 'SATISFIED', 'SYN-001'], ['LC06', 'FL04', 'Rehearse controlled exit and recovery', True, 'NOT SATISFIED', 'SYN-001']]}], 'findings': [{'id': 'NP-F01', 'title': 'Primary monitoring dependency lacks test evidence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'LC03 is supported by a build-complete assertion but no accessible monitoring exception test.', 'recommendation': 'Obtain and review a scenario-specific test before supporting a launch decision.'}, {'id': 'NP-F02', 'title': 'Reconciliation test retains an unresolved timing exception', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'One $50.00 payment remains pending at 60 minutes against an illustrative 30-minute resolution criterion; conservation of value alone passes.', 'recommendation': 'Resolve the timing failure mechanism and retest normal and delayed paths.'}, {'id': 'NP-F03', 'title': 'Exit design has not been rehearsed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'LC06 has a written recovery plan but no executed rehearsal record.', 'recommendation': 'Rehearse access withdrawal, pending-item reconciliation, and recovery evidence before approval consideration.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional payment workflow flow map and launch-condition evidence', 'locator': '10-worked-example.md, complete flow, ledger, and condition records', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'OCC 2017-43 New, Modified, or Expanded Bank Products and Services', 'locator': 'https://www.occ.gov/news-issuances/bulletins/2017/bulletin-2017-43.html', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'Federal Reserve SR 23-4 Third-Party Relationships', 'locator': 'https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Mapped flow legs', 'value': '5', 'method': 'Count separate data, service, and funds legs; no value summation across leg types.', 'format': '#,##0'}, {'label': 'Satisfied launch conditions', 'value': '3 of 6 (50.0%)', 'method': 'SATISFIED conditions / all six required conditions; no readiness average overrides critical gaps.', 'format': '#,##0'}, {'label': 'Unresolved critical conditions', 'value': '3 of 5 (60.0%)', 'method': 'LC03,LC04,LC06 / five conditions flagged critical in fictional approval criteria.', 'format': '#,##0'}], 'limitations': ['The product, approval criteria, roles, amounts, and tests are fictional.', 'Passing fixture tests does not establish full control coverage or production readiness.', 'No actual launch, pilot, or risk exception is approved.', 'The missing monitoring test is an evidence gap, not proof that the control was absent.'], 'conclusion': 'Three critical launch conditions remain unresolved in the fictional review, so the evidence does not support launch consideration yet. Obtain the monitoring test, resolve the reconciliation exception, and rehearse exit before an authorized human decision.', 'report_narrative': [['Three critical conditions remain unresolved, so the fixture evidence does not support launch consideration yet. Monitoring test evidence, reconciliation timing, and exit rehearsal require resolution before an authorized launch decision.'], ['The fictional payment-request product has five principal flow legs and six approval conditions. Instructions, data, and funds are mapped separately; the provider executes funds transfers while the request service handles instructions.'], ['LC03 lacks an inspectable monitoring exception test, LC04 has an unresolved timing exception, and LC06 lacks a performed exit rehearsal. These are different evidence states and remain distinct in the recommendation.'], ['FlowMap shows enrollment data, instruction service, review data, funds execution, and reconciliation data. Repeated representations of the same payment value must not be summed as separate economic exposure.'], ['Three conditions are SATISFIED, one PARTIAL, one NOT VERIFIABLE, and one NOT SATISFIED. Five conditions are critical; three remain unresolved. The $100.00 test instruction total equals $50.00 posted plus $50.00 pending, but the pending item is 60 minutes old against a 30-minute criterion.'], ['SYN-001 supplies the product version, flow map, six conditions, three payment records, and four-operator training evidence. Successful fixture screening tests support only their defined cases, not complete production control coverage.'], ['Propose obtaining LC03’s actual test evidence, resolving and retesting the delayed reconciliation path, and rehearsing exit with pending activity. Any narrower pilot needs enforceable scope, capacity, stop criteria, and a human-approved decision.'], ['QA preserves all six conditions and prevents minor passes from cancelling critical gaps. No launch, pilot, limit change, waiver, or funds movement is authorized by this review.']], 'suite_id': 'new-product-risk', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'NP-F01', 'proposal': 'Obtain and review a scenario-specific test before supporting a launch decision.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'NP-F02', 'proposal': 'Resolve the timing failure mechanism and retest normal and delayed paths.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'NP-F03', 'proposal': 'Rehearse access withdrawal, pending-item reconciliation, and recovery evidence before approval consideration.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'new-product-risk', 'title': 'New Product Risk and Launch Readiness', 'summary': 'Map a proposed product’s funds, data, and service flows to control dependencies and testable launch conditions.', 'audience': 'Product reviewers, control owners, and launch decision forums', 'decision': 'Does the supplied evidence support consideration of launch, and which conditions remain unresolved?', 'palette': 'slate', 'report_sections': ['Launch recommendation and unresolved conditions', 'Product scope flow and assessment method', 'Material readiness findings', 'Funds data and service flow map', 'Launch condition verification', 'Evidence and dependency limitations', 'Remediation pilot and exit proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'FlowMap', 'columns': ['flow_id', 'flow_type', 'from_role', 'to_role', 'asset_or_data', 'control_dependency', 'evidence_ids'], 'rows': [['FL01', 'DATA', 'Applicant', 'Enrollment service', 'Identity attributes', 'Enrollment review', 'SYN-001'], ['FL02', 'SERVICE', 'User channel', 'Request service', 'Payment instruction', 'Authentication and limits', 'SYN-001'], ['FL03', 'DATA', 'Request service', 'Review queue', 'Instruction and risk fields', 'Screening and monitoring', 'SYN-001'], ['FL04', 'FUNDS', 'Payment provider', 'Recipient institution', 'Illustrative payment value', 'Approved instruction and settlement', 'SYN-001'], ['FL05', 'DATA', 'Payment provider', 'Reconciliation service', 'Status and ledger events', 'Reconciliation and exception handling', 'SYN-001']]}, {'name': 'LaunchConditions', 'columns': ['condition_id', 'flow_id', 'condition', 'critical', 'status', 'evidence_ids'], 'rows': [['LC01', 'FL04', 'Document primary funds and instruction flow', True, 'SATISFIED', 'SYN-001'], ['LC02', 'FL03', 'Evidence screening configuration and fixture tests', True, 'SATISFIED', 'SYN-001'], ['LC03', 'FL03', 'Evidence monitoring exception test', True, 'NOT VERIFIABLE', 'SYN-001'], ['LC04', 'FL05', 'Resolve reconciliation timing exception', True, 'PARTIAL', 'SYN-001'], ['LC05', 'FL02', 'Train all four pilot operators', False, 'SATISFIED', 'SYN-001'], ['LC06', 'FL04', 'Rehearse controlled exit and recovery', True, 'NOT SATISFIED', 'SYN-001']]}], 'findings': [{'id': 'NP-F01', 'title': 'Primary monitoring dependency lacks test evidence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'LC03 is supported by a build-complete assertion but no accessible monitoring exception test.', 'recommendation': 'Obtain and review a scenario-specific test before supporting a launch decision.'}, {'id': 'NP-F02', 'title': 'Reconciliation test retains an unresolved timing exception', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'One $50.00 payment remains pending at 60 minutes against an illustrative 30-minute resolution criterion; conservation of value alone passes.', 'recommendation': 'Resolve the timing failure mechanism and retest normal and delayed paths.'}, {'id': 'NP-F03', 'title': 'Exit design has not been rehearsed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'LC06 has a written recovery plan but no executed rehearsal record.', 'recommendation': 'Rehearse access withdrawal, pending-item reconciliation, and recovery evidence before approval consideration.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional payment workflow flow map and launch-condition evidence', 'locator': '10-worked-example.md, complete flow, ledger, and condition records', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'OCC 2017-43 New, Modified, or Expanded Bank Products and Services', 'locator': 'https://www.occ.gov/news-issuances/bulletins/2017/bulletin-2017-43.html', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'Federal Reserve SR 23-4 Third-Party Relationships', 'locator': 'https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Mapped flow legs', 'value': '5', 'method': 'Count separate data, service, and funds legs; no value summation across leg types.', 'format': '#,##0'}, {'label': 'Satisfied launch conditions', 'value': '3 of 6 (50.0%)', 'method': 'SATISFIED conditions / all six required conditions; no readiness average overrides critical gaps.', 'format': '#,##0'}, {'label': 'Unresolved critical conditions', 'value': '3 of 5 (60.0%)', 'method': 'LC03,LC04,LC06 / five conditions flagged critical in fictional approval criteria.', 'format': '#,##0'}], 'limitations': ['The product, approval criteria, roles, amounts, and tests are fictional.', 'Passing fixture tests does not establish full control coverage or production readiness.', 'No actual launch, pilot, or risk exception is approved.', 'The missing monitoring test is an evidence gap, not proof that the control was absent.'], 'conclusion': 'Three critical launch conditions remain unresolved in the fictional review, so the evidence does not support launch consideration yet. Obtain the monitoring test, resolve the reconciliation exception, and rehearse exit before an authorized human decision.', 'report_narrative': [['Three critical conditions remain unresolved, so the fixture evidence does not support launch consideration yet. Monitoring test evidence, reconciliation timing, and exit rehearsal require resolution before an authorized launch decision.'], ['The fictional payment-request product has five principal flow legs and six approval conditions. Instructions, data, and funds are mapped separately; the provider executes funds transfers while the request service handles instructions.'], ['LC03 lacks an inspectable monitoring exception test, LC04 has an unresolved timing exception, and LC06 lacks a performed exit rehearsal. These are different evidence states and remain distinct in the recommendation.'], ['FlowMap shows enrollment data, instruction service, review data, funds execution, and reconciliation data. Repeated representations of the same payment value must not be summed as separate economic exposure.'], ['Three conditions are SATISFIED, one PARTIAL, one NOT VERIFIABLE, and one NOT SATISFIED. Five conditions are critical; three remain unresolved. The $100.00 test instruction total equals $50.00 posted plus $50.00 pending, but the pending item is 60 minutes old against a 30-minute criterion.'], ['SYN-001 supplies the product version, flow map, six conditions, three payment records, and four-operator training evidence. Successful fixture screening tests support only their defined cases, not complete production control coverage.'], ['Propose obtaining LC03’s actual test evidence, resolving and retesting the delayed reconciliation path, and rehearsing exit with pending activity. Any narrower pilot needs enforceable scope, capacity, stop criteria, and a human-approved decision.'], ['QA preserves all six conditions and prevents minor passes from cancelling critical gaps. No launch, pilot, limit change, waiver, or funds movement is authorized by this review.']], 'suite_id': 'new-product-risk', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'NP-F01', 'proposal': 'Obtain and review a scenario-specific test before supporting a launch decision.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'NP-F02', 'proposal': 'Resolve the timing failure mechanism and retest normal and delayed paths.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'NP-F03', 'proposal': 'Rehearse access withdrawal, pending-item reconciliation, and recovery evidence before approval consideration.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

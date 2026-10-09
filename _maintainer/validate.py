@@ -5,7 +5,9 @@ from pathlib import Path
 import re
 import sys
 from urllib.parse import unquote
-from build import ROOT, COMMON, generate
+from build import ROOT, COMMON, generate, RELEASE, RELEASE_DATE, VERSION
+from datetime import date
+from schema import case_errors
 
 EXPECTED = ['README.md','01-session-guide.md','02-inputs-evidence.md','03-analysis-method.md',
             '04-decision-rules.md','05-output-contract.md','06-report-template.md',
@@ -13,59 +15,36 @@ EXPECTED = ['README.md','01-session-guide.md','02-inputs-evidence.md','03-analys
             '10-worked-example.md','11-build-record.md']
 
 def validate_catalog(data):
-    errors=[]
-    for key in ('slug','title','summary','audience','decision','palette','report_sections',
-                'domain_tables','findings','evidence','metrics','limitations','report_narrative'):
-        if key not in data:
-            errors.append('catalog missing '+key)
-    if errors:
-        return errors
-    if len(data['report_narrative'])!=8 or any(not section or not all(isinstance(p,str) and p.strip() for p in section) for section in data['report_narrative']):
-        errors.append('eight populated case-specific narrative sections required')
-    if len(data['report_sections'])!=8:
-        errors.append('report must have eight sections')
-    if len(data['domain_tables'])!=2:
-        errors.append('exactly two domain tables required')
-    names=set(COMMON)
-    for t in data['domain_tables']:
-        if t['name'] in names or len(t['name'])>31 or re.search(r'[\\/*?:\[\]]',t['name']):
-            errors.append('invalid or duplicate sheet '+t['name'])
-        names.add(t['name'])
-        if len(set(t['columns']))!=len(t['columns']):
-            errors.append('duplicate columns in '+t['name'])
-        for row in t['rows']:
-            if len(row)!=len(t['columns']):
-                errors.append('row width mismatch in '+t['name'])
-    evidence={e['id'] for e in data['evidence']}
-    if len(evidence)!=len(data['evidence']):
-        errors.append('duplicate evidence ID')
-    if len({f['id'] for f in data['findings']})!=len(data['findings']):
-        errors.append('duplicate finding ID')
-    for f in data['findings']:
-        if not f['evidence_ids'] or not set(f['evidence_ids']) <= evidence:
-            errors.append('unresolved evidence key in '+f['id'])
-        if f['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):
-            errors.append('invalid severity in '+f['id'])
-        if f['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):
-            errors.append('invalid confidence in '+f['id'])
-        if f['claim_class'] not in ('Observed','Reported','Inferred','Estimated'):
-            errors.append('invalid claim class in '+f['id'])
-    return errors
+    return case_errors(data)
 
 def validate(root=ROOT, check_generated=True):
     errors=[]
+    if not re.fullmatch(r'\d+\.\d+\.\d+', VERSION):errors.append('invalid release version')
+    try:date.fromisoformat(RELEASE_DATE)
+    except ValueError:errors.append('invalid release date')
     catalogs=sorted((root/'_maintainer/catalog').glob('*.json'))
     folders={p.name for p in (root/'suites').iterdir() if p.is_dir()}
-    catalog_slugs={json.loads(p.read_text())['slug'] for p in catalogs}
+    parsed=[]
+    for path in catalogs:
+        try:data=json.loads(path.read_text())
+        except (json.JSONDecodeError,UnicodeDecodeError) as exc:
+            errors.append(f'{path.name}: invalid JSON: {exc}');continue
+        problems=validate_catalog(data)
+        errors.extend(f'{path.name}: {e}' for e in problems)
+        if problems:continue
+        if path.stem!=data['slug']:errors.append(f'{path.name}: filename must match suite slug')
+        parsed.append((path,data))
+    catalog_slugs={data['slug'] for _,data in parsed}
+    if len(catalog_slugs)!=len(parsed):errors.append('duplicate catalog suite slug')
     if folders != catalog_slugs:
         errors.append('suite/catalog inventory mismatch: '+str(sorted(folders ^ catalog_slugs)))
-    for path in catalogs:
-        data=json.loads(path.read_text())
-        errors.extend(f'{path.name}: {e}' for e in validate_catalog(data))
+    for path,data in parsed:
         folder=root/'suites'/data['slug']
+        if not folder.exists():
+            errors.append(f'{folder.name}: missing suite directory');continue
         actual=sorted(p.name for p in folder.iterdir())
         if actual!=sorted(EXPECTED):
-            errors.append(f'{folder.name}: attachment inventory mismatch {actual}')
+            errors.append(f'{folder.name}: attachment inventory mismatch {actual}');continue
         contract=(folder/'05-output-contract.md').read_text()
         for heading in data['report_sections']:
             if heading not in contract:
@@ -103,8 +82,13 @@ def validate(root=ROOT, check_generated=True):
             target=unquote(link.split('#')[0])
             if target and not (path.parent/target).exists():
                 errors.append(f'{path.relative_to(root)}: broken local link {link}')
-    if check_generated and generate(check=True):
-        errors.append('generated file drift')
+    if check_generated and not errors:
+        from budgets import build as check_budgets
+        from library import generate as check_finder, GROUPS
+        if catalog_slugs!={slug for slugs in GROUPS.values() for slug in slugs}:errors.append('finder inventory mismatch')
+        if generate(check=True):errors.append('generated file drift')
+        if check_budgets(check=True):errors.append('content budget drift')
+        if check_finder(check=True):errors.append('finder drift')
     return errors
 
 if __name__=='__main__':

@@ -1,0 +1,403 @@
+{
+  "slug": "source-wealth-funds",
+  "title": "Source of Wealth and Funds Review",
+  "summary": "Reconcile wealth accumulation and particular funding sources with dated asset, income, tax, FX, and transfer evidence.",
+  "audience": "Analysts preparing generic source-of-wealth and source-of-funds review drafts",
+  "decision": "What wealth accumulation and proposed funding can be explained from the supplied evidence, and which provenance or entitlement gaps remain?",
+  "palette": "umber",
+  "report_sections": [
+    "Wealth and funds conclusion",
+    "Scope valuation dates and reconciliation method",
+    "Material provenance findings",
+    "Wealth accumulation bridge",
+    "Proposed funding trace",
+    "Evidence chain and alternative explanations",
+    "Proposed corroboration actions",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "WealthBridge",
+      "columns": [
+        "event_id",
+        "event_date",
+        "event_type",
+        "original_amount",
+        "original_currency",
+        "fx_usd_per_unit",
+        "usd_wealth_change",
+        "cash_effect_usd",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "W01",
+          "2025-01-01",
+          "OPENING_CASH",
+          400000,
+          "USD",
+          1,
+          400000,
+          400000,
+          "SYN-001",
+          "Opening stock; not period income"
+        ],
+        [
+          "W02",
+          "2025-01-01",
+          "OPENING_SECURITIES",
+          600000,
+          "USD",
+          1,
+          600000,
+          0,
+          "SYN-001",
+          "Existing holdings; separate from inherited securities"
+        ],
+        [
+          "W03",
+          "2025-01-01",
+          "OPENING_PROPERTY",
+          500000,
+          "USD",
+          1,
+          500000,
+          0,
+          "SYN-001",
+          "Gross property value before debt"
+        ],
+        [
+          "W04",
+          "2025-01-01",
+          "OPENING_DEBT",
+          -200000,
+          "USD",
+          1,
+          -200000,
+          0,
+          "SYN-001",
+          "Liability deducted once; no period repayment"
+        ],
+        [
+          "W05",
+          "2025-06-30",
+          "SALARY_NET",
+          300000,
+          "USD",
+          1,
+          210000,
+          210000,
+          "SYN-002",
+          "Gross salary 300000 less fictional tax paid 90000"
+        ],
+        [
+          "W06",
+          "2025-07-01",
+          "INHERITED_SECURITIES",
+          400000,
+          "USD",
+          1,
+          400000,
+          0,
+          "SYN-003",
+          "Noncash inherited stock of assets; no sale receipt yet"
+        ],
+        [
+          "W07",
+          "2025-08-01",
+          "PARTIAL_DISPOSAL",
+          250000,
+          "USD",
+          1,
+          20000,
+          220000,
+          "SYN-003",
+          "Carrying amount removed 200000; fee 10000; fictional tax paid 20000"
+        ],
+        [
+          "W08",
+          "2025-08-15",
+          "DIVIDEND_NET",
+          100000,
+          "EUR",
+          1.2,
+          90000,
+          90000,
+          "SYN-004",
+          "Gross EUR100000 × 1.20 = USD120000; fictional tax paid USD30000"
+        ],
+        [
+          "W09",
+          "2025-09-30",
+          "LIVING_EXPENSE",
+          -120000,
+          "USD",
+          1,
+          -120000,
+          -120000,
+          "SYN-005",
+          "Period expense paid from cash"
+        ],
+        [
+          "W10",
+          "2025-09-30",
+          "PROPERTY_REVALUATION",
+          100000,
+          "USD",
+          1,
+          100000,
+          0,
+          "SYN-005",
+          "Unrealized change; no funding cash"
+        ],
+        [
+          "W11",
+          "2025-09-30",
+          "SECURITIES_REVALUATION",
+          60000,
+          "USD",
+          1,
+          60000,
+          0,
+          "SYN-005",
+          "Unrealized change on pre-existing holdings only"
+        ]
+      ],
+      "formats": {
+        "original_amount": "#,##0.00",
+        "fx_usd_per_unit": "0.0000",
+        "usd_wealth_change": "#,##0.00",
+        "cash_effect_usd": "#,##0.00"
+      }
+    },
+    {
+      "name": "FundingTrace",
+      "columns": [
+        "trace_id",
+        "origin_type",
+        "economic_event_id",
+        "net_available_usd",
+        "allocated_usd",
+        "supported_usd",
+        "link_status",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "F01",
+          "SALARY",
+          "SALARY01",
+          210000,
+          180000,
+          180000,
+          "SUPPORTED_ALLOCATION",
+          "SYN-002;SYN-006",
+          "Remaining net salary cash 30000 is unallocated"
+        ],
+        [
+          "F02",
+          "DIVIDEND",
+          "DIV01",
+          90000,
+          90000,
+          90000,
+          "SUPPORTED_ALLOCATION",
+          "SYN-004;SYN-006",
+          "Net dividend only; gross not added"
+        ],
+        [
+          "F03",
+          "INHERITED_ASSET_SALE",
+          "SALE01",
+          220000,
+          220000,
+          220000,
+          "SUPPORTED_ALLOCATION",
+          "SYN-003;SYN-006",
+          "Same asset already included in wealth bridge"
+        ],
+        [
+          "F04",
+          "OPENING_CASH",
+          "CASH01",
+          400000,
+          50000,
+          50000,
+          "SUPPORTED_ALLOCATION",
+          "SYN-001;SYN-006",
+          "Opening stock used; not new wealth creation"
+        ],
+        [
+          "F05",
+          "UNRELATED_THIRD_PARTY",
+          "UNKNOWN01",
+          60000,
+          60000,
+          0,
+          "UNRESOLVED",
+          "SYN-006",
+          "Claimed contribution; sender origin and entitlement absent"
+        ],
+        [
+          "F06",
+          "DUPLICATE_SALE_ADVICE",
+          "SALE01",
+          220000,
+          0,
+          0,
+          "DUPLICATE_EXCLUDED",
+          "SYN-003",
+          "Second document for F03 event; not additional money"
+        ]
+      ],
+      "formats": {
+        "net_available_usd": "#,##0.00",
+        "allocated_usd": "#,##0.00",
+        "supported_usd": "#,##0.00"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "WF-F01",
+      "title": "Proposed third-party contribution remains unsupported",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-006"
+      ],
+      "detail": "$60,000.00 of the proposed $600,000.00 funding has no supplied origin or entitlement explanation.",
+      "recommendation": "Obtain the sender relationship, economic origin, entitlement, and transfer rationale before relying on that allocation."
+    },
+    {
+      "id": "WF-F02",
+      "title": "Inheritance and disposal are the same underlying assets",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-003"
+      ],
+      "detail": "The $400,000.00 inherited securities stock includes the $200,000.00 carrying amount sold for $220,000.00 net cash. Only $20,000.00 is incremental net wealth from disposal.",
+      "recommendation": "Retain the asset bridge and reject adding all net sale cash as new wealth."
+    },
+    {
+      "id": "WF-F03",
+      "title": "Unrealized gains are not funding cash",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-005"
+      ],
+      "detail": "Property and existing securities revaluations add $160,000.00 to the wealth scenario and zero cash.",
+      "recommendation": "Separate valuation support from liquidity and funding provenance."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional opening balance sheet",
+      "locator": "10-worked-example.md, opening asset and liability population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional gross salary and tax schedule",
+      "locator": "10-worked-example.md, complete period-event population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional inheritance and partial sale records",
+      "locator": "10-worked-example.md, securities quantity and disposal bridge",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional dividend FX and tax schedule",
+      "locator": "10-worked-example.md, complete period-event population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional expenses and closing valuations",
+      "locator": "10-worked-example.md, closing reconciliation",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional proposed funding allocation",
+      "locator": "10-worked-example.md, full funding population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-PEP",
+      "title": "FATF 2013 PEP guidance, paragraphs 86–94",
+      "locator": "https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-PEP-Rec12-22.pdf",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Closing net wealth scenario",
+      "value": "$2,060,000.00",
+      "method": "Opening net wealth $1,300,000.00 plus net period wealth changes $760,000.00."
+    },
+    {
+      "label": "Supported proposed allocation",
+      "value": "$540,000.00 of $600,000.00 (90.0%)",
+      "method": "Sum supported_usd across F01–F06 / sum allocated_usd; duplicate F06 contributes zero."
+    },
+    {
+      "label": "Unsupported proposed allocation",
+      "value": "$60,000.00 (10.0%)",
+      "method": "Proposed $600,000.00 less supported $540,000.00; F05 is unresolved."
+    },
+    {
+      "label": "Closing cash before proposed transfer",
+      "value": "$800,000.00",
+      "method": "Opening cash $400,000.00 + salary $210,000.00 + sale $220,000.00 + dividend $90,000.00 − expenses $120,000.00."
+    }
+  ],
+  "limitations": [
+    "All balances, tax charges, valuations, exchange rates, and source records are fictional.",
+    "The wealth bridge is a scenario with assumed completeness, not verified net worth or a tax determination.",
+    "Supported allocation means document support within the fixture, not tracing particular currency units through a commingled account.",
+    "The proposed third-party contribution is excluded from owned wealth pending entitlement and origin evidence.",
+    "A funded amount or plausible wealth profile does not establish lawful origin or authorize a transaction."
+  ],
+  "conclusion": "The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained.",
+  "report_narrative": [
+    [
+      "The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained."
+    ],
+    [
+      "The wealth period is Jan 01–Sep 30, 2025. Opening net wealth is $1,300,000.00. The proposed funding is dated Oct 01, 2025 and has not occurred in this fixture. USD is the reporting currency; the dividend uses a fictional 1.20 USD-per-EUR conversion."
+    ],
+    [
+      "The $60,000.00 third-party proposal has no supplied economic-origin or entitlement evidence. Inherited securities and their partial-sale proceeds cannot be counted as two independent sources of wealth. Unrealized appreciation raises a valuation scenario but provides no funding cash."
+    ],
+    [
+      "The bridge adds net salary $210,000.00, inheritance $400,000.00, net disposal gain $20,000.00, net dividend $90,000.00, and revaluations $160,000.00, less living expenses $120,000.00. Closing assets total $2,260,000.00 less debt $200,000.00.",
+      "SYN-003 supplies 4,000 inherited units at $100.00 per unit ($400,000.00). Of these, 2,000 units are sold at $125.00 ($250,000.00 gross); $10,000.00 fees and $20,000.00 paid fictional tax leave $220,000.00 cash. Remove the sold $200,000.00 carrying amount to obtain $20,000.00 incremental wealth. The remaining 2,000 units retain the fixture's $100.00 carrying value ($200,000.00) at Sep 30, 2025. These are exercise values, not tax-basis determinations."
+    ],
+    [
+      "The proposed allocation is salary $180,000.00, dividend $90,000.00, inherited-asset sale $220,000.00, opening cash $50,000.00, and unresolved third-party funds $60,000.00. Duplicate sale advice F06 adds zero. Supported allocations total $540,000.00."
+    ],
+    [
+      "SYN-001 through SYN-006 supply all fictional balances, events, and proposed allocations. FATF 2013 paragraphs 86–94 inform the distinction between overall wealth origin and particular funds origin in a PEP context; this exercise does not determine PEP status or universal legal obligations."
+    ],
+    [
+      "Request the third party’s economic origin, relationship, entitlement, and proposed transfer purpose in a permitted fictional or public form. Corroborate dates, inheritance rights, sale deductions, and valuations before relying on a real-world analogue. Keep tax and legal interpretation with qualified reviewers."
+    ],
+    [
+      "QA must reconcile opening $1,300,000.00, net movement $760,000.00, closing $2,060,000.00, cash $800,000.00, and supported funding $540,000.00. The scenario does not verify tax compliance, lawful origin, actual liquidity, or human approval."
+    ]
+  ],
+  "as_of": "2025-09-30",
+  "scope": "Fictional wealth bridge from Jan 01 through Sep 30, 2025; a separate proposed Oct 01, 2025 funding allocation is not a completed event at the wealth cutoff."
+}

@@ -1,6 +1,6 @@
 # Transaction Monitoring Review — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'transaction-monitoring', 'title': 'Transaction Monitoring Review', 'summary': 'Reconcile a transaction extract, calculate transparent monitoring scenarios, and turn rule matches into reviewable observations with explicit benign explanations.', 'audience': 'Monitoring analysts, scenario owners, and independent control reviewers', 'decision': 'Which scenario matches merit further review, which have supported explanations, and which cannot be assessed because the inputs are incomplete?', 'palette': 'slate', 'report_sections': ['Review priorities and known movement', 'Scope, population, and scenario method', 'Findings and benign explanations', 'Account flow calculations', 'Scenario matches and review outcomes', 'Evidence and criterion provenance', 'Proposed review and data-repair actions', 'Limitations, quality checks, and human decision'], 'domain_tables': [{'name': 'AccountFlows', 'columns': ['account_id', 'currency', 'processed_tx_count', 'credit_total', 'debit_total', 'eligible_credit_total', 'eligible_debit_total', 'out_in_ratio', 'population_status'], 'rows': [['A', 'USD', 3, 10000, 9500, 10000, 9500, 0.95, 'COMPLETE'], ['B', 'USD', 2, 5000, 4800, 5000, 4800, 0.96, 'COMPLETE'], ['C', 'USD', 2, 3000, 3000, 0, 0, None, 'OWN_TRANSFER_EXCLUDED'], ['D', 'USD', 1, 0, 1000, 0, 1000, None, 'UNPARSED_AMOUNT']], 'formats': {'credit_total': '#,##0.00', 'debit_total': '#,##0.00', 'eligible_credit_total': '#,##0.00', 'eligible_debit_total': '#,##0.00', 'out_in_ratio': '0.0%'}}, {'name': 'ScenarioResults', 'columns': ['scenario_result_id', 'account_id', 'scenario_id', 'eligible', 'rule_result', 'first_credit_to_debit_hours', 'review_outcome', 'evidence_ids'], 'rows': [['SR-001', 'A', 'TM-01', True, 'MATCH', 2, 'ESCALATE_FOR_REVIEW', 'SYN-001;SYN-002'], ['SR-002', 'B', 'TM-01', True, 'MATCH', 3, 'EXPLANATION_SUPPORTED', 'SYN-001;SYN-003'], ['SR-003', 'C', 'TM-01', False, 'EXCLUDED', None, 'OWN_TRANSFER_CONFIRMED', 'SYN-001;SYN-004'], ['SR-004', 'D', 'TM-01', False, 'NOT_ASSESSABLE', None, 'DATA_REPAIR_REQUIRED', 'SYN-001;SYN-005']], 'formats': {'first_credit_to_debit_hours': '0.0'}}], 'findings': [{'id': 'TM-F01', 'title': 'Account A meets the illustrative rapid-movement rule', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001', 'SYN-002'], 'detail': 'Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.', 'recommendation': 'Obtain payment purpose and counterparties; refer to the authorized reviewer.'}, {'id': 'TM-F02', 'title': 'Account B has a supported ordinary-business explanation', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-003'], 'detail': 'The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.', 'recommendation': 'Document the explanation and seek human disposition; retain the rule hit.'}, {'id': 'TM-F03', 'title': 'Account D cannot be fully assessed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-005'], 'detail': 'One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit.', 'recommendation': 'Repair the source extract and recompute D before making an account conclusion.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional transaction extract', 'locator': '10-worked-example.md, raw population R01–R10', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional account A profile', 'locator': '10-worked-example.md, context register A', 'claim_class': 'Reported'}, {'id': 'SYN-003', 'title': 'Fictional invoice and matching confirmation', 'locator': '10-worked-example.md, context register B', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional ownership confirmation', 'locator': '10-worked-example.md, context register C', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional extract defect', 'locator': '10-worked-example.md, raw row R10', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Raw rows', 'value': 10, 'method': 'Count R01–R10 before deduplication', 'format': '#,##0'}, {'label': 'Processed transactions', 'value': 8, 'method': '10 raw minus 1 duplicate minus 1 unparsed', 'format': '#,##0'}, {'label': 'Known gross movement USD', 'value': 36300, 'method': '$18,000.00 credits plus $18,300.00 debits; excludes unknown R10 amount', 'format': '$#,##0.00'}, {'label': 'Rule matches', 'value': 2, 'method': 'A and B match TM-01; C excluded; D not assessable', 'format': '#,##0'}], 'limitations': ['Synthetic rules are illustrative and are not regulatory thresholds.', 'Account D has an unknown amount; total monetary completeness is not established.', 'No opening balances or complete external flow paths are supplied.'], 'conclusion': 'Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.', 'report_narrative': [['Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.'], ['The ten raw rows reconcile to eight processed transactions after the documented duplicate and exclusion decisions. The fictional scenario uses explicit amount, ratio and timing criteria; unreadable amounts remain outside assessable sums.'], ['TM-F01: Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.', 'TM-F02: The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.', 'TM-F03: One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit.'], ['Known gross movement is $36,300.00 within the captured records. Account totals retain the relationship between incoming and outgoing activity; gross movement is not net loss, customer income or suspicious value.'], ['Two accounts meet the raw illustrative rapid-movement criterion. One has a supported invoice explanation, while the other remains a review lead. An additional account is not assessable because an amount is unreadable; it cannot be scored as a negative.'], ['The synthetic source rows and criterion definitions in file 10 support the arithmetic and matches. The public typology references do not supply a regulatory threshold or evidence of wrongdoing for these fictional accounts.'], ['Review the unexplained match, preserve the invoice explanation without deleting the raw match, and repair the unreadable amount before rerunning the affected account.'], ['Synthetic rules are illustrative and are not regulatory thresholds.', 'Account D has an unknown amount; total monetary completeness is not established.', 'No opening balances or complete external flow paths are supplied.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'transaction-monitoring', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'TM-F01', 'proposal': 'Obtain payment purpose and counterparties; refer to the authorized reviewer.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'TM-F02', 'proposal': 'Document the explanation and seek human disposition; retain the rule hit.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'TM-F03', 'proposal': 'Repair the source extract and recompute D before making an account conclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'transaction-monitoring', 'title': 'Transaction Monitoring Review', 'summary': 'Reconcile a transaction extract, calculate transparent monitoring scenarios, and turn rule matches into reviewable observations with explicit benign explanations.', 'audience': 'Monitoring analysts, scenario owners, and independent control reviewers', 'decision': 'Which scenario matches merit further review, which have supported explanations, and which cannot be assessed because the inputs are incomplete?', 'palette': 'slate', 'report_sections': ['Review priorities and known movement', 'Scope, population, and scenario method', 'Findings and benign explanations', 'Account flow calculations', 'Scenario matches and review outcomes', 'Evidence and criterion provenance', 'Proposed review and data-repair actions', 'Limitations, quality checks, and human decision'], 'domain_tables': [{'name': 'AccountFlows', 'columns': ['account_id', 'currency', 'processed_tx_count', 'credit_total', 'debit_total', 'eligible_credit_total', 'eligible_debit_total', 'out_in_ratio', 'population_status'], 'rows': [['A', 'USD', 3, 10000, 9500, 10000, 9500, 0.95, 'COMPLETE'], ['B', 'USD', 2, 5000, 4800, 5000, 4800, 0.96, 'COMPLETE'], ['C', 'USD', 2, 3000, 3000, 0, 0, None, 'OWN_TRANSFER_EXCLUDED'], ['D', 'USD', 1, 0, 1000, 0, 1000, None, 'UNPARSED_AMOUNT']], 'formats': {'credit_total': '#,##0.00', 'debit_total': '#,##0.00', 'eligible_credit_total': '#,##0.00', 'eligible_debit_total': '#,##0.00', 'out_in_ratio': '0.0%'}}, {'name': 'ScenarioResults', 'columns': ['scenario_result_id', 'account_id', 'scenario_id', 'eligible', 'rule_result', 'first_credit_to_debit_hours', 'review_outcome', 'evidence_ids'], 'rows': [['SR-001', 'A', 'TM-01', True, 'MATCH', 2, 'ESCALATE_FOR_REVIEW', 'SYN-001;SYN-002'], ['SR-002', 'B', 'TM-01', True, 'MATCH', 3, 'EXPLANATION_SUPPORTED', 'SYN-001;SYN-003'], ['SR-003', 'C', 'TM-01', False, 'EXCLUDED', None, 'OWN_TRANSFER_CONFIRMED', 'SYN-001;SYN-004'], ['SR-004', 'D', 'TM-01', False, 'NOT_ASSESSABLE', None, 'DATA_REPAIR_REQUIRED', 'SYN-001;SYN-005']], 'formats': {'first_credit_to_debit_hours': '0.0'}}], 'findings': [{'id': 'TM-F01', 'title': 'Account A meets the illustrative rapid-movement rule', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001', 'SYN-002'], 'detail': 'Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.', 'recommendation': 'Obtain payment purpose and counterparties; refer to the authorized reviewer.'}, {'id': 'TM-F02', 'title': 'Account B has a supported ordinary-business explanation', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-003'], 'detail': 'The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.', 'recommendation': 'Document the explanation and seek human disposition; retain the rule hit.'}, {'id': 'TM-F03', 'title': 'Account D cannot be fully assessed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-005'], 'detail': 'One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit.', 'recommendation': 'Repair the source extract and recompute D before making an account conclusion.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional transaction extract', 'locator': '10-worked-example.md, raw population R01–R10', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional account A profile', 'locator': '10-worked-example.md, context register A', 'claim_class': 'Reported'}, {'id': 'SYN-003', 'title': 'Fictional invoice and matching confirmation', 'locator': '10-worked-example.md, context register B', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional ownership confirmation', 'locator': '10-worked-example.md, context register C', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional extract defect', 'locator': '10-worked-example.md, raw row R10', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Raw rows', 'value': 10, 'method': 'Count R01–R10 before deduplication', 'format': '#,##0'}, {'label': 'Processed transactions', 'value': 8, 'method': '10 raw minus 1 duplicate minus 1 unparsed', 'format': '#,##0'}, {'label': 'Known gross movement USD', 'value': 36300, 'method': '$18,000.00 credits plus $18,300.00 debits; excludes unknown R10 amount', 'format': '$#,##0.00'}, {'label': 'Rule matches', 'value': 2, 'method': 'A and B match TM-01; C excluded; D not assessable', 'format': '#,##0'}], 'limitations': ['Synthetic rules are illustrative and are not regulatory thresholds.', 'Account D has an unknown amount; total monetary completeness is not established.', 'No opening balances or complete external flow paths are supplied.'], 'conclusion': 'Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.', 'report_narrative': [['Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.'], ['The ten raw rows reconcile to eight processed transactions after the documented duplicate and exclusion decisions. The fictional scenario uses explicit amount, ratio and timing criteria; unreadable amounts remain outside assessable sums.'], ['TM-F01: Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.', 'TM-F02: The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.', 'TM-F03: One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit.'], ['Known gross movement is $36,300.00 within the captured records. Account totals retain the relationship between incoming and outgoing activity; gross movement is not net loss, customer income or suspicious value.'], ['Two accounts meet the raw illustrative rapid-movement criterion. One has a supported invoice explanation, while the other remains a review lead. An additional account is not assessable because an amount is unreadable; it cannot be scored as a negative.'], ['The synthetic source rows and criterion definitions in file 10 support the arithmetic and matches. The public typology references do not supply a regulatory threshold or evidence of wrongdoing for these fictional accounts.'], ['Review the unexplained match, preserve the invoice explanation without deleting the raw match, and repair the unreadable amount before rerunning the affected account.'], ['Synthetic rules are illustrative and are not regulatory thresholds.', 'Account D has an unknown amount; total monetary completeness is not established.', 'No opening balances or complete external flow paths are supplied.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'transaction-monitoring', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'TM-F01', 'proposal': 'Obtain payment purpose and counterparties; refer to the authorized reviewer.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'TM-F02', 'proposal': 'Document the explanation and seek human disposition; retain the rule hit.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'TM-F03', 'proposal': 'Repair the source extract and recompute D before making an account conclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

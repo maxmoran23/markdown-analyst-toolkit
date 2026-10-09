@@ -1,6 +1,6 @@
 # Entity Due Diligence — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'entity-due-diligence', 'title': 'Entity Due Diligence', 'summary': 'Build an identity-resolved entity profile with ownership, permissions, business purpose, and explicit evidence gaps.', 'audience': 'Analysts conducting generic public-source entity diligence', 'decision': 'Is the profile sufficiently supported for the stated research purpose, or what evidence and specialist review are needed?', 'palette': 'umber', 'report_sections': ['Entity decision brief', 'Scope and review method', 'Material findings', 'Ownership assessment', 'Profile and evidence gaps', 'Evidence record', 'Recommended diligence actions', 'Limitations and human review'], 'domain_tables': [{'name': 'Ownership', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'interest_basis', 'effective_date', 'source_status', 'evidence_ids', 'notes'], 'rows': [['O-01', 'PERSON-A', 'HOLDCO-A', 60, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Fictional ownership schedule'], ['O-02', 'PERSON-B', 'HOLDCO-A', 40, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Fictional ownership schedule'], ['O-03', 'HOLDCO-A', 'ENTITY-Q', 70, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Do not confuse with sanctions propagation'], ['O-04', 'PERSON-C', 'ENTITY-Q', 20, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Direct interest'], ['O-05', 'UNKNOWN-POOL', 'ENTITY-Q', 10, 'Ordinary economic equity', '2026-09-30', 'UNKNOWN', 'SYN-001', 'Underlying holders not supplied']], 'formats': {'interest_pct': '0.0"%"'}}, {'name': 'ProfileGaps', 'columns': ['item_id', 'dimension', 'expected_evidence', 'observed_state', 'materiality', 'assessment', 'evidence_ids', 'next_step'], 'rows': [['P-01', 'Legal identity', 'Registry identifier and status', 'ENTITY-Q active in supplied fictional extract', 'HIGH', 'SUPPORTED', 'SYN-001', 'Refresh for actual decision date'], ['P-02', 'Ownership', 'Complete dated ownership schedule', '10 percent terminal ownership unresolved', 'HIGH', 'INCOMPLETE', 'SYN-001', 'Identify underlying holders and control rights'], ['P-03', 'Business purpose', 'Product and expected-activity description', 'Company reports monthly receipts of $600,000.00', 'MEDIUM', 'REPORTED', 'SYN-001', 'Corroborate business model and expected counterparties'], ['P-04', 'License', 'Entity-specific permission for proposed service', 'Group license belongs to separate ENTITY-R', 'HIGH', 'UNRESOLVED', 'SYN-001', 'Obtain target entity permission or scope rationale'], ['P-05', 'Adverse event', 'Underlying order and current procedural status', 'Article references a proceeding; order absent', 'MEDIUM', 'NOT ASSESSED', 'SYN-001', 'Obtain public underlying record']]}], 'findings': [{'id': 'F-01', 'title': 'Terminal ownership remains incomplete', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.', 'recommendation': 'Obtain missing holder details and separate control-right evidence.'}, {'id': 'F-02', 'title': 'Target permission has not been demonstrated', 'severity': 'HIGH', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.', 'recommendation': 'Resolve target-entity scope and applicable permission requirements.'}, {'id': 'F-03', 'title': 'Receipts annualization is assumption-dependent', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '$7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts.', 'recommendation': 'Seek comparable financial evidence before relying on capacity claims.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional entity diligence case', 'locator': '10-worked-example.md, ownership and profile records', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FinCEN CDD overview', 'locator': 'https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule', 'claim_class': 'Observed'}, {'id': 'REF-CDD-2026', 'title': 'FinCEN FIN-2026-R001', 'locator': 'https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Resolved terminal economic interest', 'value': '90.0%', 'method': '42.0% Person A + 28.0% Person B + 20.0% Person C under stated comparable-equity assumptions.', 'format': '#,##0'}, {'label': 'Unresolved terminal interest', 'value': '10.0%', 'method': '100.0% less 90.0% known terminal interests.', 'format': '#,##0'}, {'label': 'Annualized receipts scenario', 'value': '$7,200,000.00', 'method': 'Reported $600,000.00 monthly receipts × 12; constant-month assumption, not annual revenue.', 'format': '#,##0'}], 'limitations': ['All facts are fictional and ownership assertions are not independently verified.', 'Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.', 'Control rights, target permission, and underlying adverse-event record are absent.'], 'metadata': {'conclusion': 'The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.'}, 'report_narrative': [['The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.'], ['The review concerns fictional ENTITY-Q, the dated ownership schedule, reported business profile and supplied group license. The legal identity, economic ownership, control rights, activity expectations and entity-specific permission are assessed separately.'], ['F-01: 10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.', 'F-02: The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.', 'F-03: $7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts.'], ['PERSON-A has a 42.0% proportional economic interest through HOLDCO-A; PERSON-B has 28.0%; PERSON-C holds 20.0% directly. The remaining 10.0% is unresolved, and these calculations do not identify control rights or determine sanctions status.'], ['The group license names ENTITY-R, so permission for ENTITY-Q is unproven. Reported monthly receipts of $600,000.00 imply a $7,200,000.00 constant-month annualized scenario, not verified annual revenue. The underlying adverse-event order is absent.'], ['SYN-001 supplies the fictional registry, schedule and profile assertions. The group license and news reference retain their entity and procedural limits; public methodology references do not corroborate fictional subject facts.'], ['Obtain the missing holders, rights instruments, target-specific permission and underlying public order before accepting the unresolved dimensions. Corroborate receipts with comparable financial evidence.'], ['All facts are fictional and ownership assertions are not independently verified.', 'Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.', 'Control rights, target permission, and underlying adverse-event record are absent.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'entity-due-diligence', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Obtain missing holder details and separate control-right evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Resolve target-entity scope and applicable permission requirements.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Seek comparable financial evidence before relying on capacity claims.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'entity-due-diligence', 'title': 'Entity Due Diligence', 'summary': 'Build an identity-resolved entity profile with ownership, permissions, business purpose, and explicit evidence gaps.', 'audience': 'Analysts conducting generic public-source entity diligence', 'decision': 'Is the profile sufficiently supported for the stated research purpose, or what evidence and specialist review are needed?', 'palette': 'umber', 'report_sections': ['Entity decision brief', 'Scope and review method', 'Material findings', 'Ownership assessment', 'Profile and evidence gaps', 'Evidence record', 'Recommended diligence actions', 'Limitations and human review'], 'domain_tables': [{'name': 'Ownership', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'interest_basis', 'effective_date', 'source_status', 'evidence_ids', 'notes'], 'rows': [['O-01', 'PERSON-A', 'HOLDCO-A', 60, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Fictional ownership schedule'], ['O-02', 'PERSON-B', 'HOLDCO-A', 40, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Fictional ownership schedule'], ['O-03', 'HOLDCO-A', 'ENTITY-Q', 70, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Do not confuse with sanctions propagation'], ['O-04', 'PERSON-C', 'ENTITY-Q', 20, 'Ordinary economic equity', '2026-09-30', 'REPORTED', 'SYN-001', 'Direct interest'], ['O-05', 'UNKNOWN-POOL', 'ENTITY-Q', 10, 'Ordinary economic equity', '2026-09-30', 'UNKNOWN', 'SYN-001', 'Underlying holders not supplied']], 'formats': {'interest_pct': '0.0"%"'}}, {'name': 'ProfileGaps', 'columns': ['item_id', 'dimension', 'expected_evidence', 'observed_state', 'materiality', 'assessment', 'evidence_ids', 'next_step'], 'rows': [['P-01', 'Legal identity', 'Registry identifier and status', 'ENTITY-Q active in supplied fictional extract', 'HIGH', 'SUPPORTED', 'SYN-001', 'Refresh for actual decision date'], ['P-02', 'Ownership', 'Complete dated ownership schedule', '10 percent terminal ownership unresolved', 'HIGH', 'INCOMPLETE', 'SYN-001', 'Identify underlying holders and control rights'], ['P-03', 'Business purpose', 'Product and expected-activity description', 'Company reports monthly receipts of $600,000.00', 'MEDIUM', 'REPORTED', 'SYN-001', 'Corroborate business model and expected counterparties'], ['P-04', 'License', 'Entity-specific permission for proposed service', 'Group license belongs to separate ENTITY-R', 'HIGH', 'UNRESOLVED', 'SYN-001', 'Obtain target entity permission or scope rationale'], ['P-05', 'Adverse event', 'Underlying order and current procedural status', 'Article references a proceeding; order absent', 'MEDIUM', 'NOT ASSESSED', 'SYN-001', 'Obtain public underlying record']]}], 'findings': [{'id': 'F-01', 'title': 'Terminal ownership remains incomplete', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.', 'recommendation': 'Obtain missing holder details and separate control-right evidence.'}, {'id': 'F-02', 'title': 'Target permission has not been demonstrated', 'severity': 'HIGH', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.', 'recommendation': 'Resolve target-entity scope and applicable permission requirements.'}, {'id': 'F-03', 'title': 'Receipts annualization is assumption-dependent', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': '$7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts.', 'recommendation': 'Seek comparable financial evidence before relying on capacity claims.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional entity diligence case', 'locator': '10-worked-example.md, ownership and profile records', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FinCEN CDD overview', 'locator': 'https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule', 'claim_class': 'Observed'}, {'id': 'REF-CDD-2026', 'title': 'FinCEN FIN-2026-R001', 'locator': 'https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Resolved terminal economic interest', 'value': '90.0%', 'method': '42.0% Person A + 28.0% Person B + 20.0% Person C under stated comparable-equity assumptions.', 'format': '#,##0'}, {'label': 'Unresolved terminal interest', 'value': '10.0%', 'method': '100.0% less 90.0% known terminal interests.', 'format': '#,##0'}, {'label': 'Annualized receipts scenario', 'value': '$7,200,000.00', 'method': 'Reported $600,000.00 monthly receipts × 12; constant-month assumption, not annual revenue.', 'format': '#,##0'}], 'limitations': ['All facts are fictional and ownership assertions are not independently verified.', 'Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.', 'Control rights, target permission, and underlying adverse-event record are absent.'], 'metadata': {'conclusion': 'The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.'}, 'report_narrative': [['The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.'], ['The review concerns fictional ENTITY-Q, the dated ownership schedule, reported business profile and supplied group license. The legal identity, economic ownership, control rights, activity expectations and entity-specific permission are assessed separately.'], ['F-01: 10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.', 'F-02: The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.', 'F-03: $7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts.'], ['PERSON-A has a 42.0% proportional economic interest through HOLDCO-A; PERSON-B has 28.0%; PERSON-C holds 20.0% directly. The remaining 10.0% is unresolved, and these calculations do not identify control rights or determine sanctions status.'], ['The group license names ENTITY-R, so permission for ENTITY-Q is unproven. Reported monthly receipts of $600,000.00 imply a $7,200,000.00 constant-month annualized scenario, not verified annual revenue. The underlying adverse-event order is absent.'], ['SYN-001 supplies the fictional registry, schedule and profile assertions. The group license and news reference retain their entity and procedural limits; public methodology references do not corroborate fictional subject facts.'], ['Obtain the missing holders, rights instruments, target-specific permission and underlying public order before accepting the unresolved dimensions. Corroborate receipts with comparable financial evidence.'], ['All facts are fictional and ownership assertions are not independently verified.', 'Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.', 'Control rights, target permission, and underlying adverse-event record are absent.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'entity-due-diligence', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Obtain missing holder details and separate control-right evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Resolve target-entity scope and applicable permission requirements.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Seek comparable financial evidence before relying on capacity claims.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

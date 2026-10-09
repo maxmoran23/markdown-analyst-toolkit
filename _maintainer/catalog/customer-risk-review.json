@@ -1,0 +1,551 @@
+{
+  "slug": "customer-risk-review",
+  "title": "Customer Risk Review",
+  "summary": "Review a customer profile with transparent factor weighting, evidence gaps, material exceptions, and human rating decisions.",
+  "audience": "Analysts preparing generic customer risk review drafts",
+  "decision": "What review priority and additional evidence are supported, and which rating decisions remain for an authorized human?",
+  "palette": "umber",
+  "report_sections": [
+    "Customer review conclusion",
+    "Population scope and scoring method",
+    "Material profile findings",
+    "Customer factor assessment",
+    "Evidence completeness and review priorities",
+    "Evidence provenance and alternatives",
+    "Proposed review actions",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "CustomerFactors",
+      "columns": [
+        "factor_id",
+        "customer_id",
+        "dimension",
+        "weight",
+        "factor_value",
+        "contribution",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "C01-1",
+          "C01",
+          "business",
+          0.3,
+          1,
+          10.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C01-2",
+          "C01",
+          "product",
+          0.25,
+          1,
+          8.333333333333332,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C01-3",
+          "C01",
+          "geography",
+          0.2,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C01-4",
+          "C01",
+          "channel",
+          0.15,
+          1,
+          5.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C01-5",
+          "C01",
+          "ownership",
+          0.1,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C02-1",
+          "C02",
+          "business",
+          0.3,
+          2,
+          20.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C02-2",
+          "C02",
+          "product",
+          0.25,
+          2,
+          16.666666666666664,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C02-3",
+          "C02",
+          "geography",
+          0.2,
+          1,
+          6.666666666666667,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C02-4",
+          "C02",
+          "channel",
+          0.15,
+          2,
+          10.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C02-5",
+          "C02",
+          "ownership",
+          0.1,
+          1,
+          3.3333333333333335,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C03-1",
+          "C03",
+          "business",
+          0.3,
+          3,
+          30.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C03-2",
+          "C03",
+          "product",
+          0.25,
+          2,
+          16.666666666666664,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C03-3",
+          "C03",
+          "geography",
+          0.2,
+          2,
+          13.333333333333334,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C03-4",
+          "C03",
+          "channel",
+          0.15,
+          1,
+          5.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C03-5",
+          "C03",
+          "ownership",
+          0.1,
+          3,
+          10.000000000000002,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C04-1",
+          "C04",
+          "business",
+          0.3,
+          1,
+          10.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C04-2",
+          "C04",
+          "product",
+          0.25,
+          1,
+          8.333333333333332,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C04-3",
+          "C04",
+          "geography",
+          0.2,
+          null,
+          null,
+          "SYN-001",
+          "NOT SUPPLIED"
+        ],
+        [
+          "C04-4",
+          "C04",
+          "channel",
+          0.15,
+          1,
+          5.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C04-5",
+          "C04",
+          "ownership",
+          0.1,
+          1,
+          3.3333333333333335,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C05-1",
+          "C05",
+          "business",
+          0.3,
+          1,
+          10.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C05-2",
+          "C05",
+          "product",
+          0.25,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C05-3",
+          "C05",
+          "geography",
+          0.2,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C05-4",
+          "C05",
+          "channel",
+          0.15,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C05-5",
+          "C05",
+          "ownership",
+          0.1,
+          0,
+          0.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C06-1",
+          "C06",
+          "business",
+          0.3,
+          2,
+          20.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C06-2",
+          "C06",
+          "product",
+          0.25,
+          1,
+          8.333333333333332,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C06-3",
+          "C06",
+          "geography",
+          0.2,
+          2,
+          13.333333333333334,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C06-4",
+          "C06",
+          "channel",
+          0.15,
+          2,
+          10.0,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ],
+        [
+          "C06-5",
+          "C06",
+          "ownership",
+          0.1,
+          1,
+          3.3333333333333335,
+          "SYN-001",
+          "Fictional rubric assignment; not calibrated"
+        ]
+      ],
+      "formats": {
+        "weight": "0.0%",
+        "factor_value": "0.0",
+        "contribution": "0.0"
+      }
+    },
+    {
+      "name": "ReviewOutcomes",
+      "columns": [
+        "customer_id",
+        "illustrative_score",
+        "illustrative_band",
+        "complete_items",
+        "required_items",
+        "completeness",
+        "material_gap",
+        "review_priority",
+        "evidence_ids",
+        "rationale"
+      ],
+      "rows": [
+        [
+          "C01",
+          23.333333333333332,
+          "LOW",
+          4,
+          4,
+          1.0,
+          "NONE",
+          "STANDARD",
+          "SYN-001",
+          "All four evidence items supplied"
+        ],
+        [
+          "C02",
+          56.666666666666664,
+          "MODERATE",
+          4,
+          4,
+          1.0,
+          "NONE",
+          "HEIGHTENED",
+          "SYN-001",
+          "Complexity warrants contextual review"
+        ],
+        [
+          "C03",
+          75.0,
+          "HIGH",
+          3,
+          4,
+          0.75,
+          "Ownership rights unresolved",
+          "SPECIALIST",
+          "SYN-001",
+          "High illustrative band and material ownership gap"
+        ],
+        [
+          "C04",
+          null,
+          "INCOMPLETE",
+          2,
+          4,
+          0.5,
+          "Geography input, ownership evidence and funds explanation missing",
+          "INCOMPLETE",
+          "SYN-001",
+          "No complete score; prioritize missing information"
+        ],
+        [
+          "C05",
+          10.0,
+          "LOW",
+          3,
+          4,
+          0.75,
+          "Third-party source of funds unsupported",
+          "TARGETED",
+          "SYN-001",
+          "Low illustrative score cannot close a material funds gap"
+        ],
+        [
+          "C06",
+          54.99999999999999,
+          "MODERATE",
+          4,
+          4,
+          1.0,
+          "Control operating exceptions in separate sample",
+          "HEIGHTENED",
+          "SYN-001;SYN-002",
+          "No arithmetic control discount; examine exception relevance"
+        ]
+      ],
+      "formats": {
+        "illustrative_score": "0.0",
+        "completeness": "0.0%"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "CR-F01",
+      "title": "One incomplete score remains outside band counts",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "C04 lacks its geography factor. The possible score spans 26.7 to 46.7 and crosses LOW/MODERATE boundaries.",
+      "recommendation": "Obtain the missing factor evidence; preserve an incomplete result."
+    },
+    {
+      "id": "CR-F02",
+      "title": "Low illustrative score does not settle funds provenance",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "C05 scores 10.0 but lacks support for a planned third-party source of funds.",
+      "recommendation": "Request a targeted funds explanation and preserve the unresolved disposition."
+    },
+    {
+      "id": "CR-F03",
+      "title": "Control claims cannot be converted to a score discount",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002"
+      ],
+      "detail": "C06 has two exceptions among eight fictional control checks; the sample has no demonstrated population representativeness.",
+      "recommendation": "Investigate the exceptions and their coverage before relying on the control."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional six-customer profiles and factor rubric",
+      "locator": "10-worked-example.md, complete customer population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional eight-check control sample for C06",
+      "locator": "10-worked-example.md, complete control sample",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-CDD",
+      "title": "FFIEC Customer Due Diligence overview",
+      "locator": "https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/02",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-RISK",
+      "title": "FFIEC BSA/AML Risk Assessment overview",
+      "locator": "https://bsaaml.ffiec.gov/manual/BSAAMLRiskAssessment/01",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Computable illustrative scores",
+      "value": "5 of 6 (83.3%)",
+      "method": "Customers with all five factor values / six supplied customers; C04 remains incomplete."
+    },
+    {
+      "label": "Evidence completeness",
+      "value": "20 of 24 (83.3%)",
+      "method": "Sum of supplied decision-evidence items / four expected items per customer × six customers."
+    },
+    {
+      "label": "C06 sample exceptions",
+      "value": "2 of 8 (25.0%)",
+      "method": "Exception checks K03 and K07 / all eight supplied checks; descriptive sample rate only."
+    }
+  ],
+  "limitations": [
+    "Scores and bands are illustrative ordering conventions, not calibrated AML probabilities.",
+    "An incomplete score and a material evidence gap cannot be treated as approval.",
+    "The C06 sample does not establish live control effectiveness or population exception rates.",
+    "No customer rating, onboarding, restriction, exit, or filing decision is authorized."
+  ],
+  "conclusion": "Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount.",
+  "report_narrative": [
+    [
+      "Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount."
+    ],
+    [
+      "The six customer profiles use five fixed factors weighted 30%, 25%, 20%, 15%, and 10%. Values range from zero to three; contributions equal value × weight / 3 × 100. Evidence completeness uses a separate four-item checklist per customer."
+    ],
+    [
+      "C04 has no geography value and cannot receive a complete band. C05 has an unsupported planned third-party receipt that the score does not resolve. C06 has two control exceptions among eight checks, with no demonstrated representativeness."
+    ],
+    [
+      "Complete scores are C01 23.3, C02 56.7, C03 75.0, C05 10.0, and C06 55.0. C04 has an illustrative possible range from 26.7 to 46.7; no midpoint or reweighted score is assigned."
+    ],
+    [
+      "Twenty of twenty-four expected evidence items are supplied. C03 remains subject to ownership review, C04 is incomplete, C05 receives targeted funds review, and C06 remains subject to control exception review. The low-band count is two among five complete scores, not two approved customers.",
+      "SYN-002 preserves all eight targeted C06 checks: K01 NO EXCEPTION (review field present); K02 NO EXCEPTION (review field present); K03 EXCEPTION (review timestamp absent); K04 NO EXCEPTION (review field present); K05 NO EXCEPTION (review field present); K06 NO EXCEPTION (review field present); K07 EXCEPTION (escalation rationale absent); K08 NO EXCEPTION (review field present). Thus 2/8 = 25.0% have recorded exceptions. Selection is targeted; the larger operating population is unknown."
+    ],
+    [
+      "SYN-001 supplies all profiles, rubric assignments, and evidence checklist statuses. SYN-002 supplies the complete eight-check sample. FFIEC references provide public U.S. bank context; they do not prescribe these weights, bands, or customer dispositions."
+    ],
+    [
+      "Propose evidence requests for C03 ownership, C04 geography, ownership and funds explanation, and C05 funds provenance. Examine C06 exceptions and control scope. Retain all numeric and narrative differences for the human rating reviewer."
+    ],
+    [
+      "QA must reproduce the five scores, the C04 range, the twenty-of-twenty-four evidence count, and two-of-eight exceptions. These are fictional consistency tests; independent review and actual customer decisions remain unrecorded."
+    ]
+  ],
+  "as_of": "2026-09-30",
+  "scope": "Six fictional customer relationships at Sep 30, 2026, with five factor assignments and four evidence expectations each; a separate eight-check C06 sample is descriptive only."
+}

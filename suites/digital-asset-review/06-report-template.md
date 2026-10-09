@@ -1,6 +1,6 @@
 # Digital Asset Review — fixed report template
 
-Version 1.0.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -56,7 +56,137 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'digital-asset-review', 'title': 'Digital Asset Review', 'summary': 'Reconcile public-ledger events and token units while separating transaction facts from real-world attribution.', 'audience': 'Analysts reviewing public blockchain evidence and data-quality limitations', 'decision': 'What activity is supported by the supplied capture, and what attribution or completeness gaps remain?', 'palette': 'teal', 'report_sections': ['Digital asset review brief', 'Scope and ledger method', 'Material findings', 'Event reconciliation', 'Counterparty and attribution assessment', 'Evidence record', 'Recommended review actions', 'Limitations and human review'], 'domain_tables': [{'name': 'LedgerEvents', 'columns': ['event_id', 'chain_id', 'tx_id', 'event_index', 'asset_id', 'raw_amount', 'decimals', 'display_units', 'direction', 'execution_state', 'included', 'evidence_ids', 'notes'], 'rows': [['EV-01', 'FICTIONAL-EVM', 'TX-01', 0, 'PAPER-CONTRACT', '100000000', 6, '100.000000', 'IN', 'SUCCESS', True, 'SYN-001', 'Duplicate raw capture R-06 linked and removed once'], ['EV-02', 'FICTIONAL-EVM', 'TX-02', 0, 'PAPER-CONTRACT', '40000000', 6, '40.000000', 'OUT', 'SUCCESS', True, 'SYN-001', 'Transfer to CP-B'], ['EV-03', 'FICTIONAL-EVM', 'TX-03', 0, 'PAPER-CONTRACT', '5000000', 6, '5.000000', 'SELF', 'SUCCESS', True, 'SYN-001', 'Separate self activity; excluded from directional totals'], ['EV-04', 'FICTIONAL-EVM', 'TX-04', 0, 'PAPER-CONTRACT', '1', 6, '0.000001', 'IN', 'SUCCESS', True, 'SYN-001', 'Small unsolicited transfer; no attribution inference'], ['EV-05', 'FICTIONAL-EVM', 'TX-05', None, 'PAPER-CONTRACT', '20000000', 6, '20.000000', 'OUT', 'FAILED', False, 'SYN-001', 'Attempted amount from supplied record; no successful event log']]}, {'name': 'Counterparties', 'columns': ['counterparty_id', 'asset_id', 'in_units', 'out_units', 'self_units', 'eligible_event_count', 'attribution_state', 'evidence_ids', 'notes'], 'rows': [['CP-A', 'PAPER-CONTRACT', '100.000000', '0.000000', '0.000000', 1, 'UNATTRIBUTED', 'SYN-001', 'Raw duplicate not counted twice'], ['CP-B', 'PAPER-CONTRACT', '0.000000', '40.000000', '0.000000', 1, 'UNVERIFIED LABEL', 'SYN-001', 'Supplied explorer label not identity evidence'], ['SUBJECT', 'PAPER-CONTRACT', '0.000000', '0.000000', '5.000000', 1, 'SELF ADDRESS', 'SYN-001', 'Same exact fictional address; no separate counterparty'], ['CP-C', 'PAPER-CONTRACT', '0.000001', '0.000000', '0.000000', 1, 'UNATTRIBUTED', 'SYN-001', 'Unsolicited small inbound amount retained']]}], 'findings': [{'id': 'F-01', 'title': 'Duplicate and failed records need distinct treatment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'Six raw rows reconcile to five unique records and four eligible successful events.', 'recommendation': 'Preserve duplicate lineage and failed-attempt exclusion.'}, {'id': 'F-02', 'title': 'Counterparty identity is not established by the label', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'CP-B has an explorer-style label without supporting identity evidence.', 'recommendation': 'Obtain independent attribution evidence before consequential reliance.'}, {'id': 'F-03', 'title': 'Captured net flow is not an ending balance', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001'], 'detail': '100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method.', 'recommendation': 'Keep balance, fiat value, and completeness limitations explicit.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional digital asset capture', 'locator': '10-worked-example.md, R-01 through R-06', 'claim_class': 'Observed'}, {'id': 'REF-ETH-TX', 'title': 'Ethereum transactions documentation', 'locator': 'https://ethereum.org/developers/docs/transactions/', 'claim_class': 'Observed'}, {'id': 'REF-ETH-RPC', 'title': 'Ethereum JSON-RPC documentation', 'locator': 'https://ethereum.org/developers/docs/apis/json-rpc/', 'claim_class': 'Observed'}, {'id': 'REF-ERC20', 'title': 'ERC-20 standard', 'locator': 'https://eips.ethereum.org/EIPS/eip-20', 'claim_class': 'Observed'}, {'id': 'REF-BTC', 'title': 'Bitcoin transactions developer guide', 'locator': 'https://developer.bitcoin.org/devguide/transactions.html', 'claim_class': 'Observed'}, {'id': 'REF-FATF-VA', 'title': 'FATF virtual asset guidance', 'locator': 'https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Guidance-rba-virtual-assets-2021.html', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Raw to unique records', 'value': '6 to 5', 'method': 'Six capture rows less one proven repeated event.', 'format': '#,##0'}, {'label': 'Eligible successful events', 'value': '4', 'method': 'Five unique records less one failed attempt.', 'format': '#,##0'}, {'label': 'Captured net directional flow', 'value': '60.000001 PAPER', 'method': '(100000000 + 1 - 40000000) / 10^6; excludes SELF and FAILED.', 'format': '#,##0'}], 'limitations': ['All network and address labels are fictional; no live-chain validation is implied.', 'No opening balance, fiat price, or complete native-fee accounting is supplied.', 'Explorer-style labels do not establish identity, intent, or legal status.'], 'metadata': {'conclusion': 'Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.'}, 'report_narrative': [['Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.'], ['The fictional EVM-style capture contains six raw rows for one token with six decimal places. Records are reconciled by event identity and execution status before directional amounts are summed; exact atomic values remain text.'], ['F-01: Six raw rows reconcile to five unique records and four eligible successful events.', 'F-02: CP-B has an explorer-style label without supporting identity evidence.', 'F-03: 100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method.'], ['One duplicate leaves five unique records. Four are successful eligible events; the failed 20.000000 PAPER attempt is excluded. The 5.000000 PAPER self transfer remains visible but does not inflate directional totals.'], ['Inbound 100.000001 PAPER less outbound 40.000000 PAPER produces captured net flow of 60.000001 PAPER. CP-B remains an unverified label; the tiny CP-C inbound transfer provides no identity or intent inference.'], ['SYN-001 supplies the raw captures, event identities and label assertion. No opening balance, fiat price, complete native-fee ledger or independent attribution evidence is supplied.'], ['Preserve duplicate lineage and exact units, obtain independent attribution before consequential reliance, and keep net captured flow separate from ending balance and fiat exposure.'], ['All network and address labels are fictional; no live-chain validation is implied.', 'No opening balance, fiat price, or complete native-fee accounting is supplied.', 'Explorer-style labels do not establish identity, intent, or legal status.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'digital-asset-review', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Preserve duplicate lineage and failed-attempt exclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Obtain independent attribution evidence before consequential reliance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Keep balance, fiat value, and completeness limitations explicit.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'digital-asset-review', 'title': 'Digital Asset Review', 'summary': 'Reconcile public-ledger events and token units while separating transaction facts from real-world attribution.', 'audience': 'Analysts reviewing public blockchain evidence and data-quality limitations', 'decision': 'What activity is supported by the supplied capture, and what attribution or completeness gaps remain?', 'palette': 'teal', 'report_sections': ['Digital asset review brief', 'Scope and ledger method', 'Material findings', 'Event reconciliation', 'Counterparty and attribution assessment', 'Evidence record', 'Recommended review actions', 'Limitations and human review'], 'domain_tables': [{'name': 'LedgerEvents', 'columns': ['event_id', 'chain_id', 'tx_id', 'event_index', 'asset_id', 'raw_amount', 'decimals', 'display_units', 'direction', 'execution_state', 'included', 'evidence_ids', 'notes'], 'rows': [['EV-01', 'FICTIONAL-EVM', 'TX-01', 0, 'PAPER-CONTRACT', '100000000', 6, '100.000000', 'IN', 'SUCCESS', True, 'SYN-001', 'Duplicate raw capture R-06 linked and removed once'], ['EV-02', 'FICTIONAL-EVM', 'TX-02', 0, 'PAPER-CONTRACT', '40000000', 6, '40.000000', 'OUT', 'SUCCESS', True, 'SYN-001', 'Transfer to CP-B'], ['EV-03', 'FICTIONAL-EVM', 'TX-03', 0, 'PAPER-CONTRACT', '5000000', 6, '5.000000', 'SELF', 'SUCCESS', True, 'SYN-001', 'Separate self activity; excluded from directional totals'], ['EV-04', 'FICTIONAL-EVM', 'TX-04', 0, 'PAPER-CONTRACT', '1', 6, '0.000001', 'IN', 'SUCCESS', True, 'SYN-001', 'Small unsolicited transfer; no attribution inference'], ['EV-05', 'FICTIONAL-EVM', 'TX-05', None, 'PAPER-CONTRACT', '20000000', 6, '20.000000', 'OUT', 'FAILED', False, 'SYN-001', 'Attempted amount from supplied record; no successful event log']]}, {'name': 'Counterparties', 'columns': ['counterparty_id', 'asset_id', 'in_units', 'out_units', 'self_units', 'eligible_event_count', 'attribution_state', 'evidence_ids', 'notes'], 'rows': [['CP-A', 'PAPER-CONTRACT', '100.000000', '0.000000', '0.000000', 1, 'UNATTRIBUTED', 'SYN-001', 'Raw duplicate not counted twice'], ['CP-B', 'PAPER-CONTRACT', '0.000000', '40.000000', '0.000000', 1, 'UNVERIFIED LABEL', 'SYN-001', 'Supplied explorer label not identity evidence'], ['SUBJECT', 'PAPER-CONTRACT', '0.000000', '0.000000', '5.000000', 1, 'SELF ADDRESS', 'SYN-001', 'Same exact fictional address; no separate counterparty'], ['CP-C', 'PAPER-CONTRACT', '0.000001', '0.000000', '0.000000', 1, 'UNATTRIBUTED', 'SYN-001', 'Unsolicited small inbound amount retained']]}], 'findings': [{'id': 'F-01', 'title': 'Duplicate and failed records need distinct treatment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'Six raw rows reconcile to five unique records and four eligible successful events.', 'recommendation': 'Preserve duplicate lineage and failed-attempt exclusion.'}, {'id': 'F-02', 'title': 'Counterparty identity is not established by the label', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'CP-B has an explorer-style label without supporting identity evidence.', 'recommendation': 'Obtain independent attribution evidence before consequential reliance.'}, {'id': 'F-03', 'title': 'Captured net flow is not an ending balance', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001'], 'detail': '100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method.', 'recommendation': 'Keep balance, fiat value, and completeness limitations explicit.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional digital asset capture', 'locator': '10-worked-example.md, R-01 through R-06', 'claim_class': 'Observed'}, {'id': 'REF-ETH-TX', 'title': 'Ethereum transactions documentation', 'locator': 'https://ethereum.org/developers/docs/transactions/', 'claim_class': 'Observed'}, {'id': 'REF-ETH-RPC', 'title': 'Ethereum JSON-RPC documentation', 'locator': 'https://ethereum.org/developers/docs/apis/json-rpc/', 'claim_class': 'Observed'}, {'id': 'REF-ERC20', 'title': 'ERC-20 standard', 'locator': 'https://eips.ethereum.org/EIPS/eip-20', 'claim_class': 'Observed'}, {'id': 'REF-BTC', 'title': 'Bitcoin transactions developer guide', 'locator': 'https://developer.bitcoin.org/devguide/transactions.html', 'claim_class': 'Observed'}, {'id': 'REF-FATF-VA', 'title': 'FATF virtual asset guidance', 'locator': 'https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Guidance-rba-virtual-assets-2021.html', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Raw to unique records', 'value': '6 to 5', 'method': 'Six capture rows less one proven repeated event.', 'format': '#,##0'}, {'label': 'Eligible successful events', 'value': '4', 'method': 'Five unique records less one failed attempt.', 'format': '#,##0'}, {'label': 'Captured net directional flow', 'value': '60.000001 PAPER', 'method': '(100000000 + 1 - 40000000) / 10^6; excludes SELF and FAILED.', 'format': '#,##0'}], 'limitations': ['All network and address labels are fictional; no live-chain validation is implied.', 'No opening balance, fiat price, or complete native-fee accounting is supplied.', 'Explorer-style labels do not establish identity, intent, or legal status.'], 'metadata': {'conclusion': 'Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.'}, 'report_narrative': [['Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.'], ['The fictional EVM-style capture contains six raw rows for one token with six decimal places. Records are reconciled by event identity and execution status before directional amounts are summed; exact atomic values remain text.'], ['F-01: Six raw rows reconcile to five unique records and four eligible successful events.', 'F-02: CP-B has an explorer-style label without supporting identity evidence.', 'F-03: 100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method.'], ['One duplicate leaves five unique records. Four are successful eligible events; the failed 20.000000 PAPER attempt is excluded. The 5.000000 PAPER self transfer remains visible but does not inflate directional totals.'], ['Inbound 100.000001 PAPER less outbound 40.000000 PAPER produces captured net flow of 60.000001 PAPER. CP-B remains an unverified label; the tiny CP-C inbound transfer provides no identity or intent inference.'], ['SYN-001 supplies the raw captures, event identities and label assertion. No opening balance, fiat price, complete native-fee ledger or independent attribution evidence is supplied.'], ['Preserve duplicate lineage and exact units, obtain independent attribution before consequential reliance, and keep net captured flow separate from ending balance and fiat exposure.'], ['All network and address labels are fictional; no live-chain validation is implied.', 'No opening balance, fiat price, or complete native-fee accounting is supplied.', 'Explorer-style labels do not establish identity, intent, or legal status.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'digital-asset-review', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Preserve duplicate lineage and failed-attempt exclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Obtain independent attribution evidence before consequential reliance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Keep balance, fiat value, and completeness limitations explicit.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-report.docx')
 doc = Document()
 doc.core_properties.author = 'Markdown Analyst Toolkit'
@@ -99,12 +229,17 @@ def formatted(value, fmt):
         return f'{value:.1%}'
     if fmt == '0.0"%"':
         return f'{value:.1f}%'
-    places = 2 if '.00' in fmt else 1 if '.0' in fmt else 0
-    return ('$' if '$' in fmt else '') + f'{value:,.{places}f}'
+    decimal = re.search(r'\.([0#]+)', fmt)
+    places = len(decimal.group(1)) if decimal else 0
+    number = f'{value:,}' + ('.'+'0'*places if places else '') if isinstance(value,int) else f'{value:,.{places}f}'
+    return ('$' if '$' in fmt else '') + number
 
-def table(headers, rows, keep_together=False):
+def table(headers, rows, keep_together=False, widths=None):
     t = doc.add_table(rows=1, cols=len(headers))
     t.style = 'Table Grid'
+    if widths:
+        t.autofit = False
+        for column,width in zip(t.columns,widths):column.width=Inches(width)
     for i,h in enumerate(headers):
         t.rows[0].cells[i].text = h
     repeat = OxmlElement('w:tblHeader')
@@ -115,7 +250,8 @@ def table(headers, rows, keep_together=False):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
         row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
-        for cell in row.cells:
+        for cell_index,cell in enumerate(row.cells):
+            if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
             shading.set(qn('w:fill'),'344E5F' if row_index==0 else 'E2E8E9' if row_index%2 else 'F1F2EF')
             cell._tc.get_or_add_tcPr().append(shading)
@@ -158,7 +294,7 @@ for index, heading in enumerate(DATA['report_sections']):
         missing = sum(value is None for row in source['rows'] for value in row)
         doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
-        table(['Evidence ID','Source or fixture','Exact locator'], [[e['id'],e['title'],e['locator']] for e in DATA['evidence']])
+        table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
         for a in DATA['actions']:
             doc.add_paragraph(f"{a['id']} / {a['finding_id']}: {a['proposal']} Owner: {text(a['owner'])}. Due: {text(a['due_date'])}. State: {a['status']}")

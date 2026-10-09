@@ -5,6 +5,7 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
 DATA = None  # __DATA__
+# __CASE_VALIDATION__
 OUTPUT = Path(DATA['suite_id'] + '-report.docx')
 doc = Document()
 doc.core_properties.author = 'Markdown Analyst Toolkit'
@@ -47,12 +48,17 @@ def formatted(value, fmt):
         return f'{value:.1%}'
     if fmt == '0.0"%"':
         return f'{value:.1f}%'
-    places = 2 if '.00' in fmt else 1 if '.0' in fmt else 0
-    return ('$' if '$' in fmt else '') + f'{value:,.{places}f}'
+    decimal = re.search(r'\.([0#]+)', fmt)
+    places = len(decimal.group(1)) if decimal else 0
+    number = f'{value:,}' + ('.'+'0'*places if places else '') if isinstance(value,int) else f'{value:,.{places}f}'
+    return ('$' if '$' in fmt else '') + number
 
-def table(headers, rows, keep_together=False):
+def table(headers, rows, keep_together=False, widths=None):
     t = doc.add_table(rows=1, cols=len(headers))
     t.style = 'Table Grid'
+    if widths:
+        t.autofit = False
+        for column,width in zip(t.columns,widths):column.width=Inches(width)
     for i,h in enumerate(headers):
         t.rows[0].cells[i].text = h
     repeat = OxmlElement('w:tblHeader')
@@ -63,7 +69,8 @@ def table(headers, rows, keep_together=False):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
         row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
-        for cell in row.cells:
+        for cell_index,cell in enumerate(row.cells):
+            if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
             shading.set(qn('w:fill'),'344E5F' if row_index==0 else 'E2E8E9' if row_index%2 else 'F1F2EF')
             cell._tc.get_or_add_tcPr().append(shading)
@@ -106,7 +113,7 @@ for index, heading in enumerate(DATA['report_sections']):
         missing = sum(value is None for row in source['rows'] for value in row)
         doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
-        table(['Evidence ID','Source or fixture','Exact locator'], [[e['id'],e['title'],e['locator']] for e in DATA['evidence']])
+        table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
         for a in DATA['actions']:
             doc.add_paragraph(f"{a['id']} / {a['finding_id']}: {a['proposal']} Owner: {text(a['owner'])}. Due: {text(a['due_date'])}. State: {a['status']}")

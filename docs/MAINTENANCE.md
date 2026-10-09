@@ -11,6 +11,9 @@ optional release tooling, not a user setup requirement.
 | Synthetic specimen and schema | `_maintainer/catalog/<suite>.json` | Report, workbook and dashboard example payloads |
 | Rendering code | `_maintainer/templates/` | Complete blocks in suite files 06–08 |
 | Build-resource method | `_maintainer/build.py` | File 11 and README budget block |
+| Release identity | `_maintainer/release.json` | Version/date labels, download links and manifest |
+| Structural preflight | `_maintainer/schema.py` | Self-contained checks inside both Office renderers |
+| Finder metadata and layout | `_maintainer/library.py` and `templates/finder.html` | Root `suite-finder.html` |
 | Verification claims | `docs/VERIFICATION.md` | Authored only after actual checks |
 
 The domain contracts and catalog must agree. A new field requires its type, unit,
@@ -26,20 +29,26 @@ available. They are not part of the manual chat workflow.
 ```sh
 python _maintainer/build.py
 python _maintainer/budgets.py
+python _maintainer/library.py
 python _maintainer/validate.py
+python _maintainer/test_schema.py
 python _maintainer/test_renderers.py
-python _maintainer/package.py
+python _maintainer/test_packages.py
 ```
 
 The validator uses the standard library. Renderer tests use real document libraries,
-reopen actual emitted files and test malformed schemas and executable-looking source
+extract the runnable blocks from the distributed Markdown, reopen actual emitted files,
+and test malformed schemas and executable-looking source
 strings. They do not mock a database or a file-generation capability. CI runs these
 checks on pushes and pull requests; there is no recurring workflow or scheduler.
 
 Archives contain only the twelve Markdown files for the selected suite. A combined
 archive contains the same files grouped by suite, not instructions to attach them all.
-Archive timestamps and permissions are fixed for repeatability. `SHA256SUMS.txt` is
-generated from the final ZIP bytes. Rebuild after any edit and verify the published
+Archive timestamps derive from the release date; permissions are fixed for repeatability.
+The release also includes an offline finder and a manifest listing the SHA-256 hash of
+each Markdown file. `SHA256SUMS.txt` covers every archive, the finder and the manifest.
+The package test checks exact source bytes, the manifest, checksum coverage and repeated
+build identity. Rebuild after any edit and verify the published
 download against the checksum before announcing a release.
 
 ## What needs manual review
@@ -51,6 +60,17 @@ Review current public primary sources when changing a legal or regulatory refere
 Record access failures as failures, not evidence the source disappeared.
 
 The optional `_maintainer/browser_check.cjs` uses Playwright and an installed Chrome browser to exercise every generated HTML specimen. It writes its results under the ignored `build/browser/` folder; this browser check is local and is not part of CI.
+
+`_maintainer/test_finder.cjs` exercises the offline selection guide: categories, search,
+every suite's six attachment prompts, focus restoration, narrow layouts, themes,
+blocked storage and the unavailable-clipboard fallback. It writes evidence under
+`build/finder-check/`. Use an available local Node/Playwright runtime to run these
+browser checks; end users do not need either dependency.
+
+Update release identity first, then regenerate all outputs. The validator checks drift
+in templates, measurements and finder metadata without rewriting files. Keep previous
+verification records under `docs/releases/`; do not rewrite a published tag or its
+assets to conceal an error. A correction gets a new version and an explicit change note.
 
 For HTML changes, exercise both themes, keyboard controls, mobile reflow, filters,
 empty findings, long evidence, print restoration and CSV scope. Check text escaping

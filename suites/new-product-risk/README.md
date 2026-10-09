@@ -49,9 +49,9 @@ All example organizations, records, dates, outcomes, and amounts in 10 are ficti
 <!-- BUILD:START -->
 ## Build and attachment budget
 
-The ten instructional files contain **13,736 words** and approximately **29,748 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **118,992–297,480 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
+The ten instructional files contain **15,356 words** and approximately **34,380 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **137,520–343,800 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
 
-Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.0.0/docs/VERIFICATION.md) records what was actually tested.
+Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.1.0/docs/VERIFICATION.md) records what was actually tested.
 
-[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.0.0/new-product-risk.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
+[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/new-product-risk.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
 <!-- BUILD:END -->

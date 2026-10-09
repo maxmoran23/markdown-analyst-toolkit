@@ -1,6 +1,6 @@
 # Sanctions Review — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'sanctions-review', 'title': 'Sanctions Review', 'summary': 'Separate identity matching, authority scope, ownership propagation, other nexus, and human disposition.', 'audience': 'Analysts preparing sanctions evidence for authorized human review', 'decision': 'What does the identified authority imply on the supplied facts, and which questions require further review?', 'palette': 'slate', 'report_sections': ['Sanctions review brief', 'Scope and applicable authority', 'Material findings', 'Ownership propagation assessment', 'Identity and nexus assessment', 'Evidence record', 'Recommended review actions', 'Limitations and human disposition'], 'domain_tables': [{'name': 'OwnershipEdges', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'basis', 'effective_date', 'evidence_ids', 'notes'], 'rows': [['S-01', 'BLOCKED-A', 'ENTITY-A', 60, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Blocked status stipulated for fictional example'], ['S-02', 'ENTITY-A', 'ENTITY-B', 55, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'ENTITY-A becomes a propagation source'], ['S-03', 'BLOCKED-B', 'ENTITY-C', 20, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Independent blocked holder'], ['S-04', 'ENTITY-A', 'ENTITY-C', 30, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Distinct direct stake; no double counting'], ['S-05', 'BLOCKED-A', 'ENTITY-D', 49, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Other ownership stipulated nonblocked; control unassessed']], 'formats': {'interest_pct': '0.0"%"'}}, {'name': 'ReviewDecisions', 'columns': ['subject_id', 'identity_state', 'authority_scope', 'known_blocked_pct', 'ownership_result', 'other_nexus', 'review_state', 'evidence_ids', 'rationale'], 'rows': [['ENTITY-A', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 60, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', '60 percent direct ownership by stipulated blocked holder'], ['ENTITY-B', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 55, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', 'ENTITY-A is a blocked propagation source; economic product is not the test'], ['ENTITY-C', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 50, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', '20 percent BLOCKED-B plus 30 percent ENTITY-A'], ['ENTITY-D', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 49, 'THRESHOLD NOT MET ON SUPPLIED FACTS', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', 'No all-sanctions clearance; control and other restrictions not assessed']], 'formats': {'known_blocked_pct': '0.0"%"'}}], 'findings': [{'id': 'F-01', 'title': 'Three entities meet the scoped ownership condition', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.', 'recommendation': 'Present the scoped result and assumptions for human sanctions review.'}, {'id': 'F-02', 'title': 'Other nexus and authorization are unassessed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'All four entity rows retain NOT ASSESSED for other sanctions nexus.', 'recommendation': 'Obtain actual activity, authority, parties, and authorization evidence.'}, {'id': 'F-03', 'title': 'Below-threshold result depends on complete stipulated ownership', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked.', 'recommendation': 'Preserve assumptions and avoid describing the result as clearance.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional sanctions ownership case', 'locator': '10-worked-example.md, S-01 through S-05', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-401', 'title': 'OFAC FAQ 401', 'locator': 'https://ofac.treasury.gov/faqs/401', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-398', 'title': 'OFAC FAQ 398', 'locator': 'https://ofac.treasury.gov/faqs/398', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-5', 'title': 'OFAC FAQ 5', 'locator': 'https://ofac.treasury.gov/faqs/5', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-402', 'title': 'OFAC FAQ 402', 'locator': 'https://ofac.treasury.gov/faqs/402', 'claim_class': 'Observed'}, {'id': 'REF-SLS', 'title': 'OFAC Sanctions List Service', 'locator': 'https://ofac.treasury.gov/sanctions-list-service', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Direct ownership edges', 'value': '5', 'method': 'Count distinct S-01 through S-05.', 'format': '#,##0'}, {'label': 'Scoped threshold-met entities', 'value': '3 of 4', 'method': 'ENTITY-A, ENTITY-B, and ENTITY-C meet the illustrated condition.', 'format': '#,##0'}, {'label': 'Other-nexus reviews complete', 'value': '0 of 4', 'method': 'All four rows are explicitly NOT ASSESSED for other nexus.', 'format': '#,##0'}], 'limitations': ['Fictional blocked seeds and simplified comparable ownership are stipulated.', 'The OFAC ownership illustration is not a global ownership/control rule.', 'No real identity, transaction, authorization, or operational disposition has been assessed.'], 'metadata': {'conclusion': 'Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.'}, 'report_narrative': [['Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.'], ['The calculation is limited to a stipulated OFAC ownership illustration with five direct edges and four subjects. Initial blocked status, comparable ownership, complete relevant holdings and the as-of date are assumptions of this fictional example.'], ['F-01: ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.', 'F-02: All four entity rows retain NOT ASSESSED for other sanctions nexus.', 'F-03: ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked.'], ['BLOCKED-A owns 60.0% of ENTITY-A. ENTITY-A therefore becomes a propagation source for its 55.0% holding in ENTITY-B. ENTITY-C reaches 50.0% through distinct 20.0% and 30.0% blocked-source holdings. Multiplying the first chain to 33.0% would apply the wrong test.'], ['ENTITY-D has 49.0% known blocked ownership on stipulated complete facts, below this ownership condition alone. Other sanctions nexuses, applicable restrictions, transaction facts and authorization remain unassessed for all four subjects.'], ['SYN-001 contains the fictional seed status and complete edges. Authority references explain the scoped method; no real list search, identity resolution, license assessment or operational disposition is evidenced.'], ['Present the propagation calculation for human sanctions review. Require actual identity, applicable authority, activity and authorization evidence before any operational decision, including for ENTITY-D.'], ['Fictional blocked seeds and simplified comparable ownership are stipulated.', 'The OFAC ownership illustration is not a global ownership/control rule.', 'No real identity, transaction, authorization, or operational disposition has been assessed.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'sanctions-review', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Present the scoped result and assumptions for human sanctions review.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Obtain actual activity, authority, parties, and authorization evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Preserve assumptions and avoid describing the result as clearance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'sanctions-review', 'title': 'Sanctions Review', 'summary': 'Separate identity matching, authority scope, ownership propagation, other nexus, and human disposition.', 'audience': 'Analysts preparing sanctions evidence for authorized human review', 'decision': 'What does the identified authority imply on the supplied facts, and which questions require further review?', 'palette': 'slate', 'report_sections': ['Sanctions review brief', 'Scope and applicable authority', 'Material findings', 'Ownership propagation assessment', 'Identity and nexus assessment', 'Evidence record', 'Recommended review actions', 'Limitations and human disposition'], 'domain_tables': [{'name': 'OwnershipEdges', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'basis', 'effective_date', 'evidence_ids', 'notes'], 'rows': [['S-01', 'BLOCKED-A', 'ENTITY-A', 60, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Blocked status stipulated for fictional example'], ['S-02', 'ENTITY-A', 'ENTITY-B', 55, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'ENTITY-A becomes a propagation source'], ['S-03', 'BLOCKED-B', 'ENTITY-C', 20, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Independent blocked holder'], ['S-04', 'ENTITY-A', 'ENTITY-C', 30, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Distinct direct stake; no double counting'], ['S-05', 'BLOCKED-A', 'ENTITY-D', 49, 'Ordinary ownership', '2026-09-30', 'SYN-001', 'Other ownership stipulated nonblocked; control unassessed']], 'formats': {'interest_pct': '0.0"%"'}}, {'name': 'ReviewDecisions', 'columns': ['subject_id', 'identity_state', 'authority_scope', 'known_blocked_pct', 'ownership_result', 'other_nexus', 'review_state', 'evidence_ids', 'rationale'], 'rows': [['ENTITY-A', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 60, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', '60 percent direct ownership by stipulated blocked holder'], ['ENTITY-B', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 55, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', 'ENTITY-A is a blocked propagation source; economic product is not the test'], ['ENTITY-C', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 50, 'THRESHOLD MET', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', '20 percent BLOCKED-B plus 30 percent ENTITY-A'], ['ENTITY-D', 'RESOLVED IN FIXTURE', 'Illustrative OFAC ownership only', 49, 'THRESHOLD NOT MET ON SUPPLIED FACTS', 'NOT ASSESSED', 'HUMAN REVIEW REQUIRED', 'SYN-001', 'No all-sanctions clearance; control and other restrictions not assessed']], 'formats': {'known_blocked_pct': '0.0"%"'}}], 'findings': [{'id': 'F-01', 'title': 'Three entities meet the scoped ownership condition', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.', 'recommendation': 'Present the scoped result and assumptions for human sanctions review.'}, {'id': 'F-02', 'title': 'Other nexus and authorization are unassessed', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'All four entity rows retain NOT ASSESSED for other sanctions nexus.', 'recommendation': 'Obtain actual activity, authority, parties, and authorization evidence.'}, {'id': 'F-03', 'title': 'Below-threshold result depends on complete stipulated ownership', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked.', 'recommendation': 'Preserve assumptions and avoid describing the result as clearance.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional sanctions ownership case', 'locator': '10-worked-example.md, S-01 through S-05', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-401', 'title': 'OFAC FAQ 401', 'locator': 'https://ofac.treasury.gov/faqs/401', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-398', 'title': 'OFAC FAQ 398', 'locator': 'https://ofac.treasury.gov/faqs/398', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-5', 'title': 'OFAC FAQ 5', 'locator': 'https://ofac.treasury.gov/faqs/5', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-402', 'title': 'OFAC FAQ 402', 'locator': 'https://ofac.treasury.gov/faqs/402', 'claim_class': 'Observed'}, {'id': 'REF-SLS', 'title': 'OFAC Sanctions List Service', 'locator': 'https://ofac.treasury.gov/sanctions-list-service', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Direct ownership edges', 'value': '5', 'method': 'Count distinct S-01 through S-05.', 'format': '#,##0'}, {'label': 'Scoped threshold-met entities', 'value': '3 of 4', 'method': 'ENTITY-A, ENTITY-B, and ENTITY-C meet the illustrated condition.', 'format': '#,##0'}, {'label': 'Other-nexus reviews complete', 'value': '0 of 4', 'method': 'All four rows are explicitly NOT ASSESSED for other nexus.', 'format': '#,##0'}], 'limitations': ['Fictional blocked seeds and simplified comparable ownership are stipulated.', 'The OFAC ownership illustration is not a global ownership/control rule.', 'No real identity, transaction, authorization, or operational disposition has been assessed.'], 'metadata': {'conclusion': 'Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.'}, 'report_narrative': [['Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.'], ['The calculation is limited to a stipulated OFAC ownership illustration with five direct edges and four subjects. Initial blocked status, comparable ownership, complete relevant holdings and the as-of date are assumptions of this fictional example.'], ['F-01: ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.', 'F-02: All four entity rows retain NOT ASSESSED for other sanctions nexus.', 'F-03: ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked.'], ['BLOCKED-A owns 60.0% of ENTITY-A. ENTITY-A therefore becomes a propagation source for its 55.0% holding in ENTITY-B. ENTITY-C reaches 50.0% through distinct 20.0% and 30.0% blocked-source holdings. Multiplying the first chain to 33.0% would apply the wrong test.'], ['ENTITY-D has 49.0% known blocked ownership on stipulated complete facts, below this ownership condition alone. Other sanctions nexuses, applicable restrictions, transaction facts and authorization remain unassessed for all four subjects.'], ['SYN-001 contains the fictional seed status and complete edges. Authority references explain the scoped method; no real list search, identity resolution, license assessment or operational disposition is evidenced.'], ['Present the propagation calculation for human sanctions review. Require actual identity, applicable authority, activity and authorization evidence before any operational decision, including for ENTITY-D.'], ['Fictional blocked seeds and simplified comparable ownership are stipulated.', 'The OFAC ownership illustration is not a global ownership/control rule.', 'No real identity, transaction, authorization, or operational disposition has been assessed.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'sanctions-review', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Present the scoped result and assumptions for human sanctions review.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Obtain actual activity, authority, parties, and authorization evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Preserve assumptions and avoid describing the result as clearance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

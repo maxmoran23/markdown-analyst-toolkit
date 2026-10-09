@@ -1,6 +1,6 @@
 # Investigation Case Review — fixed workbook template
 
-Version 1.0.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -49,6 +49,12 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
+The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
+
+Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
+
 ```python
 from pathlib import Path
 from openpyxl import Workbook
@@ -60,7 +66,137 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'investigations', 'title': 'Investigation Case Review', 'summary': 'Build an evidence-led chronology, reconcile funds movements, test competing explanations, and prepare a bounded case assessment for a human decision-maker.', 'audience': 'Investigators, case reviewers, and quality-assurance analysts', 'decision': 'Which case propositions are supported, contradicted, or unresolved, and what specific evidence or human decision is needed next?', 'palette': 'indigo', 'report_sections': ['Decision questions and current assessment', 'Scope, chronology method, and coverage', 'Findings and contradictions', 'Chronology and funds movement', 'Competing hypothesis tests', 'Evidence inventory and provenance', 'Proposed investigative actions', 'Limitations, quality checks, and reviewer decision'], 'domain_tables': [{'name': 'CaseTimeline', 'columns': ['event_id', 'event_time', 'event_type', 'amount', 'currency', 'evidence_id', 'claim_class', 'detail'], 'rows': [['EV-01', '2026-09-01T09:00:00-04:00', 'PROFILE', None, None, 'SYN-001', 'Reported', 'Profile states equipment trading'], ['EV-02', '2026-09-02T10:00:00-04:00', 'CREDIT', 12000, 'USD', 'SYN-002', 'Observed', 'Posted receipt from Payer-P'], ['EV-03', '2026-09-02T11:00:00-04:00', 'DEBIT', 11000, 'USD', 'SYN-003', 'Observed', 'Posted payment to Supplier-Q'], ['EV-04', '2026-09-03T09:00:00-04:00', 'EXPLANATION', None, None, 'SYN-004', 'Reported', 'Customer says EV-03 paid for equipment'], ['EV-05', '2026-09-03T10:00:00-04:00', 'DOCUMENT', None, None, 'SYN-005', 'Observed', 'Invoice face amount 10000 USD names Supplier-R'], ['EV-06', '2026-09-04T09:00:00-04:00', 'RETURN', 2000, 'USD', 'SYN-006', 'Observed', 'Posted return explicitly linked to EV-03']], 'formats': {'amount': '#,##0.00'}}, {'name': 'HypothesisTests', 'columns': ['hypothesis_id', 'hypothesis', 'supporting_evidence', 'conflicting_evidence', 'missing_evidence', 'assessment', 'confidence', 'next_step'], 'rows': [['H-01', 'Payment was ordinary equipment settlement', 'SYN-001;SYN-004;SYN-005', 'SYN-003;SYN-005', 'Supplier identity bridge and contract', 'UNRESOLVED', 'LOW', 'Match beneficiary and full invoiced amount'], ['H-02', 'Onward movement lacks a supported purpose', 'SYN-002;SYN-003;SYN-005', 'SYN-004', 'Purpose and beneficiary corroboration', 'PATTERN_SUPPORTED', 'MODERATE', 'Obtain discriminating source documents'], ['H-03', 'Return fully reversed the payment', 'SYN-006', 'SYN-003;SYN-006', 'None for arithmetic', 'CONTRADICTED', 'HIGH', 'Record $9,000.00 net unreversed amount']]}], 'findings': [{'id': 'INV-F01', 'title': 'Invoice does not fully reconcile to the payment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003', 'SYN-005'], 'detail': 'The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.', 'recommendation': 'Obtain beneficiary identity linkage and documentation for the full amount.'}, {'id': 'INV-F02', 'title': 'Rapid onward movement has an unresolved economic purpose', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-002', 'SYN-003', 'SYN-004', 'SYN-005'], 'detail': '$11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.', 'recommendation': 'Refer the bounded evidence package for authorized investigative review.'}, {'id': 'INV-F03', 'title': 'Partial return leaves $9,000.00 unreversed', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003', 'SYN-006'], 'detail': '$11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount.', 'recommendation': 'Preserve the gross debit and return separately and avoid presenting the payment as fully reversed.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional profile', 'locator': '10-worked-example.md, source I01', 'claim_class': 'Reported'}, {'id': 'SYN-002', 'title': 'Fictional incoming posting', 'locator': '10-worked-example.md, source I02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional outgoing posting', 'locator': '10-worked-example.md, source I03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional customer explanation', 'locator': '10-worked-example.md, source I04', 'claim_class': 'Reported'}, {'id': 'SYN-005', 'title': 'Fictional invoice', 'locator': '10-worked-example.md, source I05', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional return posting', 'locator': '10-worked-example.md, source I06', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Source items received', 'value': 8, 'method': 'I01–I08, including one duplicate and one inaccessible contract', 'format': '#,##0'}, {'label': 'Chronology events', 'value': 6, 'method': 'Six canonical processed sources support EV-01–EV-06', 'format': '#,##0'}, {'label': 'Gross debit USD', 'value': 11000, 'method': 'EV-03 only; invoice is not a posted transaction', 'format': '$#,##0.00'}, {'label': 'Net unreversed debit USD', 'value': 9000, 'method': 'EV-03 11000 minus EV-06 linked return 2000', 'format': '$#,##0.00'}], 'limitations': ['All records are fictional; no filing or legal determination is made.', 'The contract is inaccessible and supplier identity linkage is unresolved.', 'Net unreversed value is neither proven loss nor an automatically reportable amount.'], 'conclusion': 'The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss.', 'report_narrative': [['The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss.'], ['Eight source items support six chronology events. The review separates the invoice, payment instruction, executed debit and linked return so multiple documents about one event do not inflate monetary totals.'], ['INV-F01: The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.', 'INV-F02: $11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.', 'INV-F03: $11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount.'], ['The $11,000.00 gross debit and $2,000.00 linked return leave $9,000.00 unreversed. The supplied invoice differs in amount and beneficiary identity; invoice face value is not another payment, and unreversed value is not proven loss.'], ['The business-purpose explanation remains unresolved because the invoice does not reconcile to the payment. The linked return is relevant counterevidence but does not by itself establish purpose or disprove another hypothesis.'], ['Each chronology event retains its source locator and event-versus-record distinction. The synthetic evidence inventory includes contradictory records and does not treat an absent explanation as affirmative proof of misconduct.'], ['Obtain the missing reconciliation of purpose, beneficiary and amount. Preserve the linked return and test both supporting and contradictory evidence before a reviewer accepts a case disposition.'], ['All records are fictional; no filing or legal determination is made.', 'The contract is inaccessible and supplier identity linkage is unresolved.', 'Net unreversed value is neither proven loss nor an automatically reportable amount.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'investigations', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'INV-F01', 'proposal': 'Obtain beneficiary identity linkage and documentation for the full amount.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'INV-F02', 'proposal': 'Refer the bounded evidence package for authorized investigative review.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'INV-F03', 'proposal': 'Preserve the gross debit and return separately and avoid presenting the payment as fully reversed.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'investigations', 'title': 'Investigation Case Review', 'summary': 'Build an evidence-led chronology, reconcile funds movements, test competing explanations, and prepare a bounded case assessment for a human decision-maker.', 'audience': 'Investigators, case reviewers, and quality-assurance analysts', 'decision': 'Which case propositions are supported, contradicted, or unresolved, and what specific evidence or human decision is needed next?', 'palette': 'indigo', 'report_sections': ['Decision questions and current assessment', 'Scope, chronology method, and coverage', 'Findings and contradictions', 'Chronology and funds movement', 'Competing hypothesis tests', 'Evidence inventory and provenance', 'Proposed investigative actions', 'Limitations, quality checks, and reviewer decision'], 'domain_tables': [{'name': 'CaseTimeline', 'columns': ['event_id', 'event_time', 'event_type', 'amount', 'currency', 'evidence_id', 'claim_class', 'detail'], 'rows': [['EV-01', '2026-09-01T09:00:00-04:00', 'PROFILE', None, None, 'SYN-001', 'Reported', 'Profile states equipment trading'], ['EV-02', '2026-09-02T10:00:00-04:00', 'CREDIT', 12000, 'USD', 'SYN-002', 'Observed', 'Posted receipt from Payer-P'], ['EV-03', '2026-09-02T11:00:00-04:00', 'DEBIT', 11000, 'USD', 'SYN-003', 'Observed', 'Posted payment to Supplier-Q'], ['EV-04', '2026-09-03T09:00:00-04:00', 'EXPLANATION', None, None, 'SYN-004', 'Reported', 'Customer says EV-03 paid for equipment'], ['EV-05', '2026-09-03T10:00:00-04:00', 'DOCUMENT', None, None, 'SYN-005', 'Observed', 'Invoice face amount 10000 USD names Supplier-R'], ['EV-06', '2026-09-04T09:00:00-04:00', 'RETURN', 2000, 'USD', 'SYN-006', 'Observed', 'Posted return explicitly linked to EV-03']], 'formats': {'amount': '#,##0.00'}}, {'name': 'HypothesisTests', 'columns': ['hypothesis_id', 'hypothesis', 'supporting_evidence', 'conflicting_evidence', 'missing_evidence', 'assessment', 'confidence', 'next_step'], 'rows': [['H-01', 'Payment was ordinary equipment settlement', 'SYN-001;SYN-004;SYN-005', 'SYN-003;SYN-005', 'Supplier identity bridge and contract', 'UNRESOLVED', 'LOW', 'Match beneficiary and full invoiced amount'], ['H-02', 'Onward movement lacks a supported purpose', 'SYN-002;SYN-003;SYN-005', 'SYN-004', 'Purpose and beneficiary corroboration', 'PATTERN_SUPPORTED', 'MODERATE', 'Obtain discriminating source documents'], ['H-03', 'Return fully reversed the payment', 'SYN-006', 'SYN-003;SYN-006', 'None for arithmetic', 'CONTRADICTED', 'HIGH', 'Record $9,000.00 net unreversed amount']]}], 'findings': [{'id': 'INV-F01', 'title': 'Invoice does not fully reconcile to the payment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003', 'SYN-005'], 'detail': 'The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.', 'recommendation': 'Obtain beneficiary identity linkage and documentation for the full amount.'}, {'id': 'INV-F02', 'title': 'Rapid onward movement has an unresolved economic purpose', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-002', 'SYN-003', 'SYN-004', 'SYN-005'], 'detail': '$11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.', 'recommendation': 'Refer the bounded evidence package for authorized investigative review.'}, {'id': 'INV-F03', 'title': 'Partial return leaves $9,000.00 unreversed', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003', 'SYN-006'], 'detail': '$11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount.', 'recommendation': 'Preserve the gross debit and return separately and avoid presenting the payment as fully reversed.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional profile', 'locator': '10-worked-example.md, source I01', 'claim_class': 'Reported'}, {'id': 'SYN-002', 'title': 'Fictional incoming posting', 'locator': '10-worked-example.md, source I02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional outgoing posting', 'locator': '10-worked-example.md, source I03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional customer explanation', 'locator': '10-worked-example.md, source I04', 'claim_class': 'Reported'}, {'id': 'SYN-005', 'title': 'Fictional invoice', 'locator': '10-worked-example.md, source I05', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional return posting', 'locator': '10-worked-example.md, source I06', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Source items received', 'value': 8, 'method': 'I01–I08, including one duplicate and one inaccessible contract', 'format': '#,##0'}, {'label': 'Chronology events', 'value': 6, 'method': 'Six canonical processed sources support EV-01–EV-06', 'format': '#,##0'}, {'label': 'Gross debit USD', 'value': 11000, 'method': 'EV-03 only; invoice is not a posted transaction', 'format': '$#,##0.00'}, {'label': 'Net unreversed debit USD', 'value': 9000, 'method': 'EV-03 11000 minus EV-06 linked return 2000', 'format': '$#,##0.00'}], 'limitations': ['All records are fictional; no filing or legal determination is made.', 'The contract is inaccessible and supplier identity linkage is unresolved.', 'Net unreversed value is neither proven loss nor an automatically reportable amount.'], 'conclusion': 'The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss.', 'report_narrative': [['The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss.'], ['Eight source items support six chronology events. The review separates the invoice, payment instruction, executed debit and linked return so multiple documents about one event do not inflate monetary totals.'], ['INV-F01: The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.', 'INV-F02: $11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.', 'INV-F03: $11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount.'], ['The $11,000.00 gross debit and $2,000.00 linked return leave $9,000.00 unreversed. The supplied invoice differs in amount and beneficiary identity; invoice face value is not another payment, and unreversed value is not proven loss.'], ['The business-purpose explanation remains unresolved because the invoice does not reconcile to the payment. The linked return is relevant counterevidence but does not by itself establish purpose or disprove another hypothesis.'], ['Each chronology event retains its source locator and event-versus-record distinction. The synthetic evidence inventory includes contradictory records and does not treat an absent explanation as affirmative proof of misconduct.'], ['Obtain the missing reconciliation of purpose, beneficiary and amount. Preserve the linked return and test both supporting and contradictory evidence before a reviewer accepts a case disposition.'], ['All records are fictional; no filing or legal determination is made.', 'The contract is inaccessible and supplier identity linkage is unresolved.', 'Net unreversed value is neither proven loss nor an automatically reportable amount.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'investigations', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'INV-F01', 'proposal': 'Obtain beneficiary identity linkage and documentation for the full amount.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'INV-F02', 'proposal': 'Refer the bounded evidence package for authorized investigative review.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'INV-F03', 'proposal': 'Preserve the gross debit and return separately and avoid presenting the payment as fully reversed.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-review.xlsx')
 wb = Workbook()
 wb.remove(wb.active)
@@ -78,6 +214,10 @@ def literal(cell, value):
         return
     elif isinstance(value, (list, dict)):
         value = '; '.join(map(str, value)) if isinstance(value, list) else str(value)
+    if isinstance(value, str) and len(value) > 32767:
+        raise ValueError('Excel cell text exceeds 32767 characters; use an evidence summary with an exact source locator and preserve the full source separately.')
+    if isinstance(value, (int, float)) and not isinstance(value, bool) and abs(value) >= 10**15:
+        raise ValueError('Excel numeric value exceeds 15-digit precision; preserve exact digits as text with a documented domain type and unit instead of silently rounding.')
     cell.value = value
     # Evidence text is data even when it starts with a spreadsheet formula marker.
     if isinstance(value, str):

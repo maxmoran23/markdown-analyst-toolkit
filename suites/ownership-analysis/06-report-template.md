@@ -1,6 +1,6 @@
 # Ownership Analysis — fixed report template
 
-Version 1.0.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -56,7 +56,137 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'ownership-analysis', 'title': 'Ownership Analysis', 'summary': 'Trace dated ownership edges, economic paths, unresolved branches, and control rights with separate legal overlays.', 'audience': 'Analysts reviewing layered ownership structures and public ownership disclosures', 'decision': 'Which ultimate economic interests are supported by the dated graph, and what evidence or interpretation remains missing?', 'palette': 'indigo', 'report_sections': ['Ownership decision brief', 'Scope and graph method', 'Material findings', 'Direct ownership assessment', 'Ultimate interests and unresolved branches', 'Evidence record', 'Recommended ownership review actions', 'Limitations and human review'], 'domain_tables': [{'name': 'OwnershipEdges', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'interest_basis', 'effective_date', 'evidence_ids', 'notes'], 'formats': {'interest_pct': '0.0"%"'}, 'rows': [['OW-01', 'PERSON-A', 'HOLDCO', 60, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Fictional supplied schedule'], ['OW-02', 'PERSON-B', 'HOLDCO', 40, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Fictional supplied schedule'], ['OW-03', 'HOLDCO', 'TARGET', 50, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Intermediate holding'], ['OW-04', 'PERSON-A', 'TARGET', 10, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Separate direct holding'], ['OW-05', 'PERSON-C', 'TARGET', 25, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Reported veto right assessed separately'], ['OW-06', 'UNKNOWN-POOL', 'TARGET', 15, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Amount known; holders unresolved']]}, {'name': 'UltimateInterests', 'columns': ['ultimate_id', 'target_id', 'economic_interest_pct', 'path_ids', 'resolution_state', 'control_state', 'claim_class', 'evidence_ids', 'notes'], 'formats': {'economic_interest_pct': '0.0"%"'}, 'rows': [['PERSON-A', 'TARGET', 40, 'OW-01>OW-03;OW-04', 'RESOLVED ON SUPPLIED GRAPH', 'NOT ASSESSED', 'Estimated', 'SYN-001', '60 percent × 50 percent + 10 percent'], ['PERSON-B', 'TARGET', 20, 'OW-02>OW-03', 'RESOLVED ON SUPPLIED GRAPH', 'NOT ASSESSED', 'Estimated', 'SYN-001', '40 percent × 50 percent'], ['PERSON-C', 'TARGET', 25, 'OW-05', 'RESOLVED ON SUPPLIED GRAPH', 'REPORTED RIGHTS', 'Reported', 'SYN-001', 'Veto scope and legal effect not established'], ['UNKNOWN-POOL', 'TARGET', 15, 'OW-06', 'UNRESOLVED', 'NOT ASSESSED', 'Reported', 'SYN-001', 'Do not allocate residual to known holders']]}], 'findings': [{'id': 'F-01', 'title': 'Unidentified holders account for 15.0%', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.', 'recommendation': 'Obtain the missing holder schedule and effective-date evidence.'}, {'id': 'F-02', 'title': 'Known terminal economic interests total 85.0%', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001'], 'detail': 'Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.', 'recommendation': 'Preserve path arithmetic, reported-source status, and separate legal questions.'}, {'id': 'F-03', 'title': 'Reported veto right lacks supporting instrument', 'severity': 'MEDIUM', 'confidence': 'LOW', 'claim_class': 'Reported', 'evidence_ids': ['SYN-001'], 'detail': 'Person C reportedly has a veto over certain asset sales; scope and governing document are absent.', 'recommendation': 'Obtain rights evidence before drawing a control conclusion.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional ownership graph', 'locator': '10-worked-example.md, OW-01 through OW-06', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FinCEN CDD overview', 'locator': 'https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule', 'claim_class': 'Observed'}, {'id': 'REF-CDD-2026', 'title': 'FinCEN FIN-2026-R001', 'locator': 'https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-401', 'title': 'OFAC FAQ 401', 'locator': 'https://ofac.treasury.gov/faqs/401', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-398', 'title': 'OFAC FAQ 398', 'locator': 'https://ofac.treasury.gov/faqs/398', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Known terminal economic interests', 'value': '85.0%', 'method': '40.0% Person A + 20.0% Person B + 25.0% Person C.', 'format': '#,##0'}, {'label': 'Unresolved economic interest', 'value': '15.0%', 'method': '100.0% less 85.0% known terminal interests.', 'format': '#,##0'}, {'label': 'Direct edges', 'value': '6', 'method': 'Count distinct OW-01 through OW-06; no graph-wide percentage sum.', 'format': '#,##0'}], 'limitations': ['All holdings and rights are fictional reported inputs.', 'Simple path multiplication requires comparable proportional rights and no cycles or overlap.', 'Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions.'], 'metadata': {'conclusion': 'The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.'}, 'report_narrative': [['The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.'], ['The review uses six dated direct ownership edges for an acyclic, proportional economic-equity graph. It assesses path arithmetic and unresolved branches separately from control, legal beneficial ownership and sanctions propagation.'], ['F-01: UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.', 'F-02: Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.', 'F-03: Person C reportedly has a veto over certain asset sales; scope and governing document are absent.'], ['HOLDCO is owned 60.0% by PERSON-A and 40.0% by PERSON-B. TARGET is held 50.0% by HOLDCO, 10.0% directly by PERSON-A, 25.0% by PERSON-C and 15.0% by unidentified holders. Distinct direct and indirect holdings are retained.'], ['PERSON-A has 60.0% × 50.0% + 10.0% = 40.0%; PERSON-B has 40.0% × 50.0% = 20.0%; PERSON-C has 25.0%. Resolved terminal interests total 85.0%; the 15.0% residual is not reallocated. The reported veto right lacks its supporting instrument.'], ['SYN-001 supplies the fictional reported schedule and rights assertion. The arithmetic is conditional on comparable proportional rights and no overlapping or circular interests; source verification remains distinct from calculation.'], ['Obtain the missing holder schedule and rights instrument. Reassess effective dates, share classes and path overlap before carrying these economic results into any separate legal test.'], ['All holdings and rights are fictional reported inputs.', 'Simple path multiplication requires comparable proportional rights and no cycles or overlap.', 'Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'ownership-analysis', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Obtain the missing holder schedule and effective-date evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Preserve path arithmetic, reported-source status, and separate legal questions.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Obtain rights evidence before drawing a control conclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'ownership-analysis', 'title': 'Ownership Analysis', 'summary': 'Trace dated ownership edges, economic paths, unresolved branches, and control rights with separate legal overlays.', 'audience': 'Analysts reviewing layered ownership structures and public ownership disclosures', 'decision': 'Which ultimate economic interests are supported by the dated graph, and what evidence or interpretation remains missing?', 'palette': 'indigo', 'report_sections': ['Ownership decision brief', 'Scope and graph method', 'Material findings', 'Direct ownership assessment', 'Ultimate interests and unresolved branches', 'Evidence record', 'Recommended ownership review actions', 'Limitations and human review'], 'domain_tables': [{'name': 'OwnershipEdges', 'columns': ['edge_id', 'owner_id', 'owned_entity_id', 'interest_pct', 'interest_basis', 'effective_date', 'evidence_ids', 'notes'], 'formats': {'interest_pct': '0.0"%"'}, 'rows': [['OW-01', 'PERSON-A', 'HOLDCO', 60, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Fictional supplied schedule'], ['OW-02', 'PERSON-B', 'HOLDCO', 40, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Fictional supplied schedule'], ['OW-03', 'HOLDCO', 'TARGET', 50, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Intermediate holding'], ['OW-04', 'PERSON-A', 'TARGET', 10, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Separate direct holding'], ['OW-05', 'PERSON-C', 'TARGET', 25, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Reported veto right assessed separately'], ['OW-06', 'UNKNOWN-POOL', 'TARGET', 15, 'Ordinary economic equity', '2026-09-30', 'SYN-001', 'Amount known; holders unresolved']]}, {'name': 'UltimateInterests', 'columns': ['ultimate_id', 'target_id', 'economic_interest_pct', 'path_ids', 'resolution_state', 'control_state', 'claim_class', 'evidence_ids', 'notes'], 'formats': {'economic_interest_pct': '0.0"%"'}, 'rows': [['PERSON-A', 'TARGET', 40, 'OW-01>OW-03;OW-04', 'RESOLVED ON SUPPLIED GRAPH', 'NOT ASSESSED', 'Estimated', 'SYN-001', '60 percent × 50 percent + 10 percent'], ['PERSON-B', 'TARGET', 20, 'OW-02>OW-03', 'RESOLVED ON SUPPLIED GRAPH', 'NOT ASSESSED', 'Estimated', 'SYN-001', '40 percent × 50 percent'], ['PERSON-C', 'TARGET', 25, 'OW-05', 'RESOLVED ON SUPPLIED GRAPH', 'REPORTED RIGHTS', 'Reported', 'SYN-001', 'Veto scope and legal effect not established'], ['UNKNOWN-POOL', 'TARGET', 15, 'OW-06', 'UNRESOLVED', 'NOT ASSESSED', 'Reported', 'SYN-001', 'Do not allocate residual to known holders']]}], 'findings': [{'id': 'F-01', 'title': 'Unidentified holders account for 15.0%', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.', 'recommendation': 'Obtain the missing holder schedule and effective-date evidence.'}, {'id': 'F-02', 'title': 'Known terminal economic interests total 85.0%', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001'], 'detail': 'Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.', 'recommendation': 'Preserve path arithmetic, reported-source status, and separate legal questions.'}, {'id': 'F-03', 'title': 'Reported veto right lacks supporting instrument', 'severity': 'MEDIUM', 'confidence': 'LOW', 'claim_class': 'Reported', 'evidence_ids': ['SYN-001'], 'detail': 'Person C reportedly has a veto over certain asset sales; scope and governing document are absent.', 'recommendation': 'Obtain rights evidence before drawing a control conclusion.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional ownership graph', 'locator': '10-worked-example.md, OW-01 through OW-06', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FinCEN CDD overview', 'locator': 'https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule', 'claim_class': 'Observed'}, {'id': 'REF-CDD-2026', 'title': 'FinCEN FIN-2026-R001', 'locator': 'https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-401', 'title': 'OFAC FAQ 401', 'locator': 'https://ofac.treasury.gov/faqs/401', 'claim_class': 'Observed'}, {'id': 'REF-OFAC-398', 'title': 'OFAC FAQ 398', 'locator': 'https://ofac.treasury.gov/faqs/398', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Known terminal economic interests', 'value': '85.0%', 'method': '40.0% Person A + 20.0% Person B + 25.0% Person C.', 'format': '#,##0'}, {'label': 'Unresolved economic interest', 'value': '15.0%', 'method': '100.0% less 85.0% known terminal interests.', 'format': '#,##0'}, {'label': 'Direct edges', 'value': '6', 'method': 'Count distinct OW-01 through OW-06; no graph-wide percentage sum.', 'format': '#,##0'}], 'limitations': ['All holdings and rights are fictional reported inputs.', 'Simple path multiplication requires comparable proportional rights and no cycles or overlap.', 'Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions.'], 'metadata': {'conclusion': 'The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.'}, 'report_narrative': [['The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.'], ['The review uses six dated direct ownership edges for an acyclic, proportional economic-equity graph. It assesses path arithmetic and unresolved branches separately from control, legal beneficial ownership and sanctions propagation.'], ['F-01: UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.', 'F-02: Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.', 'F-03: Person C reportedly has a veto over certain asset sales; scope and governing document are absent.'], ['HOLDCO is owned 60.0% by PERSON-A and 40.0% by PERSON-B. TARGET is held 50.0% by HOLDCO, 10.0% directly by PERSON-A, 25.0% by PERSON-C and 15.0% by unidentified holders. Distinct direct and indirect holdings are retained.'], ['PERSON-A has 60.0% × 50.0% + 10.0% = 40.0%; PERSON-B has 40.0% × 50.0% = 20.0%; PERSON-C has 25.0%. Resolved terminal interests total 85.0%; the 15.0% residual is not reallocated. The reported veto right lacks its supporting instrument.'], ['SYN-001 supplies the fictional reported schedule and rights assertion. The arithmetic is conditional on comparable proportional rights and no overlapping or circular interests; source verification remains distinct from calculation.'], ['Obtain the missing holder schedule and rights instrument. Reassess effective dates, share classes and path overlap before carrying these economic results into any separate legal test.'], ['All holdings and rights are fictional reported inputs.', 'Simple path multiplication requires comparable proportional rights and no cycles or overlap.', 'Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'ownership-analysis', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'conclusion': 'The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'F-01', 'proposal': 'Obtain the missing holder schedule and effective-date evidence.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'F-02', 'proposal': 'Preserve path arithmetic, reported-source status, and separate legal questions.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'F-03', 'proposal': 'Obtain rights evidence before drawing a control conclusion.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+"""Validate the data boundary shared by catalogs and standalone Python renderers."""
+import math
+import re
+
+SCHEMA_COMMON = {'Summary', 'Dashboard', 'Findings', 'Evidence', 'Actions', 'QA'}
+
+def case_errors(data, complete=False):
+    errors = []
+    if not isinstance(data, dict):
+        return ['case data must be an object']
+    def string(value):
+        return isinstance(value, str) and bool(value.strip())
+    if complete:
+        for key in ['suite_id','version','as_of','notice','scope','conclusion']:
+            if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
+        if not isinstance(data.get('methods'),list) or not data['methods'] or not all(string(x) for x in data['methods']):errors.append('complete case methods must contain text')
+        for key in ['actions','qa']:
+            if not isinstance(data.get(key),list):errors.append(key+' must be a list in a complete case')
+        if data.get('suite_id')!=data.get('slug'):errors.append('complete case suite_id must match the safe slug')
+    for key in ['slug','title','summary','audience','decision','palette']:
+        if not string(data.get(key)):
+            errors.append(key + ' must be nonempty text')
+    if not re.fullmatch(r'[a-z][a-z0-9]*(?:-[a-z0-9]+)*', data.get('slug','') if isinstance(data.get('slug'),str) else ''):
+        errors.append('slug must be a safe lowercase identifier')
+    if data.get('palette') not in ('slate','teal','indigo','umber'):
+        errors.append('unknown palette')
+    for key in ['report_sections','report_narrative','domain_tables','findings','evidence','metrics','limitations']:
+        if not isinstance(data.get(key), list):
+            errors.append(key + ' must be a list')
+    if errors:
+        return errors
+    if len(data['report_sections']) != 8 or not all(string(x) for x in data['report_sections']) or len(set(data['report_sections'])) != 8:
+        errors.append('eight distinct report headings required')
+    narrative = data['report_narrative']
+    if len(narrative) != 8 or any(not isinstance(section,list) or not section or not all(string(p) for p in section) for section in narrative):
+        errors.append('eight populated case-specific narrative sections required')
+    if not all(string(x) for x in data['limitations']):
+        errors.append('limitations must contain text')
+    if len(data['domain_tables']) != 2:
+        errors.append('exactly two domain tables required')
+    names = {x.casefold() for x in SCHEMA_COMMON}
+    for index, table in enumerate(data['domain_tables']):
+        label = f'domain table {index + 1}'
+        if not isinstance(table,dict):
+            errors.append(label+' must be an object'); continue
+        name = table.get('name')
+        if not string(name) or len(name)>31 or re.search(r'[\\/*?:\[\]]',name) or name.startswith("'") or name.endswith("'") or name.casefold() in names:
+            errors.append('invalid or duplicate sheet '+str(name))
+        else:
+            names.add(name.casefold())
+        columns, rows = table.get('columns'), table.get('rows')
+        if not isinstance(columns,list) or not columns or not all(string(c) for c in columns):
+            errors.append(label+' requires nonempty text columns'); continue
+        if len(set(columns)) != len(columns):
+            errors.append('duplicate columns in '+str(name))
+        if not isinstance(rows,list):
+            errors.append(label+' rows must be a list'); continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):
+                errors.append(f'row width mismatch in {name}, row {row_number}')
+            elif any(isinstance(value,(dict,list)) for value in row):
+                errors.append(f'nested domain cell in {name}, row {row_number}')
+        formats = table.get('formats',{})
+        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns')
+    def records(key,fields):
+        valid=[]
+        for index,row in enumerate(data[key]):
+            if not isinstance(row,dict) or any(field not in row for field in fields):
+                errors.append(f'{key} row {index+1} missing required fields'); continue
+            valid.append(row)
+        return valid
+    evidence_rows=records('evidence',['id','title','locator','claim_class'])
+    findings=records('findings',['id','title','severity','confidence','claim_class','evidence_ids','detail','recommendation'])
+    evidence_ids=[e['id'] for e in evidence_rows if string(e['id'])]
+    finding_ids=[f['id'] for f in findings if string(f['id'])]
+    if len(evidence_ids)!=len(evidence_rows):errors.append('invalid evidence ID')
+    if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
+    if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
+    if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    classes=('Observed','Reported','Inferred','Estimated')
+    for row in evidence_rows:
+        if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
+            errors.append('invalid evidence text or claim class')
+    for row in findings:
+        refs=row['evidence_ids']
+        if not isinstance(refs,list) or not refs or not all(string(x) and x in evidence_ids for x in refs):
+            errors.append('unresolved evidence key in '+str(row['id']))
+        if row['severity'] not in ('CRITICAL','HIGH','MEDIUM','LOW'):errors.append('invalid severity in '+str(row['id']))
+        if row['confidence'] not in ('HIGH','MODERATE','LOW','NOT ASSESSABLE'):errors.append('invalid confidence in '+str(row['id']))
+        if row['claim_class'] not in classes:errors.append('invalid claim class in '+str(row['id']))
+        if any(not string(row[k]) for k in ['title','detail','recommendation']):errors.append('invalid finding text')
+    for row in records('metrics',['label','value','method']):
+        if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
+            errors.append('invalid metric label, method or scalar value')
+        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+    for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
+        if key not in data:continue
+        if not isinstance(data[key],list):
+            errors.append(key+' must be a list');continue
+        rows=records(key,fields);ids=[r['id'] for r in rows if string(r['id'])]
+        if len(ids)!=len(rows) or len(ids)!=len(set(ids)):errors.append('invalid or duplicate '+key+' ID')
+        if key=='actions':
+            for row in rows:
+                if row['finding_id'] not in finding_ids:errors.append('unresolved action finding key')
+                if row['status'] not in ('Proposed','Accepted','In progress','Blocked','Closed','Risk accepted'):errors.append('invalid action state')
+                if not string(row['proposal']) or any(row[k] is not None and not string(row[k]) for k in ['owner','due_date']):errors.append('invalid action text')
+        else:
+            for row in rows:
+                if not string(row['check']) or not string(row['evidence']):errors.append('invalid QA text')
+                if row['result'] not in ('PASS','FAIL','REVIEW REQUIRED','NOT RECORDED','NOT TESTED'):errors.append('invalid QA result')
+    def visit(value):
+        if isinstance(value,float) and not math.isfinite(value):
+            errors.append('non-finite numeric value')
+        elif isinstance(value,str):
+            if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+        elif isinstance(value,list):
+            for item in value:visit(item)
+        elif isinstance(value,dict):
+            for item in value.values():visit(item)
+    visit(data)
+    return list(dict.fromkeys(errors))
+
+def require_case(data):
+    problems=case_errors(data, complete=True)
+    if problems:
+        raise ValueError('Case data rejected: '+ '; '.join(problems))
+
+require_case(DATA)
+
 OUTPUT = Path(DATA['suite_id'] + '-report.docx')
 doc = Document()
 doc.core_properties.author = 'Markdown Analyst Toolkit'
@@ -99,12 +229,17 @@ def formatted(value, fmt):
         return f'{value:.1%}'
     if fmt == '0.0"%"':
         return f'{value:.1f}%'
-    places = 2 if '.00' in fmt else 1 if '.0' in fmt else 0
-    return ('$' if '$' in fmt else '') + f'{value:,.{places}f}'
+    decimal = re.search(r'\.([0#]+)', fmt)
+    places = len(decimal.group(1)) if decimal else 0
+    number = f'{value:,}' + ('.'+'0'*places if places else '') if isinstance(value,int) else f'{value:,.{places}f}'
+    return ('$' if '$' in fmt else '') + number
 
-def table(headers, rows, keep_together=False):
+def table(headers, rows, keep_together=False, widths=None):
     t = doc.add_table(rows=1, cols=len(headers))
     t.style = 'Table Grid'
+    if widths:
+        t.autofit = False
+        for column,width in zip(t.columns,widths):column.width=Inches(width)
     for i,h in enumerate(headers):
         t.rows[0].cells[i].text = h
     repeat = OxmlElement('w:tblHeader')
@@ -115,7 +250,8 @@ def table(headers, rows, keep_together=False):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
         row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
-        for cell in row.cells:
+        for cell_index,cell in enumerate(row.cells):
+            if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
             shading.set(qn('w:fill'),'344E5F' if row_index==0 else 'E2E8E9' if row_index%2 else 'F1F2EF')
             cell._tc.get_or_add_tcPr().append(shading)
@@ -158,7 +294,7 @@ for index, heading in enumerate(DATA['report_sections']):
         missing = sum(value is None for row in source['rows'] for value in row)
         doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
-        table(['Evidence ID','Source or fixture','Exact locator'], [[e['id'],e['title'],e['locator']] for e in DATA['evidence']])
+        table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
         for a in DATA['actions']:
             doc.add_paragraph(f"{a['id']} / {a['finding_id']}: {a['proposal']} Owner: {text(a['owner'])}. Due: {text(a['due_date'])}. State: {a['status']}")

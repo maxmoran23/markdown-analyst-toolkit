@@ -1,18 +1,18 @@
 # Regulatory Change and Obligation Mapping — build record
 
-Version 1.0.0. Build date: 2026-10-09. This file documents the suite and is not required as a chat attachment.
+Version 1.1.0. Build date: 2026-10-09. This file documents the suite and is not required as a chat attachment.
 
 ## Measured content and estimated resources
 
 | Measure | Result | Method / limitation |
 | --- | --- | --- |
 | Instructional files | 10 | Files 01–10; README and this record excluded |
-| Instructional words | 13,975 | Whitespace-separated tokens, including code |
-| UTF-8 bytes | 121,944 | Sum of files 01–10 |
-| Characters | 121,862 | Unicode characters across files 01–10 |
-| Estimated attachment tokens | 30,466 | Ceiling(characters / 4); not a tokenizer measurement |
-| Context sensitivity range | 24,373–40,621 | Characters / 5 to characters / 3; not a guaranteed bound |
-| Illustrative build-token budget | 121,864–304,660 | Planning heuristic: 4–10 times final context estimate for drafting, review and revision; **not observed consumption**, actual usage may fall outside |
+| Instructional words | 15,595 | Whitespace-separated tokens, including code |
+| UTF-8 bytes | 140,472 | Sum of files 01–10 |
+| Characters | 140,390 | Unicode characters across files 01–10 |
+| Estimated attachment tokens | 35,098 | Ceiling(characters / 4); not a tokenizer measurement |
+| Context sensitivity range | 28,078–46,797 | Characters / 5 to characters / 3; not a guaranteed bound |
+| Illustrative build-token budget | 140,392–350,980 | Planning heuristic: 4–10 times final context estimate for drafting, review and revision; **not observed consumption**, actual usage may fall outside |
 | Actual authoring/reasoning/input tokens | Not available | No complete per-suite generation telemetry captured |
 | Actual monetary build cost | Not available | No token billing attribution or assumed model price |
 | Elapsed effort | Not attributed per suite | Parallel authoring and shared template work overlap |
@@ -30,7 +30,7 @@ The build-budget range is intentionally an estimate of resources one might reser
 | 5. Review | Defined falsifiable analytical and delivery checks | File 09; actual release checks are listed in the root verification record |
 | 6. Package | Measured files, embedded renderers and created checksummed bundles | This record, release assets and root verification record |
 
-Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.0.0/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
+Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.1.0/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
 
 ## Instructional file integrity
 
@@ -41,9 +41,9 @@ Stage order describes the workflow, not a fabricated hourly timeline. A listed a
 | `03-analysis-method.md` | `a80f88d95e3b63b69c676949efd3639bf95479d3e6eb1bb8b59e465cf5a9482f` |
 | `04-decision-rules.md` | `ea8fe5a214a8489c69bf31ad2e4cee5cc97d9fd9bd34de90014118fed5bc1912` |
 | `05-output-contract.md` | `5a7dc9af3660fc7966f269e1542b4f3211289c9a5294b6b9a962363a4c35ee4d` |
-| `06-report-template.md` | `60324afb7cbb106f8dcac0fb0493e63ac8c05aa49d0c7ddacf83eb9eb51fb7ef` |
-| `07-workbook-template.md` | `76803e0964dc29f92527fa7f2f5ee84947f0773f6faa58a31ee7cec394e67f22` |
-| `08-dashboard-template.md` | `0296581200d06d02f41ba9ac3e1d22fb85dd73a4b13597b4ca7b0107e2421c86` |
+| `06-report-template.md` | `0cdd6c19941d1ec65cc743d59199af6b5a1ffda3310bc998472c8e3747e25f3c` |
+| `07-workbook-template.md` | `a0f9d7d118ab1c2863496f87c08887d5ce90cf6188f476ee3ccb62cb3c91be6e` |
+| `08-dashboard-template.md` | `64a2f7ebb3177e783e59675642c00a500cf28da3c26e6c3b6e2b90531b02fe07` |
 | `09-quality-review.md` | `dc6a30052065069750feedfb6effb3d112e5641ac80f500f119502f40b45e186` |
 | `10-worked-example.md` | `26526cfb3c5773b407b0c1ed7f48bb696279b07b92eef464294a2bdf3f31d646` |
 

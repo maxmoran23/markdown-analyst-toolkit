@@ -1,0 +1,317 @@
+{
+  "slug": "jurisdiction-risk",
+  "title": "Jurisdiction Risk and Exposure Review",
+  "summary": "Map jurisdiction-related exposure while separating strategic AML deficiencies, sanctions scope, governance context, and evidence gaps.",
+  "audience": "Analysts preparing generic geographic exposure and jurisdiction review drafts",
+  "decision": "Which geographic exposures and legal-scope questions need additional review, without turning a country label into a customer decision?",
+  "palette": "teal",
+  "report_sections": [
+    "Jurisdiction exposure conclusion",
+    "Scope dates and allocation method",
+    "Material geographic findings",
+    "Jurisdiction context assessment",
+    "Exposure allocation and overlap",
+    "Source applicability and uncertainty",
+    "Proposed specialist and evidence actions",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "JurisdictionFactors",
+      "columns": [
+        "jurisdiction_id",
+        "aml_category",
+        "sanctions_scope",
+        "corruption_context",
+        "source_date",
+        "as_of_date",
+        "evidence_ids",
+        "limitation"
+      ],
+      "rows": [
+        [
+          "J-A",
+          "NONE_IN_FIXTURE",
+          "NO_PROGRAM_QUESTION_IN_FIXTURE",
+          "Lower fictional concern",
+          "2026-09-15",
+          "2026-09-30",
+          "SYN-001",
+          "Invented jurisdiction; no real-world status asserted"
+        ],
+        [
+          "J-B",
+          "INCREASED_MONITORING_FIXTURE",
+          "NO_PROGRAM_QUESTION_IN_FIXTURE",
+          "Moderate fictional concern",
+          "2026-09-15",
+          "2026-09-30",
+          "SYN-001",
+          "Strategic-deficiency context is separate from sanctions"
+        ],
+        [
+          "J-C",
+          "CALL_FOR_ACTION_FIXTURE",
+          "NO_PROGRAM_QUESTION_IN_FIXTURE",
+          "Higher fictional concern",
+          "2026-09-15",
+          "2026-09-30",
+          "SYN-001",
+          "Illustrative category requires contextual review, not automatic exclusion"
+        ],
+        [
+          "J-D",
+          "NONE_IN_FIXTURE",
+          "SCOPE_REVIEW_REQUIRED",
+          "Moderate fictional concern",
+          "2026-09-15",
+          "2026-09-30",
+          "SYN-001",
+          "Fictional sector-related restriction question; applicability unresolved"
+        ]
+      ]
+    },
+    {
+      "name": "ExposureMapping",
+      "columns": [
+        "exposure_id",
+        "subject_id",
+        "destination_id",
+        "intermediary_id",
+        "amount",
+        "currency",
+        "exposure_role",
+        "include_in_total",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "T01",
+          "C01",
+          "J-A",
+          "J-A",
+          100000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T02",
+          "C01",
+          "J-B",
+          "J-A",
+          200000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T03",
+          "C02",
+          "J-C",
+          "J-D",
+          150000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T04",
+          "C02",
+          "J-B",
+          "J-A",
+          50000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T05",
+          "C03",
+          null,
+          "J-A",
+          100000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Destination not supplied; retained in total"
+        ],
+        [
+          "T06",
+          "C03",
+          "J-D",
+          "J-A",
+          250000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T07",
+          "C04",
+          "J-A",
+          "J-A",
+          50000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ],
+        [
+          "T08",
+          "C04",
+          "J-C",
+          "J-A",
+          100000,
+          "USD",
+          "BENEFICIARY_JURISDICTION",
+          true,
+          "SYN-002",
+          "Single transfer; intermediary not a second payment"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "JR-F01",
+      "title": "Unknown destination remains a material exposure gap",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-002"
+      ],
+      "detail": "$100,000.00 of the $1,000,000.00 fictional transfer population has no beneficiary jurisdiction.",
+      "recommendation": "Resolve T05 destination without excluding it from the total."
+    },
+    {
+      "id": "JR-F02",
+      "title": "Destination and any-nexus exposure use different inclusion rules",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002"
+      ],
+      "detail": "J-D receives $250,000.00 as destination, while its destination-or-intermediary union is $400,000.00.",
+      "recommendation": "Preserve role-specific and union calculations; deduplicate T03 and T06."
+    },
+    {
+      "id": "JR-F03",
+      "title": "Fictional sanctions scope question is unresolved",
+      "severity": "HIGH",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002"
+      ],
+      "detail": "J-D has a fictional sector-related restriction question; neither country presence nor absence from an AML category resolves transaction applicability.",
+      "recommendation": "Obtain the relevant authoritative rule and transaction facts for specialist review."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional four-jurisdiction context snapshots",
+      "locator": "10-worked-example.md, full context population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional eight-transfer exposure ledger",
+      "locator": "10-worked-example.md, full transfer population",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-FATF",
+      "title": "FATF monitored-jurisdiction category descriptions",
+      "locator": "https://www.fatf-gafi.org/en/countries/black-and-grey-lists.html",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC",
+      "title": "OFAC sanctions programs and country information",
+      "locator": "https://ofac.treasury.gov/sanctions-programs-and-country-information",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-WGI",
+      "title": "World Bank Worldwide Governance Indicators and usage advisory",
+      "locator": "https://www.worldbank.org/en/publication/worldwide-governance-indicators",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Total supplied transfers",
+      "value": "$1,000,000.00",
+      "method": "Sum of eight unique USD transfers T01–T08; no FX required."
+    },
+    {
+      "label": "Destination mapped",
+      "value": "$900,000.00 (90.0%)",
+      "method": "Transfers with a supplied destination / all $1,000,000.00; unknown T05 remains in denominator."
+    },
+    {
+      "label": "J-D any-nexus union",
+      "value": "$400,000.00 (40.0%)",
+      "method": "Unique IDs T03 and T06 with J-D as destination or intermediary / total $1,000,000.00."
+    }
+  ],
+  "limitations": [
+    "All jurisdiction identifiers, category assignments, and transfer records are fictional.",
+    "No current live country list or actual sanctions determination is supplied.",
+    "Country context, nationality, and payment routing do not establish individual wrongdoing.",
+    "Destination and intermediary exposures overlap; role totals are not additive.",
+    "The unknown destination could change category allocations and remains in the denominator."
+  ],
+  "conclusion": "The fictional transfer population totals $1,000,000.00, with $100,000.00 of destination exposure unresolved. J-D accounts for 25.0% by destination and 40.0% by unique destination-or-intermediary nexus; its separate sanctions-scope question requires specialist review.",
+  "report_narrative": [
+    [
+      "The fictional transfer population totals $1,000,000.00, with $100,000.00 of destination exposure unresolved. J-D accounts for 25.0% by destination and 40.0% by unique destination-or-intermediary nexus; its separate sanctions-scope question requires specialist review."
+    ],
+    [
+      "The cutoff is Sep 30, 2026. Eight unique transfers in USD form the monetary denominator. Beneficiary jurisdiction is the primary allocation role; intermediary jurisdiction is a separate overlapping role. No actual-country statuses or present-day legal conclusions are imported."
+    ],
+    [
+      "T05 is unmapped by destination and remains $100,000.00 of the total. J-B and J-C each receive $250,000.00 under different fictional AML-context categories. J-D raises a separate sector-related scope question that neither AML category resolves."
+    ],
+    [
+      "The four snapshots keep AML strategic-deficiency context, sanctions-scope status, and corruption-related context in separate fields. J-A has no fixture category, J-B has an increased-monitoring fixture label, J-C a call-for-action fixture label, and J-D a distinct unresolved scope question."
+    ],
+    [
+      "Destination allocation is J-A $150,000.00, J-B $250,000.00, J-C $250,000.00, J-D $250,000.00, and unknown $100,000.00. J-D appears on T03 as intermediary and T06 as destination, producing a deduplicated union of $400,000.00.",
+      "Under the separate missing-destination scenario, allocating all of T05's $100,000.00 to J-D raises J-D destination exposure from $250,000.00/$1,000,000.00 = 25.0% to $350,000.00/$1,000,000.00 = 35.0%. Allocating none to J-D preserves 25.0%. The 25.0%–35.0% range is deterministic sensitivity, with no assigned probabilities; the observed baseline remains unchanged (SYN-002)."
+    ],
+    [
+      "SYN-001 defines invented context and SYN-002 defines all transfers. FATF category descriptions, OFAC program scope, and the World Bank usage advisory were reviewed for methodological distinctions. They do not establish any fictional jurisdiction status or replace a current rule applicability review."
+    ],
+    [
+      "Resolve T05 destination and review T03/T06 transaction roles, sector facts, parties, dates, and applicable authority. Preserve both destination and any-nexus views. Propose targeted diligence and specialist assessment without an automatic customer outcome."
+    ],
+    [
+      "QA must reconcile eight IDs, the $1,000,000.00 total, the $900,000.00 mapped amount, and the $400,000.00 J-D union. Dynamic country statements, legal applicability, and human disposition remain outside this fictional result."
+    ]
+  ],
+  "as_of": "2026-09-30",
+  "scope": "Eight fictional USD transfers at the Sep 30, 2026 review cutoff; four invented jurisdiction snapshots dated Sep 15, 2026. Beneficiary jurisdiction is the primary additive role."
+}

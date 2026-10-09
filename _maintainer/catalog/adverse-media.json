@@ -1,0 +1,379 @@
+{
+  "slug": "adverse-media",
+  "title": "Adverse Media",
+  "summary": "Assess adverse public reporting with identity resolution, source lineage, procedural chronology and a record of corrections.",
+  "audience": "Analysts reviewing bounded public adverse-information cases",
+  "decision": "Which adverse events are attributable and current enough to inform a proportionate human review?",
+  "palette": "slate",
+  "report_sections": [
+    "Adverse-information decision brief",
+    "Scope, identity and search coverage",
+    "Material findings and competing accounts",
+    "Event assessment and current status",
+    "Source lineage and identity review",
+    "Evidence, chronology and corrections",
+    "Proposed review and clarification actions",
+    "Limitations, quality checks and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "EventAssessment",
+      "columns": [
+        "event_id",
+        "subject_id",
+        "event_summary",
+        "identity_state",
+        "procedural_status",
+        "adverse_origin_families",
+        "current_assessment",
+        "confidence",
+        "evidence_ids",
+        "next_step"
+      ],
+      "rows": [
+        [
+          "EV-01",
+          "ML-041",
+          "Reported invoice-fraud charge",
+          "MATCHED",
+          "DISMISSED",
+          1,
+          "Charge dismissed on procedural grounds; merits not determined",
+          "HIGH",
+          "SYN-002;SYN-003;SYN-004;SYN-005",
+          "Preserve corrected chronology"
+        ],
+        [
+          "EV-02",
+          "ML-041",
+          "Administrative recordkeeping order",
+          "MATCHED",
+          "FINAL_ORDER",
+          1,
+          "Final administrative finding in supplied record; not a criminal conviction",
+          "HIGH",
+          "SYN-006",
+          "Review decision relevance and any later order"
+        ],
+        [
+          "EV-03",
+          "ML-904",
+          "Fraud conviction of a namesake",
+          "DIFFERENT_SUBJECT",
+          "EXCLUDED_IDENTITY",
+          0,
+          "Not attributable to ML-041",
+          "HIGH",
+          "SYN-001;SYN-007",
+          "Retain documented exclusion"
+        ],
+        [
+          "EV-04",
+          "ML-041",
+          "Anonymous payroll-diversion allegation",
+          "MATCHED",
+          "ALLEGATION_UNRESOLVED",
+          1,
+          "Underlying complaint unavailable; subject denial recorded",
+          "LOW",
+          "SYN-008;SYN-009",
+          "Obtain permitted primary support and assess response"
+        ]
+      ]
+    },
+    {
+      "name": "SourceReview",
+      "columns": [
+        "source_id",
+        "event_id",
+        "family_id",
+        "source_role",
+        "identity_state",
+        "eligible_for_event",
+        "publication_date",
+        "evidence_id",
+        "assessment_note"
+      ],
+      "rows": [
+        [
+          "D-01",
+          "CONTEXT",
+          "REGISTRY",
+          "IDENTITY",
+          "MATCHED",
+          "CONTEXT",
+          "2026-09-30",
+          "SYN-001",
+          "Target ML-041; not adverse-event support"
+        ],
+        [
+          "D-02",
+          "EV-01",
+          "PROSECUTOR",
+          "ORIGINAL_REPORT",
+          "MATCHED",
+          "YES",
+          "2026-09-01",
+          "SYN-002",
+          "Reports D-04 charge; no separate underlying evidence"
+        ],
+        [
+          "D-03",
+          "EV-01",
+          "PROSECUTOR",
+          "SYNDICATED_COPY",
+          "MATCHED",
+          "YES",
+          "2026-09-02",
+          "SYN-003",
+          "Copies D-02; no new origin"
+        ],
+        [
+          "D-04",
+          "EV-01",
+          "PROSECUTOR",
+          "CHARGE_NOTICE",
+          "MATCHED",
+          "YES",
+          "2026-09-01",
+          "SYN-004",
+          "Original allegation; does not establish guilt"
+        ],
+        [
+          "D-05",
+          "EV-01",
+          "COURT",
+          "STATUS_UPDATE",
+          "MATCHED",
+          "YES",
+          "2026-09-20",
+          "SYN-005",
+          "Dismissal updates status; not an adverse assertion origin"
+        ],
+        [
+          "D-06",
+          "EV-02",
+          "ADMINISTRATIVE",
+          "FINAL_ORDER",
+          "MATCHED",
+          "YES",
+          "2026-07-10",
+          "SYN-006",
+          "Recordkeeping finding; no later order supplied"
+        ],
+        [
+          "D-07",
+          "EV-03",
+          "OTHER_COURT",
+          "DIFFERENT_SUBJECT_REPORT",
+          "DIFFERENT_SUBJECT",
+          "NO",
+          "2026-08-15",
+          "SYN-007",
+          "Explicit ML-904 identity mismatch"
+        ],
+        [
+          "D-08",
+          "EV-04",
+          "ANONYMOUS_BLOG",
+          "ALLEGATION",
+          "MATCHED",
+          "YES",
+          "2026-09-23",
+          "SYN-008",
+          "One anonymous claim; primary support unavailable"
+        ],
+        [
+          "D-09",
+          "EV-04",
+          "SUBJECT",
+          "SUBJECT_RESPONSE",
+          "MATCHED",
+          "YES",
+          "2026-09-24",
+          "SYN-009",
+          "Denies allegation; does not independently disprove it"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "AM-F01",
+      "title": "Later dismissal changes the charge narrative",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-004",
+        "SYN-005"
+      ],
+      "detail": "The fictional charge was dismissed on procedural grounds on 2026-09-20; the order makes no merits determination.",
+      "recommendation": "Correct current status and preserve the dated charge history."
+    },
+    {
+      "id": "AM-F02",
+      "title": "Administrative order remains relevant within supplied scope",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-006"
+      ],
+      "detail": "The fictional final administrative order records a recordkeeping finding and a USD 25,000 amount ordered, without evidence of payment or a later order.",
+      "recommendation": "Assess decision relevance and obtain any later operative record."
+    },
+    {
+      "id": "AM-F03",
+      "title": "Namesake conviction must be excluded",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-007"
+      ],
+      "detail": "D-07 identifies ML-904; the target is ML-041.",
+      "recommendation": "Retain the exclusion and do not attribute the conviction to the target."
+    },
+    {
+      "id": "AM-F04",
+      "title": "Anonymous allegation remains unsupported by a primary record",
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "claim_class": "Reported",
+      "evidence_ids": [
+        "SYN-008",
+        "SYN-009"
+      ],
+      "detail": "D-08 alleges payroll diversion; D-09 denies it; the planned underlying-complaint search is access limited.",
+      "recommendation": "Seek permitted primary support and assess the supplied response without prejudgment."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional D-01 source",
+      "locator": "10-worked-example.md, complete input D-01",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional D-02 source",
+      "locator": "10-worked-example.md, complete input D-02",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional D-03 source",
+      "locator": "10-worked-example.md, complete input D-03",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional D-04 source",
+      "locator": "10-worked-example.md, complete input D-04",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional D-05 source",
+      "locator": "10-worked-example.md, complete input D-05",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional D-06 source",
+      "locator": "10-worked-example.md, complete input D-06",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-007",
+      "title": "Fictional D-07 source",
+      "locator": "10-worked-example.md, complete input D-07",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-008",
+      "title": "Fictional D-08 source",
+      "locator": "10-worked-example.md, complete input D-08",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-009",
+      "title": "Fictional D-09 source",
+      "locator": "10-worked-example.md, complete input D-09",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-NNS",
+      "title": "Wolfsberg Negative News Screening FAQs (2022)",
+      "locator": "https://db.wolfsberg-group.org/assets/b3652a98-4bc6-4b42-9f05-e378a4adbd95/Negative%20News%20Screening%20FAQs%20(2022).pdf; Q4\u2013Q5 and 02 applicability note",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Event candidates",
+      "value": 4,
+      "method": "Distinct EV-01 through EV-04."
+    },
+    {
+      "label": "Attributable events",
+      "value": 3,
+      "method": "Three MATCHED events; exclude EV-03 identity mismatch."
+    },
+    {
+      "label": "Eligible event-source items",
+      "value": "7 of 8",
+      "method": "D-02 through D-09 less D-07; D-01 is context only."
+    },
+    {
+      "label": "Planned-search completion",
+      "value": 80.0,
+      "format": "0.0\"%\"",
+      "method": "Four completed planned searches / five planned \u00d7 100."
+    }
+  ],
+  "limitations": [
+    "All case records and events are fictional.",
+    "The anonymous allegation has no supplied underlying complaint.",
+    "The five-search plan does not establish exhaustive public coverage.",
+    "No authorized human disposition or external action is recorded."
+  ],
+  "metadata": {
+    "conclusion": "Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded."
+  },
+  "report_narrative": [
+    [
+      "Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded."
+    ],
+    [
+      "The review covers nine fictional source items and five planned searches through Sep 30, 2026 5:00 PM ET. Four searches are complete; the underlying complaint search is access limited."
+    ],
+    [
+      "AM-F01 corrects the charge chronology using the later dismissal. AM-F02 preserves the administrative order within its stated scope. AM-F03 excludes the namesake. AM-F04 retains the anonymous allegation and denial as unresolved accounts."
+    ],
+    [
+      "EventAssessment contains four candidates and three MATCHED events. EV-01 has one upstream allegation origin despite three publications; the dismissal changes status without deciding merits."
+    ],
+    [
+      "SourceReview preserves nine source items. D-01 is identity context. Seven of eight event-source items are eligible, or 87.5%; that is not an adverse-event prevalence measure. D-09 is an attributed response, not corroboration of the allegation."
+    ],
+    [
+      "SYN-001 through SYN-009 resolve to the complete fictional records in file 10. D-05 updates D-04; D-07 conflicts with target identity, and D-09 responds to D-08. REF-NNS provides method context only."
+    ],
+    [
+      "Preserve the corrected chronology, assess the administrative order, keep the namesake excluded and obtain primary support for the anonymous claim if relevant. All actions remain proposed."
+    ],
+    [
+      "All case records and events are fictional.",
+      "The anonymous allegation has no supplied underlying complaint.",
+      "The five-search plan does not establish exhaustive public coverage.",
+      "No authorized human disposition or external action is recorded.",
+      "QA must be recorded from actual checks; human disposition remains NOT REVIEWED."
+    ]
+  ],
+  "as_of": "2026-09-30 5:00 PM ET",
+  "scope": "Nine fictional source items, four event candidates and five planned searches for ML-041 through Sep 30, 2026 5:00 PM ET. Method sources are not subject evidence."
+}
