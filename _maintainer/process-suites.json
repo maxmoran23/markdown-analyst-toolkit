@@ -1,0 +1,15 @@
+{
+  "minimum_authored_prose_words": 18000,
+  "minimum_domain_tables": 5,
+  "suites": [
+    "transaction-monitoring",
+    "scenario-design",
+    "tm-data-lineage",
+    "monitoring-tuning",
+    "monitoring-validation",
+    "lookback-review",
+    "investigations",
+    "network-flow-review",
+    "alert-qa"
+  ]
+}

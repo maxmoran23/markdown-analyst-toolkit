@@ -2,7 +2,7 @@
 import math
 import argparse
 from pathlib import Path
-from build import ROOT, instruction_metrics, replace_block
+from build import ROOT, instruction_metrics, replace_block, authored_metrics
 
 def tokens(paths):
     return math.ceil(sum(len(p.read_text()) for p in paths)/4)
@@ -16,7 +16,7 @@ def build(check=False):
             raise ValueError('Incomplete suite '+folder.name)
         base=[folder/'01-session-guide.md',folder/'05-output-contract.md',folder/'09-quality-review.md']
         renders=[tokens(base+[folder/name]) for name in ['06-report-template.md','07-workbook-template.md','08-dashboard-template.md']]
-        rows.append(f'| [{folder.name}](../suites/{folder.name}/) | {m["words"]:,} | {m["tokens"]:,} | {tokens(analysis):,} | '+ ' / '.join(f'{t:,}' for t in renders)+' |')
+        rows.append(f'| [{folder.name}](../suites/{folder.name}/) | {authored_metrics(folder)["words"]:,} | {m["words"]:,} | {m["tokens"]:,} | {tokens(analysis):,} | '+ ' / '.join(f'{t:,}' for t in renders)+' |')
         total_words+=m['words'];total_tokens+=m['tokens']
     content='''# Measured attachment budgets
 
@@ -26,8 +26,13 @@ All figures exclude your input data, prior messages, the case checkpoint and gen
 output. Reserve space for each. File 11 in every suite supplies a sensitivity range,
 resource-estimate limitations and the exact file hashes.
 
-| Suite | Words in 01–10 | Full ten-file token estimate | Analysis stage estimate | Render stage: report / workbook / dashboard |
-| --- | --- | --- | --- | --- |
+Authored prose counts cover files 01–05, 09 and 10, including Markdown tables but
+excluding fenced code and the compiled field dictionary. Full-set figures include
+all content. [Process depth](PROCESS-DEPTH.md) reports the focused before/after
+comparison and individual authored-file sizes.
+
+| Suite | Authored prose words | All words in 01–10 | Full ten-file token estimate | Analysis stage estimate | Render stage: report / workbook / dashboard |
+| --- | --- | --- | --- | --- | --- |
 '''+ '\n'.join(rows)+f'''
 
 Across {len(rows)} suites, the ten-file sets contain {total_words:,} whitespace-counted

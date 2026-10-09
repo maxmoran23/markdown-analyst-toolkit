@@ -18,7 +18,7 @@ def run_python(source, directory, filename):
     old=Path.cwd()
     try:
         os.chdir(directory)
-        runpy.run_path(str(path))
+        return runpy.run_path(str(path))
     finally:
         os.chdir(old)
 
@@ -38,6 +38,12 @@ class RendererTests(unittest.TestCase):
                 wb=load_workbook(folder/(data['slug']+'-review.xlsx'),data_only=False)
                 schemas={**COMMON,**{t['name']:t['columns'] for t in data['domain_tables']}}
                 self.assertEqual(wb.sheetnames,list(schemas))
+                summary_rows=list(wb['Summary'].iter_rows(min_row=2,values_only=True))
+                actual_narratives=[list(row) for row in summary_rows if str(row[0]).startswith('report_section_')]
+                expected_narratives=[[f'report_section_{i:02}_paragraph_{j:02}',paragraph,data['report_sections'][i-1]]
+                    for i,paragraphs in enumerate(data['report_narrative'],1) for j,paragraph in enumerate(paragraphs,1)]
+                self.assertEqual(actual_narratives,expected_narratives)
+                self.assertIn(('conclusion',data['conclusion'],'Case-specific conclusion; human disposition remains separate'),summary_rows)
                 for name,columns in schemas.items():
                     actual=[cell.value for cell in wb[name][1]][:len(columns)]
                     self.assertEqual(actual,columns)
@@ -64,7 +70,7 @@ class RendererTests(unittest.TestCase):
                     self.assertTrue(ws.freeze_panes)
                     self.assertTrue(ws.print_title_rows)
                 embedded=(ROOT/'suites'/data['slug']/'06-report-template.md').read_text()
-                run_python(re.search(r'^```python\n(.*?)^```',embedded,re.M|re.S).group(1),folder,'report.py')
+                report_runtime=run_python(re.search(r'^```python\n(.*?)^```',embedded,re.M|re.S).group(1),folder,'report.py')
                 doc=Document(folder/(data['slug']+'-report.docx'))
                 headings=[p.text for p in doc.paragraphs if p.style.name=='Heading 1']
                 self.assertEqual(headings,data['report_sections'])
@@ -75,6 +81,18 @@ class RendererTests(unittest.TestCase):
                 evidence_tables=[t for t in doc.tables if [c.text for c in t.rows[0].cells]==['Evidence ID','Source or fixture','Exact locator','Claim class']]
                 self.assertEqual(len(evidence_tables),1)
                 self.assertEqual([[c.text for c in r.cells] for r in evidence_tables[0].rows[1:]],[[e['id'],e['title'],e['locator'],e['claim_class']] for e in data['evidence']])
+                record_tables=[t for t in doc.tables if [c.text for c in t.rows[0].cells]==['Field','Value']]
+                ordered=[t for section in (4,5) for index,t in enumerate(data['domain_tables']) if t.get('report_section',4 if index==0 else 5)==section]
+                expected_rows=[(t,row) for t in ordered for row in t['rows']]
+                self.assertEqual(len(record_tables),len(expected_rows))
+                formatter=report_runtime['formatted']
+                for emitted,(source,row) in zip(record_tables,expected_rows):
+                    self.assertEqual([[c.text for c in r.cells] for r in emitted.rows[1:]],[[key,formatter(value,source.get('formats',{}).get(key))] for key,value in zip(source['columns'],row)])
+                qa_tables=[t for t in doc.tables if [c.text for c in t.rows[0].cells]==['Check ID','Check','Result','Evidence']]
+                self.assertEqual(len(qa_tables),1)
+                self.assertEqual([[c.text for c in r.cells] for r in qa_tables[0].rows[1:]],[[q['id'],q['check'],q['result'],q['evidence']] for q in data['qa']])
+                for paragraphs in data['report_narrative']:
+                    for paragraph in paragraphs:self.assertIn(paragraph,all_text)
 
     def test_report_preserves_declared_fx_precision(self):
         data=prepare(json.loads((ROOT/'_maintainer/catalog/source-wealth-funds.json').read_text()))
@@ -86,6 +104,32 @@ class RendererTests(unittest.TestCase):
             values=[r.cells[1].text for t in doc.tables for r in t.rows if len(r.cells)==2 and r.cells[0].text=='fx_usd_per_unit']
             self.assertEqual(values[0],'1.2345')
             self.assertIn('1.2000',values)
+
+    def test_eight_registers_empty_schema_and_long_record_remain_present(self):
+        from test_domain_contracts import typed_case
+        from docx.oxml.ns import qn
+        data=prepare(typed_case())
+        for i in range(6):
+            extra=copy.deepcopy(data['domain_tables'][0]);extra['name']='Extra'+str(i);data['domain_tables'].append(extra)
+        data['domain_tables'][-1]['rows']=[]
+        long_text='Retained source detail. '*160
+        data['domain_tables'][1]['rows'][0][-1]=long_text
+        with tempfile.TemporaryDirectory() as tmp:
+            folder=Path(tmp);run_python(python_template('report.py',data),folder,'report.py')
+            doc=Document(folder/(data['slug']+'-report.docx'))
+            paragraphs='\n'.join(p.text for p in doc.paragraphs)
+            self.assertIn('No records supplied. Declared columns: id, currency, amount, active, evidence_ids.',paragraphs)
+            for t in data['domain_tables']:self.assertIn(t['name'],paragraphs)
+            records=[t for t in doc.tables if [c.text for c in t.rows[0].cells]==['Field','Value']]
+            self.assertEqual(len(records),sum(len(t['rows']) for t in data['domain_tables']))
+            retained=[r for t in records for r in t.rows if len(r.cells)==2 and r.cells[1].text==long_text]
+            self.assertEqual(len(retained),1)
+            self.assertIsNone(retained[0]._tr.find('.//'+qn('w:cantSplit')))
+            run_python(python_template('workbook.py',data),folder,'workbook.py')
+            wb=load_workbook(folder/(data['slug']+'-review.xlsx'))
+            self.assertEqual(len(wb.sheetnames),14)
+            self.assertIn('Type: boolean',wb['Parents']['D1'].comment.text)
+            self.assertEqual(wb['Extra5']['B3'].value,0)
 
     def test_injected_evidence_stays_literal_in_all_formats(self):
         data=prepare(copy.deepcopy(self.catalogs[0]))

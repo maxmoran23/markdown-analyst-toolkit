@@ -1,0 +1,1347 @@
+{
+  "slug": "scenario-design",
+  "title": "Transaction Monitoring Scenario Design",
+  "summary": "Translate a risk hypothesis into a fully specified, reproducible monitoring rule, with temporal semantics, evidence gates, suppression boundaries and populated acceptance tests.",
+  "audience": "Monitoring analysts, scenario owners, data owners and independent control reviewers",
+  "decision": "Does the proposed rule implement its stated hypothesis without ambiguous fields, boundary behavior, exclusions or delivery decisions?",
+  "palette": "slate",
+  "as_of": "2026-09-03T04:00:00Z",
+  "report_sections": [
+    "Proposed rule and acceptance decision",
+    "Risk hypothesis, source scope and design boundary",
+    "Design findings and unresolved decisions",
+    "Predicate and event specification",
+    "Window outcomes, delivery and acceptance evidence",
+    "Evidence and authority provenance",
+    "Proposed design and data actions",
+    "Limitations, quality gates and human authorization"
+  ],
+  "domain_tables": [
+    {
+      "name": "EventLedger",
+      "title": "Full fictional rule acceptance source",
+      "columns": [
+        "event_id",
+        "account_id",
+        "event_utc",
+        "direction",
+        "amount",
+        "currency",
+        "ownership_state",
+        "posting_state",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "E01",
+          "J",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          3000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E02",
+          "J",
+          "2026-09-01T14:00:00Z",
+          "CREDIT",
+          2000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E03",
+          "J",
+          "2026-09-01T15:00:00Z",
+          "DEBIT",
+          4500,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E04",
+          "K",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E05",
+          "K",
+          "2026-09-02T13:00:00Z",
+          "DEBIT",
+          4500,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E06",
+          "L",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E07",
+          "L",
+          "2026-09-01T15:00:00Z",
+          "DEBIT",
+          4499.99,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E08",
+          "M",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          6000,
+          "USD",
+          "CONFIRMED_OWN",
+          "POSTED",
+          "SD-E01;SD-E02"
+        ],
+        [
+          "E09",
+          "M",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          5700,
+          "USD",
+          "CONFIRMED_OWN",
+          "POSTED",
+          "SD-E01;SD-E02"
+        ],
+        [
+          "E10",
+          "N",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E11",
+          "N",
+          "2026-09-01T13:00:00Z",
+          "DEBIT",
+          4500,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E12",
+          "O",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01"
+        ],
+        [
+          "E13",
+          "O",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          null,
+          "USD",
+          "EXTERNAL",
+          "POSTED",
+          "SD-E01;SD-E03"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      },
+      "primary_key": [
+        "event_id"
+      ],
+      "column_contracts": {
+        "event_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable synthetic source-event identifier. It survives window expansion and may occur in several window membership lists without becoming another economic event."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "event_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Timezone-aware economic event instant serialized in UTC. The source-local representation belongs in evidence; elapsed comparisons use this instant."
+        },
+        "direction": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical CREDIT or DEBIT from the account perspective. Amount remains nonnegative; do not infer direction from a signed display string."
+        },
+        "amount": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row currency",
+          "description": "Known nonnegative monetary amount in the row currency. Null means unrecovered source value and blocks the relevant completeness proposition."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "ownership_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evidence-backed own/external classification for the specific leg and historical period. Unknown ownership is not automatically external or own."
+        },
+        "posting_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical posting status that determines whether a leg enters the declared posted population. A pending item remains visible outside that population."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one unique fictional source event within the complete declared 48-hour interval",
+      "report_section": 4
+    },
+    {
+      "name": "PredicateSpec",
+      "title": "Ordered deterministic rule predicates",
+      "columns": [
+        "predicate_id",
+        "order",
+        "field_or_measure",
+        "operator",
+        "operand",
+        "null_result",
+        "purpose",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "P01",
+          1,
+          "data coverage",
+          "EQUAL",
+          "COMPLETE",
+          "NOT_ASSESSABLE",
+          "Reject relevant missing amount, time, identity or uncovered interval",
+          "SD-E04"
+        ],
+        [
+          "P02",
+          2,
+          "posting_state",
+          "EQUAL",
+          "POSTED",
+          "NOT_ASSESSABLE",
+          "Pending and rejected legs never enter sums",
+          "SD-E04"
+        ],
+        [
+          "P03",
+          3,
+          "ownership_state",
+          "EQUAL",
+          "EXTERNAL",
+          "NOT_ASSESSABLE",
+          "Confirmed own legs excluded; unknown ownership blocks affected window",
+          "SD-E04"
+        ],
+        [
+          "P04",
+          4,
+          "event_utc",
+          "INTERVAL",
+          "anchor <= t <= anchor + 24 hours",
+          "NOT_ASSESSABLE",
+          "Credit-anchored closed window uses normalized UTC instants",
+          "SD-E04"
+        ],
+        [
+          "P05",
+          5,
+          "credit_total",
+          "GREATER_OR_EQUAL",
+          "5000.00 USD",
+          "NOT_ASSESSABLE",
+          "Minimum aggregate eligible credits",
+          "SD-E04"
+        ],
+        [
+          "P06",
+          6,
+          "debit_total / credit_total",
+          "GREATER_OR_EQUAL",
+          "0.90",
+          "NO_MATCH_IF_ZERO_CREDITS",
+          "Exact comparison before display rounding",
+          "SD-E04"
+        ],
+        [
+          "P07",
+          7,
+          "first subsequent debit",
+          "STRICTLY_AFTER",
+          "anchor instant",
+          "NO_MATCH_IF_NONE",
+          "Same-time debit without sequence is not subsequent",
+          "SD-E04"
+        ],
+        [
+          "P08",
+          8,
+          "delivery grouping",
+          "SAME_ACCOUNT_AND_EVENT_SET",
+          "same version; same review run",
+          "NO_GROUP_IF_UNKNOWN",
+          "Retain raw matches; one delivery group only for exact identical event set",
+          "SD-E04"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "predicate_id"
+      ],
+      "column_contracts": {
+        "predicate_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique predicate identifier within the versioned rule. Its declared order controls precedence for blocking defects, exclusions and numeric comparisons."
+        },
+        "order": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Positive integer evaluation precedence. Numeric predicates cannot override an earlier relevant data-completeness failure."
+        },
+        "field_or_measure": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact input field or derived quantity being tested. A business phrase without a computable field mapping does not satisfy this contract."
+        },
+        "operator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Literal comparison or grouping operation. Inclusive, strict and interval comparisons are deliberately different and must remain explicit."
+        },
+        "operand": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Complete threshold, interval or category against which the predicate compares. Monetary values include currency and durations include elapsed units."
+        },
+        "null_result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Required branch when input cannot be evaluated. A null-sensitive predicate may block a window rather than defaulting to false or zero."
+        },
+        "purpose": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Bounded reason for the predicate and the mechanism it tests. This is an authored design rationale rather than a legal requirement."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one ordered predicate in RULE-SD-01-v1",
+      "report_section": 4
+    },
+    {
+      "name": "WindowResults",
+      "title": "Full anchored calculations and truth states",
+      "columns": [
+        "window_id",
+        "account_id",
+        "anchor_event_id",
+        "start_utc",
+        "end_utc",
+        "event_ids",
+        "credit_total",
+        "debit_total",
+        "ratio",
+        "first_debit_hours",
+        "coverage_state",
+        "rule_result",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "WJ1",
+          "J",
+          "E01",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "E01;E02;E03",
+          5000,
+          4500,
+          0.9,
+          2,
+          "COMPLETE",
+          "MATCH",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "WJ2",
+          "J",
+          "E02",
+          "2026-09-01T14:00:00Z",
+          "2026-09-02T14:00:00Z",
+          "E02;E03",
+          2000,
+          4500,
+          2.25,
+          1,
+          "COMPLETE",
+          "NO_MATCH",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "WK1",
+          "K",
+          "E04",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "E04;E05",
+          5000,
+          4500,
+          0.9,
+          24,
+          "COMPLETE",
+          "MATCH",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "WL1",
+          "L",
+          "E06",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "E06;E07",
+          5000,
+          4499.99,
+          0.899998,
+          2,
+          "COMPLETE",
+          "NO_MATCH",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "WN1",
+          "N",
+          "E10",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "E10;E11",
+          5000,
+          4500,
+          0.9,
+          null,
+          "COMPLETE",
+          "NO_MATCH",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "WO1",
+          "O",
+          "E12",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "E12;E13",
+          5000,
+          null,
+          null,
+          1,
+          "AMOUNT_UNKNOWN",
+          "NOT_ASSESSABLE",
+          "SD-E01;SD-E03;SD-E04"
+        ]
+      ],
+      "formats": {
+        "credit_total": "#,##0.00",
+        "debit_total": "#,##0.00",
+        "ratio": "0.000000",
+        "first_debit_hours": "0.0"
+      },
+      "primary_key": [
+        "window_id"
+      ],
+      "column_contracts": {
+        "window_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable account/anchor/specification window key. It distinguishes overlapping observations so a membership count cannot be mistaken for unique transactions."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "anchor_event_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Source eligible credit that starts the specified closed 24-hour window. Same-account membership is explicit and independently reproducible."
+        },
+        "start_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Inclusive UTC instant at the anchor. The applicable window convention determines endpoint inclusion, not the date formatting of the rendered table."
+        },
+        "end_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "UTC endpoint exactly 24 elapsed hours after the anchor. The scenario-design closed interval includes this instant; the TM diagnostic convention matches it."
+        },
+        "event_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited source-event membership in the specific window. Recompute the union separately before calculating unique population movement."
+        },
+        "credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known eligible or gross credit subtotal as specified by the table grain. It is not necessarily a complete total when coverage_state or population_status is defective."
+        },
+        "debit_total": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row currency",
+          "description": "Known eligible debit subtotal at the table grain. Null is required for a window total dependent on an unknown debit; known subtotals elsewhere remain explicitly partial."
+        },
+        "ratio": {
+          "type": "number",
+          "nullable": true,
+          "unit": "ratio",
+          "description": "Unrounded window debit-to-credit ratio. Null indicates a missing component or no positive denominator; comparisons occur before display rounding."
+        },
+        "first_debit_hours": {
+          "type": "number",
+          "nullable": true,
+          "unit": "hours",
+          "description": "Elapsed hours from anchor to first strictly subsequent eligible debit. Null means no qualifying ordered pair; a contemporaneous debit cannot satisfy the predicate."
+        },
+        "coverage_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Completeness state for the exact account/window inputs. COMPLETE, BOUNDARY_INCOMPLETE and AMOUNT_UNKNOWN cannot be collapsed into a binary risk score."
+        },
+        "rule_result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Deterministic raw result under the named specification: MATCH, NO_MATCH, EXCLUDED or NOT_ASSESSABLE. Contextual evidence does not rewrite it."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "anchor_event_id"
+          ],
+          "table": "EventLedger",
+          "references": [
+            "event_id"
+          ]
+        }
+      ],
+      "grain": "one account, eligible credit anchor, currency and rule version",
+      "report_section": 4
+    },
+    {
+      "name": "DeliveryDecisions",
+      "title": "Raw result retention and proposed delivery grouping",
+      "columns": [
+        "delivery_id",
+        "window_id",
+        "raw_result",
+        "delivery_state",
+        "group_id",
+        "reason",
+        "human_approval",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "DL-J1",
+          "WJ1",
+          "MATCH",
+          "PROPOSED_FOR_REVIEW",
+          "G-J1",
+          "No earlier identical match; purpose unreviewed",
+          "NOT_RECORDED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "DL-J2",
+          "WJ2",
+          "NO_MATCH",
+          "NO_DELIVERY",
+          null,
+          "Credit total below minimum despite ratio above one",
+          "NOT_RECORDED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "DL-K1",
+          "WK1",
+          "MATCH",
+          "PROPOSED_FOR_REVIEW",
+          "G-K1",
+          "Exact 24-hour endpoint included",
+          "NOT_RECORDED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "DL-L1",
+          "WL1",
+          "NO_MATCH",
+          "NO_DELIVERY",
+          null,
+          "4499.99 / 5000 below .90 before rounding",
+          "NOT_RECORDED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "DL-N1",
+          "WN1",
+          "NO_MATCH",
+          "NO_DELIVERY",
+          null,
+          "No strictly subsequent debit",
+          "NOT_RECORDED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "DL-O1",
+          "WO1",
+          "NOT_ASSESSABLE",
+          "DATA_REPAIR_QUEUE",
+          null,
+          "Debit amount unknown; retain blocked window",
+          "NOT_RECORDED",
+          "SD-E03;SD-E04"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "delivery_id"
+      ],
+      "column_contracts": {
+        "delivery_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique proposal for a window delivery disposition. The record is separate from the raw match so grouping cannot hide a numerical result."
+        },
+        "window_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable account/anchor/specification window key. It distinguishes overlapping observations so a membership count cannot be mistaken for unique transactions."
+        },
+        "raw_result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Preserved deterministic rule result before human review or delivery grouping. Explanations and grouping decisions must not delete or change it."
+        },
+        "delivery_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Proposed route for a raw outcome: review, no delivery or data repair. It describes the analytical queue decision without performing an external action."
+        },
+        "group_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Stable proposed delivery-group identifier. Null means the window produces no review group; grouping never erases the underlying result."
+        },
+        "reason": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific evidence-backed reason for a state or transition. It identifies the relevant row, rule or missing fact rather than a generic compliance label."
+        },
+        "human_approval": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evidence of authorized approval for a design or delivery treatment. NOT_RECORDED is not interchangeable with approved or presumed approved."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "window_id"
+          ],
+          "table": "WindowResults",
+          "references": [
+            "window_id"
+          ]
+        }
+      ],
+      "grain": "one proposed delivery disposition for a retained raw window result",
+      "report_section": 5
+    },
+    {
+      "name": "AccountCoverage",
+      "title": "One row for every source account including excluded accounts",
+      "columns": [
+        "account_id",
+        "raw_events",
+        "known_credit_total",
+        "known_debit_total",
+        "external_anchor_count",
+        "window_count",
+        "coverage_outcome",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "J",
+          3,
+          5000,
+          4500,
+          2,
+          2,
+          "ASSESSED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "K",
+          2,
+          5000,
+          4500,
+          1,
+          1,
+          "ASSESSED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "L",
+          2,
+          5000,
+          4499.99,
+          1,
+          1,
+          "ASSESSED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "M",
+          2,
+          6000,
+          5700,
+          0,
+          0,
+          "CONFIRMED_OWN_EXCLUDED",
+          "SD-E01;SD-E02"
+        ],
+        [
+          "N",
+          2,
+          5000,
+          4500,
+          1,
+          1,
+          "ASSESSED",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "O",
+          2,
+          5000,
+          0,
+          1,
+          1,
+          "BLOCKED_UNKNOWN_DEBIT",
+          "SD-E01;SD-E03"
+        ]
+      ],
+      "formats": {
+        "known_credit_total": "#,##0.00",
+        "known_debit_total": "#,##0.00"
+      },
+      "primary_key": [
+        "account_id"
+      ],
+      "column_contracts": {
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "raw_events": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Count of source events for the account, including excluded and unknown-amount events. It reconciles the retained account frame to the source ledger."
+        },
+        "known_credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable credits only at the declared stage, account or observed diagnostic window. The word known is substantive where an unresolved amount exists."
+        },
+        "known_debit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable debits only at the declared stage, account or observed diagnostic window. An unknown debit is not imputed as a measured zero."
+        },
+        "external_anchor_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Number of eligible external credit anchors generated for an account. Confirmed own transfers produce no external-flow anchors."
+        },
+        "window_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Count of generated windows for the account, including blocked ones. It is not the count of delivered alerts or unique source legs."
+        },
+        "coverage_outcome": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Account-level outcome that retains excluded and blocked accounts alongside assessed accounts. No-record output is not an acceptable substitute."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one source account, including accounts that generate no external windows",
+      "report_section": 5
+    },
+    {
+      "name": "AcceptanceTests",
+      "title": "Explicit specimen test expectations and observed arithmetic",
+      "columns": [
+        "test_id",
+        "test_name",
+        "expected",
+        "actual",
+        "result",
+        "affected_ids",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "AT01",
+          "All raw events retained",
+          "13",
+          "13",
+          "PASS",
+          "E01-E13",
+          "SD-E01"
+        ],
+        [
+          "AT02",
+          "Raw matching windows",
+          "WJ1;WK1",
+          "WJ1;WK1",
+          "PASS",
+          "WJ1;WK1",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "AT03",
+          "Below-ratio boundary",
+          "WL1 NO_MATCH at .899998",
+          "WL1 NO_MATCH at .899998",
+          "PASS",
+          "WL1",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "AT04",
+          "Same-time ordering",
+          "WN1 NO_MATCH",
+          "WN1 NO_MATCH",
+          "PASS",
+          "WN1",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "AT05",
+          "Missing amount",
+          "WO1 NOT_ASSESSABLE",
+          "WO1 NOT_ASSESSABLE",
+          "PASS",
+          "WO1",
+          "SD-E03;SD-E04"
+        ],
+        [
+          "AT06",
+          "Independent operational approval",
+          "No approval supplied",
+          "No approval supplied",
+          "NOT_RECORDED",
+          "RULE-SD-01-v1",
+          "SD-E04"
+        ],
+        [
+          "AT07",
+          "Window memberships versus unique events",
+          "13 memberships;11 unique external events",
+          "13 memberships;11 unique external events",
+          "PASS",
+          "WJ1;WJ2;WK1;WL1;WN1;WO1",
+          "SD-E01;SD-E04"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "test_id"
+      ],
+      "column_contracts": {
+        "test_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique deterministic acceptance-test key. Each test names the affected records and compares a specific expected result to a separately produced actual result."
+        },
+        "test_name": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific acceptance proposition rather than a generic passed label. It names a boundary, count, state or authorization gate."
+        },
+        "expected": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact target result for the named check. This is fixed before execution and may state not supplied when the check concerns authorization."
+        },
+        "actual": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded output of the check. In future sessions, use NOT TESTED until performed; do not copy the specimen result as evidence of a new execution."
+        },
+        "result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Control result or acceptance state. PASS applies to an executed synthetic check; it is not regulatory assurance or an operational approval."
+        },
+        "affected_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit source, window or specification keys involved in an acceptance test. Preserve their grain rather than treating every identifier as a transaction."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one explicit deterministic expectation and its authored synthetic actual result",
+      "report_section": 5
+    },
+    {
+      "name": "EvidenceProvenance",
+      "title": "Source identity, period, availability and evidential limits",
+      "columns": [
+        "evidence_id",
+        "source_kind",
+        "source_date",
+        "availability",
+        "locator",
+        "supports",
+        "limitation"
+      ],
+      "rows": [
+        [
+          "SD-E01",
+          "Authored fictional case record",
+          "2026-09-03",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, EventLedger E01-E13; coverage declaration",
+          "Fictional complete 48-hour event ledger",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SD-E02",
+          "Authored fictional case record",
+          "2026-09-03",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, M ownership declaration",
+          "Fictional common-ownership evidence",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SD-E03",
+          "Authored fictional case record",
+          "2026-09-03",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, E13 missing amount notice",
+          "Fictional extraction exception",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SD-E04",
+          "Authored fictional case record",
+          "2026-09-03",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, RULE-SD-01-v1 full specification and acceptance convention",
+          "Authored illustrative rule specification",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "evidence_id"
+      ],
+      "column_contracts": {
+        "evidence_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact unique Evidence key at one source-provenance row. It joins the common Evidence register without combining unrelated sources."
+        },
+        "source_kind": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicitly fictional record type and origin. Authored cases and guidance references must not be mislabeled as actual institutional evidence."
+        },
+        "source_date": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "ISO calendar date of the authored source package, distinct from transaction event dates and evidence retrieval dates."
+        },
+        "availability": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "State of access to the source text. FULL_TEXT_IN_FILE_10 means the complete fictional content is supplied in this suite, not externally verified."
+        },
+        "locator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact file and section or row reference supporting retrieval of the fictional source. A title alone is insufficient."
+        },
+        "supports": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Bounded proposition the source can establish in the synthetic exercise. It does not certify any broader customer or control conclusion."
+        },
+        "limitation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific scope restriction or evidential weakness that must accompany use of the source."
+        }
+      },
+      "grain": "one fictional evidence source with its access state and evidential limit",
+      "report_section": 5
+    },
+    {
+      "name": "ProcessQA",
+      "title": "Explicit expected and actual control evidence",
+      "columns": [
+        "check_id",
+        "check",
+        "expected",
+        "actual",
+        "status",
+        "reviewer",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "SQ01",
+          "Raw matches",
+          "WJ1 and WK1",
+          "WJ1 and WK1",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "SQ02",
+          "Rounding cannot change decision",
+          ".899998 is NO_MATCH",
+          ".899998 is NO_MATCH",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "SQ03",
+          "Same-time debit",
+          "WN1 NO_MATCH",
+          "WN1 NO_MATCH",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SD-E01;SD-E04"
+        ],
+        [
+          "SQ04",
+          "Unknown amount",
+          "WO1 remains blocked",
+          "WO1 remains blocked",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SD-E03"
+        ],
+        [
+          "SQ05",
+          "Operational approval",
+          "Not supplied",
+          "Not supplied",
+          "NOT RECORDED",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SD-E04"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "check_id"
+      ],
+      "column_contracts": {
+        "check_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique process-quality check key retained across output formats. A later rerun creates a dated actual result without changing the original expectation."
+        },
+        "check": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Falsifiable control proposition with defined expected evidence. It must be precise enough for another reviewer to reproduce."
+        },
+        "expected": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact target result for the named check. This is fixed before execution and may state not supplied when the check concerns authorization."
+        },
+        "actual": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded output of the check. In future sessions, use NOT TESTED until performed; do not copy the specimen result as evidence of a new execution."
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded PASS, FAIL, REVIEW REQUIRED, NOT RECORDED or NOT TESTED status for this check, separate from analytical finding severity."
+        },
+        "reviewer": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Identity or role of the actual check performer. The specimen labels authored arithmetic and explicitly records absent independent operational review."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one performed or explicitly unrecorded quality proposition",
+      "report_section": 5
+    }
+  ],
+  "findings": [
+    {
+      "id": "SD-F01",
+      "title": "Two raw windows meet the authored rule",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SD-E01",
+        "SD-E04"
+      ],
+      "detail": "WJ1 and WK1 satisfy the exact predicates. No subject context or operational review outcome has been supplied.",
+      "recommendation": "Preserve both raw matches and request authorized review of the proposed specification."
+    },
+    {
+      "id": "SD-F02",
+      "title": "One unknown debit blocks a window",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SD-E01",
+        "SD-E03"
+      ],
+      "detail": "E13 has unknown amount; WO1 cannot be classified as a clean negative or a numerical match.",
+      "recommendation": "Repair E13 and rerun O; retain the original blocked state."
+    },
+    {
+      "id": "SD-F03",
+      "title": "Specification tests do not authorize deployment",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SD-E04"
+      ],
+      "detail": "No institution-specific criteria, independent operating validation or deployment approval is supplied.",
+      "recommendation": "Obtain the appropriate human design decision before any operational use."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SD-E01",
+      "title": "Fictional complete 48-hour event ledger",
+      "locator": "10-worked-example.md, EventLedger E01-E13; coverage declaration",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SD-E02",
+      "title": "Fictional common-ownership evidence",
+      "locator": "10-worked-example.md, M ownership declaration",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SD-E03",
+      "title": "Fictional extraction exception",
+      "locator": "10-worked-example.md, E13 missing amount notice",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SD-E04",
+      "title": "Authored illustrative rule specification",
+      "locator": "10-worked-example.md, RULE-SD-01-v1 full specification and acceptance convention",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Raw events",
+      "value": 13,
+      "method": "Count E01 through E13, including one unknown amount"
+    },
+    {
+      "label": "Anchored windows",
+      "value": 6,
+      "method": "Two J anchors plus one K, L, N and O anchor; M excluded"
+    },
+    {
+      "label": "Raw matches",
+      "value": 2,
+      "method": "WJ1 and WK1; no contextual disposition implied"
+    },
+    {
+      "label": "Known gross movement USD",
+      "value": 54699.99,
+      "method": "31000 credits plus 23699.99 known debits; E13 unknown"
+    }
+  ],
+  "limitations": [
+    "All parameters are authored synthetic controls, not approved institutional thresholds.",
+    "One unknown amount prevents complete gross movement and O assessment.",
+    "Passing design cases is not a measure of detection recall, precision or production performance."
+  ],
+  "report_narrative": [
+    [
+      "The authored credit-anchored rule yields two raw matching windows, three complete nonmatching windows and one blocked window. Its specification can be reviewed, but deployment authorization is absent."
+    ],
+    [
+      "The complete fictional source covers Sep 01, 2026 12:00 AM ET to Sep 03, 2026 12:00 AM ET exclusive. Thirteen events cover six accounts. M is retained as a confirmed own-transfer exclusion; O has one unknown amount."
+    ],
+    [
+      "J and K meet the exact authored predicates. L fails at an unrounded .899998 ratio even though one-decimal percentage display rounds to 90.0%. N fails strict temporal ordering. O requires data repair."
+    ],
+    [
+      "PredicateSpec fixes data completeness, posting and ownership eligibility, closed 24-hour credit-anchored windows, inclusive USD 5000 and .90 thresholds, strict subsequent-debit timing, and limited exact-set delivery grouping. EventLedger retains every source event."
+    ],
+    [
+      "WindowResults contains six windows and thirteen membership entries over eleven distinct external events. AccountCoverage retains the excluded M account. DeliveryDecisions retains raw states and no human approval. AcceptanceTests records arithmetic checks separately from unrecorded authorization."
+    ],
+    [
+      "All subject facts are fictional and located in file 10. Public FFIEC and Wolfsberg references support control-design context and do not endorse these parameters."
+    ],
+    [
+      "Repair E13; review rule scope, intended risks and untested mechanics; obtain an actual design decision. Do not automatically send alerts, change thresholds or apply suppression."
+    ],
+    [
+      "Known gross movement is $54,699.99, with E13 unknown. No production performance, complete monetary coverage, institutional approval or customer conclusion is established."
+    ]
+  ],
+  "conclusion": "The authored credit-anchored rule yields two raw matching windows, three complete nonmatching windows and one blocked window. Its specification can be reviewed, but deployment authorization is absent."
+}

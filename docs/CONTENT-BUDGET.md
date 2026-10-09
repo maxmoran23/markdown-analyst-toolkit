@@ -6,35 +6,46 @@ All figures exclude your input data, prior messages, the case checkpoint and gen
 output. Reserve space for each. File 11 in every suite supplies a sensitivity range,
 resource-estimate limitations and the exact file hashes.
 
-| Suite | Words in 01–10 | Full ten-file token estimate | Analysis stage estimate | Render stage: report / workbook / dashboard |
-| --- | --- | --- | --- | --- |
-| [adverse-media](../suites/adverse-media/) | 16,771 | 37,680 | 10,316 | 13,410 / 14,684 / 14,237 |
-| [control-testing](../suites/control-testing/) | 15,547 | 34,020 | 9,685 | 11,882 / 13,144 / 12,413 |
-| [correspondent-banking](../suites/correspondent-banking/) | 17,613 | 39,334 | 11,219 | 13,765 / 15,033 / 14,625 |
-| [customer-risk-review](../suites/customer-risk-review/) | 17,766 | 39,324 | 10,699 | 13,713 / 14,988 / 15,018 |
-| [data-quality](../suites/data-quality/) | 15,295 | 33,652 | 9,494 | 11,857 / 13,108 / 12,457 |
-| [digital-asset-review](../suites/digital-asset-review/) | 15,834 | 35,340 | 9,999 | 12,143 / 13,442 / 12,856 |
-| [entity-due-diligence](../suites/entity-due-diligence/) | 15,411 | 35,089 | 9,654 | 12,144 / 13,431 / 12,797 |
-| [fraud-review](../suites/fraud-review/) | 16,404 | 36,922 | 10,058 | 12,405 / 13,671 / 13,053 |
-| [investigations](../suites/investigations/) | 15,659 | 35,005 | 9,658 | 11,871 / 13,132 / 12,504 |
-| [issue-remediation](../suites/issue-remediation/) | 18,448 | 39,504 | 11,305 | 13,124 / 14,382 / 13,801 |
-| [jurisdiction-risk](../suites/jurisdiction-risk/) | 16,603 | 37,366 | 10,587 | 13,197 / 14,469 / 13,922 |
-| [monitoring-tuning](../suites/monitoring-tuning/) | 15,161 | 33,753 | 9,621 | 11,892 / 13,136 / 12,461 |
-| [new-product-risk](../suites/new-product-risk/) | 15,356 | 34,380 | 9,753 | 11,908 / 13,148 / 12,484 |
-| [osint-research](../suites/osint-research/) | 15,256 | 33,721 | 9,311 | 11,775 / 13,063 / 12,398 |
-| [ownership-analysis](../suites/ownership-analysis/) | 16,288 | 36,021 | 10,419 | 12,185 / 13,467 / 12,856 |
-| [regulatory-change](../suites/regulatory-change/) | 15,595 | 35,098 | 9,967 | 12,077 / 13,332 / 12,698 |
-| [sampling-assurance](../suites/sampling-assurance/) | 17,614 | 37,839 | 10,961 | 12,883 / 14,153 / 13,511 |
-| [sanctions-review](../suites/sanctions-review/) | 15,680 | 35,131 | 9,858 | 12,173 / 13,458 / 12,822 |
-| [source-wealth-funds](../suites/source-wealth-funds/) | 18,013 | 39,690 | 11,265 | 13,731 / 15,009 / 14,656 |
-| [third-party-risk](../suites/third-party-risk/) | 15,621 | 35,177 | 10,048 | 12,068 / 13,308 / 12,648 |
-| [trade-finance-review](../suites/trade-finance-review/) | 19,074 | 41,261 | 12,182 | 14,145 / 15,443 / 14,981 |
-| [trade-surveillance](../suites/trade-surveillance/) | 16,735 | 36,839 | 10,607 | 12,161 / 13,436 / 12,863 |
-| [transaction-monitoring](../suites/transaction-monitoring/) | 15,540 | 34,474 | 9,584 | 11,641 / 12,916 / 12,261 |
-| [typology-red-flags](../suites/typology-red-flags/) | 15,679 | 34,839 | 9,659 | 11,804 / 13,077 / 12,431 |
+Authored prose counts cover files 01–05, 09 and 10, including Markdown tables but
+excluding fenced code and the compiled field dictionary. Full-set figures include
+all content. [Process depth](PROCESS-DEPTH.md) reports the focused before/after
+comparison and individual authored-file sizes.
 
-Across 24 suites, the ten-file sets contain 392,963 whitespace-counted
-words and a summed estimate of 871,459 tokens. This is library size, not a
+| Suite | Authored prose words | All words in 01–10 | Full ten-file token estimate | Analysis stage estimate | Render stage: report / workbook / dashboard |
+| --- | --- | --- | --- | --- | --- |
+| [adverse-media](../suites/adverse-media/) | 6,971 | 19,055 | 45,722 | 10,316 | 15,677 / 17,098 / 17,597 |
+| [alert-qa](../suites/alert-qa/) | 20,607 | 43,184 | 93,475 | 29,699 | 31,530 / 33,057 / 36,101 |
+| [control-testing](../suites/control-testing/) | 6,769 | 17,831 | 42,062 | 9,685 | 14,149 / 15,559 / 15,774 |
+| [correspondent-banking](../suites/correspondent-banking/) | 7,758 | 19,897 | 47,377 | 11,219 | 16,032 / 17,448 / 17,985 |
+| [customer-risk-review](../suites/customer-risk-review/) | 7,538 | 20,050 | 47,366 | 10,699 | 15,980 / 17,402 / 18,378 |
+| [data-quality](../suites/data-quality/) | 6,504 | 17,579 | 41,694 | 9,494 | 14,124 / 15,523 / 15,818 |
+| [digital-asset-review](../suites/digital-asset-review/) | 6,866 | 18,118 | 43,382 | 9,999 | 14,410 / 15,856 / 16,216 |
+| [entity-due-diligence](../suites/entity-due-diligence/) | 6,477 | 17,695 | 43,132 | 9,654 | 14,411 / 15,846 / 16,157 |
+| [fraud-review](../suites/fraud-review/) | 6,739 | 18,688 | 44,964 | 10,058 | 14,672 / 16,086 / 16,414 |
+| [investigations](../suites/investigations/) | 20,450 | 42,912 | 92,742 | 29,219 | 32,084 / 33,667 / 36,720 |
+| [issue-remediation](../suites/issue-remediation/) | 8,736 | 20,732 | 47,546 | 11,305 | 15,391 / 16,797 / 17,162 |
+| [jurisdiction-risk](../suites/jurisdiction-risk/) | 7,335 | 18,887 | 45,408 | 10,587 | 15,464 / 16,884 / 17,283 |
+| [lookback-review](../suites/lookback-review/) | 23,400 | 55,067 | 122,238 | 27,561 | 39,317 / 41,037 / 46,772 |
+| [monitoring-tuning](../suites/monitoring-tuning/) | 22,947 | 50,310 | 109,185 | 26,779 | 35,832 / 37,455 / 43,914 |
+| [monitoring-validation](../suites/monitoring-validation/) | 20,155 | 43,631 | 94,794 | 27,701 | 31,918 / 33,515 / 36,986 |
+| [network-flow-review](../suites/network-flow-review/) | 20,232 | 41,966 | 89,843 | 29,002 | 31,310 / 32,894 / 35,863 |
+| [new-product-risk](../suites/new-product-risk/) | 6,536 | 17,640 | 42,422 | 9,753 | 14,175 / 15,563 / 15,845 |
+| [osint-research](../suites/osint-research/) | 6,401 | 17,540 | 41,764 | 9,311 | 14,042 / 15,477 / 15,758 |
+| [ownership-analysis](../suites/ownership-analysis/) | 7,234 | 18,572 | 44,064 | 10,419 | 14,452 / 15,882 / 16,216 |
+| [regulatory-change](../suites/regulatory-change/) | 6,677 | 17,879 | 43,140 | 9,967 | 14,344 / 15,747 / 16,059 |
+| [sampling-assurance](../suites/sampling-assurance/) | 7,847 | 19,898 | 45,881 | 10,961 | 15,150 / 16,568 / 16,871 |
+| [sanctions-review](../suites/sanctions-review/) | 6,589 | 17,964 | 43,173 | 9,858 | 14,440 / 15,872 / 16,183 |
+| [scenario-design](../suites/scenario-design/) | 18,478 | 42,724 | 91,852 | 31,467 | 34,985 / 36,591 / 39,196 |
+| [source-wealth-funds](../suites/source-wealth-funds/) | 8,032 | 20,297 | 47,732 | 11,265 | 15,998 / 17,423 / 18,016 |
+| [third-party-risk](../suites/third-party-risk/) | 6,740 | 17,905 | 43,220 | 10,048 | 14,335 / 15,723 / 16,008 |
+| [tm-data-lineage](../suites/tm-data-lineage/) | 20,044 | 48,094 | 102,699 | 33,637 | 38,937 / 40,595 / 43,956 |
+| [trade-finance-review](../suites/trade-finance-review/) | 9,138 | 21,358 | 49,303 | 12,182 | 16,412 / 17,858 / 18,341 |
+| [trade-surveillance](../suites/trade-surveillance/) | 7,292 | 19,019 | 44,882 | 10,607 | 14,428 / 15,851 / 16,224 |
+| [transaction-monitoring](../suites/transaction-monitoring/) | 20,639 | 50,262 | 108,010 | 36,677 | 42,497 / 44,246 / 47,587 |
+| [typology-red-flags](../suites/typology-red-flags/) | 6,561 | 17,963 | 42,881 | 9,659 | 14,071 / 15,491 / 15,792 |
+
+Across 30 suites, the ten-file sets contain 812,717 whitespace-counted
+words and a summed estimate of 1,841,953 tokens. This is library size, not a
 recommended combined attachment. Shared rules and renderers are repeated deliberately
 so each suite works on its own.
 

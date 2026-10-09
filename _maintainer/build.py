@@ -26,6 +26,8 @@ COMMON = {
     'QA': ['check_id','check','result','evidence'],
 }
 
+NUMERIC_INPUT_RULE = "For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic."
+
 def prepare(catalog):
     data = dict(catalog)
     data.update(suite_id=data['slug'], version=VERSION,
@@ -65,7 +67,7 @@ def python_template(name, data):
 def dashboard(data):
     light, dark = PALETTES[data['palette']]
     payload=json.dumps(data,ensure_ascii=True,indent=2).replace('<','\\u003c').replace('>','\\u003e').replace('&','\\u0026')
-    return (HERE/'templates/dashboard.html').read_text().replace('__TITLE__',html.escape(data['title'])).replace('__LIGHT_ACCENT__',light).replace('__DARK_ACCENT__',dark).replace('__DATA__',payload)
+    return (HERE/'templates/dashboard.html').read_text().replace('__TITLE__',html.escape(data['title'])).replace('__LIGHT_ACCENT__',light).replace('__DARK_ACCENT__',dark).replace('__DATA__',payload).replace('__CASE_PREFLIGHT__',(HERE/'templates/case-validation.js').read_text())
 
 def report_md(data):
     sections='\n'.join(f'{i}. **{heading}**' for i,heading in enumerate(data['report_sections'],1))
@@ -81,7 +83,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 
 {sections}
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -110,6 +112,8 @@ The workbook retains every domain column in order; the report may present the sa
 - Reopen the actual deliverable. Check page breaks, repeated headers, complete rows, dates, metadata and citations. If visual review is unavailable, say so.
 
 ## Complete in-session renderer
+
+{NUMERIC_INPUT_RULE}
 
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
@@ -164,15 +168,20 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 - The Dashboard calculates counts from the Findings severity column using `COUNTIF`. Counts cover **supplied findings**, not the entire transaction/customer population. Use the exact source scope in denominators.
 - This is a snapshot generator: after adding or removing records, regenerate the workbook so formulas, validations, filters and chart ranges include every row. Do not assume inserting a row extends all ranges.
 - Summary business measures come from validated input calculations. Preserve each method and limitation alongside the value. Recompute them from source when adapting; never retain a specimen metric by accident.
+- Summary also retains the conclusion, every method and all eight report sections' narrative paragraphs in ordered, individually identified rows. Preserve their exact section names in `method_or_limit`; a workbook handoff must retain the reasoning alongside the domain tables.
 - `openpyxl` writes formulas but does not calculate them. Request recalculation in Excel or the available spreadsheet engine, inspect results, and record the outcome. If unavailable, label formula-cache/display behavior **NOT TESTED**; the independently computed check does not prove Excel behavior.
 
 ## Complete in-session renderer
+
+{NUMERIC_INPUT_RULE}
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
 The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
 
 Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+All output formats limit declared decimal display places to 15. This is a portable rendering boundary, not a claim of 15-decimal calculation accuracy. Keep more precise source quantities as exact text with the declared unit when their digits matter.
 
 The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
 
@@ -202,9 +211,9 @@ Version {VERSION}. Use the complete HTML below to create a single downloadable `
 | Suite accent | `{light}` | `{dark}` |
 | High / medium / low | `#8A3439` / `#735119` / `#315F54` | `#FFB8B8` / `#F0D393` / `#B1DCC9` |
 
-Use Segoe UI, Calibri or Arial; 15 px body; responsive title; no remote font. Keep the ten fixed dashboard sections and exact domain tables. Navigation identifies analytical sections. It is not an operational case-management interface.
+Use Segoe UI, Calibri or Arial; 15 px body; responsive title; no remote font. Keep eight common dashboard sections plus one section for every declared domain table. Preserve all eight report-narrative sections, every domain row and all declared field definitions. Navigation identifies analytical sections. It is not an operational case-management interface.
 
-Theme control is keyboard operable and retains the preference when browser storage permits. Storage failure does not stop rendering. Findings search and severity filtering affect the table and CSV export only; coverage metrics and severity/confidence charts remain full-fixture measures and are labeled accordingly. Printing temporarily restores all findings, uses a neutral light print theme, and restores the filter afterward. Table regions scroll independently on small screens with keyboard access. Empty results state what scope is empty; they never imply no underlying risk.
+Theme control is keyboard operable and retains the preference when browser storage permits. Storage failure does not stop rendering. Findings search and severity filtering affect the table and CSV export only; coverage metrics and severity/confidence charts remain full-fixture measures and are labeled accordingly. Export complete case downloads the unfiltered JSON payload, including all domain rows, field contracts and narratives, for an explicit case handoff. It does not include source documents that are only referenced by locator. Printing temporarily restores all findings, uses a neutral light print theme, and restores the filter afterward. Table regions scroll independently on small screens with keyboard access. Empty results state what scope is empty; they never imply no underlying risk.
 
 ## Populate safely
 
@@ -214,6 +223,8 @@ Serialize `<`, `>` and `&` in JSON as `\\u003c`, `\\u003e`, `\\u0026` before emb
 
 ## Complete standalone HTML
 
+{NUMERIC_INPUT_RULE}
+
 ```html
 {dashboard(data)}
 ```
@@ -222,6 +233,42 @@ Serialize `<`, `>` and `&` in JSON as `\\u003c`, `\\u003e`, `\\u0026` before emb
 
 Open the actual file. Check both themes, desktop and narrow screens, keyboard navigation, visible focus, long evidence strings, missing values, empty filters, reset, CSV scope and print preview. Reconcile every displayed metric and chart to its input rows. Verify no network resources are requested. Rendering success does not establish evidence quality or analytical validity. Record untested browser/platform behavior honestly. If a browser blocks downloads or scripting, use the unchanged source data and fixed report/workbook alternatives; do not invent a functioning control.
 '''
+
+def authored_metrics(folder):
+    prefixes=('01-','02-','03-','04-','05-','09-','10-')
+    files=sorted(p for p in folder.glob('*.md') if p.name.startswith(prefixes))
+    raw=[p.read_text() for p in files]
+    prose=[re.sub(r'<!-- FIELD_CONTRACTS:START -->.*?<!-- FIELD_CONTRACTS:END -->','',value,flags=re.S) for value in raw]
+    prose=[re.sub(r'^```.*?^```\s*$','',value,flags=re.M|re.S) for value in prose]
+    return dict(files=len(files),words=sum(len(value.split()) for value in prose),bytes=sum(len(value.encode('utf-8')) for value in prose),source_words=sum(len(value.split()) for value in raw),source_bytes=sum(len(value.encode('utf-8')) for value in raw))
+
+def field_contract_md(data):
+    lines=['## Compiled domain field dictionary','',
+        'This dictionary is part of this attachment. It fixes the type, null rule, unit, permitted values and record identity used by the embedded renderers. It is generated from the same reviewed case contract; no external file is needed. Raw source defects must be retained as raw text under their declared type. Correcting a malformed value requires evidence, not coercion by the renderer.','']
+    def cell(value):return str(value).replace('|','\\|').replace('\n',' ')
+    for position,table in enumerate(data['domain_tables']):
+        contracts=table.get('column_contracts')
+        if not contracts:continue
+        lines.extend(['### '+table['name']+' — field contract','',
+            '**Record grain:** '+table.get('grain','The primary key identifies one record; apply the detailed grain definition above.'),'',
+            '**Primary key:** `'+ ' + '.join(table['primary_key'])+'`','',
+            '**Report placement:** section '+str(table.get('report_section',4 if position==0 else 5))+'. Empty tables retain their schema and zero-record state.','',
+            '| Field | Type | Null allowed | Unit | Definition | Allowed values / bounds | Display |',
+            '| --- | --- | --- | --- | --- | --- | --- |'])
+        for column in table['columns']:
+            spec=contracts[column]
+            limits=[]
+            if 'enum' in spec:limits.append(' / '.join(map(str,spec['enum'])))
+            if 'minimum' in spec:limits.append('minimum '+str(spec['minimum']))
+            if 'maximum' in spec:limits.append('maximum '+str(spec['maximum']))
+            lines.append('| '+' | '.join(cell(v) for v in [column,spec['type'],'yes' if spec['nullable'] else 'no',spec['unit'],spec['description'],'; '.join(limits) or 'No additional enum or range constraint',table.get('formats',{}).get(column,'Native value / literal text')])+' |')
+        lines.append('')
+        for join in table.get('foreign_keys',[]):
+            lines.append('Foreign key: `'+ ' + '.join(join['columns'])+'` resolves to `'+join['table']+' ('+' + '.join(join['references'])+')`. A composite key may be entirely null only where each field allows null; partially missing keys are rejected.')
+        if any(c=='evidence_id' or c.endswith('_evidence_id') or c=='evidence_ids' or c.endswith('_evidence_ids') for c in table['columns']):
+            lines.append('Every non-null evidence key must resolve to the common Evidence register. Multiple keys use semicolons; unresolved or empty references block generation.')
+        lines.append('')
+    return '\n'.join(lines).strip()
 
 def instruction_metrics(folder):
     files=sorted(p for p in folder.glob('*.md') if re.match(r'(0[1-9]|10)-',p.name))
@@ -241,6 +288,9 @@ Version {VERSION}. Build date: {RELEASE_DATE}. This file documents the suite and
 | --- | --- | --- |
 | Instructional files | {m['files']} | Files 01–10; README and this record excluded |
 | Instructional words | {m['words']:,} | Whitespace-separated tokens, including code |
+| Authored method prose | {authored_metrics(ROOT/'suites'/data['slug'])['words']:,} | Files 01–05, 09 and 10; excludes fences and compiled dictionary |
+| Complete authored-file bytes | {authored_metrics(ROOT/'suites'/data['slug'])['source_bytes']:,} | Seven method files, including their fixture code and compiled dictionary |
+| Domain registers and rows | {len(data['domain_tables'])} registers / {sum(len(t['rows']) for t in data['domain_tables'])} rows | Populated fictional specimen; volume does not prove quality |
 | UTF-8 bytes | {m['bytes']:,} | Sum of files 01–10 |
 | Characters | {m['characters']:,} | Unicode characters across files 01–10 |
 | Estimated attachment tokens | {m['tokens']:,} | Ceiling(characters / 4); not a tokenizer measurement |
@@ -290,6 +340,9 @@ def generate(check=False):
         data=prepare(json.loads(src.read_text()))
         folder=ROOT/'suites'/data['slug']
         folder.mkdir(parents=True,exist_ok=True)
+        contract=folder/'05-output-contract.md'
+        if contract.exists() and any(t.get('column_contracts') for t in data['domain_tables']):
+            put(contract,replace_block(contract.read_text(),'FIELD_CONTRACTS',field_contract_md(data)))
         for name,content in [('06-report-template.md',report_md(data)),('07-workbook-template.md',workbook_md(data)),('08-dashboard-template.md',dashboard_md(data))]:
             put(folder/name,content)
         if not check:
@@ -304,9 +357,11 @@ def generate(check=False):
 
 The ten instructional files contain **{m['words']:,} words** and approximately **{m['tokens']:,} attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **{m['tokens']*4:,}–{m['tokens']*10:,} tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
 
+The seven authored method files (01–05, 09 and 10) contain **{authored_metrics(folder)['words']:,} prose/table words**, excluding fenced code and the compiled field dictionary. This separates method depth from repeated renderer code and embedded fixture payloads. Their complete file size is **{authored_metrics(folder)['source_bytes']:,} UTF-8 bytes**. Counts measure content, not analytical validity.
+
 Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification]({REPOSITORY}/blob/v{VERSION}/docs/VERIFICATION.md) records what was actually tested.
 
-[Download this 12-file Markdown suite]({REPOSITORY}/releases/download/v{VERSION}/{data['slug']}.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.'''
+[Download this 12-file Markdown suite]({REPOSITORY}/releases/download/v{VERSION}/{data['slug']}.zip). Unzip and attach the files for the current stage in file 01; files 01–10 contain the complete instructions. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.'''
             put(readme,replace_block(readme.read_text(),'BUILD',block))
     if changed:
         print(('STALE: ' if check else 'Generated: ')+', '.join(changed))

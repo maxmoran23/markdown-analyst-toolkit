@@ -1,6 +1,6 @@
 # Issue Remediation and Closure Review — fixed workbook template
 
-Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.2.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -43,15 +43,20 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 - The Dashboard calculates counts from the Findings severity column using `COUNTIF`. Counts cover **supplied findings**, not the entire transaction/customer population. Use the exact source scope in denominators.
 - This is a snapshot generator: after adding or removing records, regenerate the workbook so formulas, validations, filters and chart ranges include every row. Do not assume inserting a row extends all ranges.
 - Summary business measures come from validated input calculations. Preserve each method and limitation alongside the value. Recompute them from source when adapting; never retain a specimen metric by accident.
+- Summary also retains the conclusion, every method and all eight report sections' narrative paragraphs in ordered, individually identified rows. Preserve their exact section names in `method_or_limit`; a workbook handoff must retain the reasoning alongside the domain tables.
 - `openpyxl` writes formulas but does not calculate them. Request recalculation in Excel or the available spreadsheet engine, inspect results, and record the outcome. If unavailable, label formula-cache/display behavior **NOT TESTED**; the independently computed check does not prove Excel behavior.
 
 ## Complete in-session renderer
+
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
 The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
 
 Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+All output formats limit declared decimal display places to 15. This is a portable rendering boundary, not a claim of 15-decimal calculation accuracy. Keep more precise source quantities as exact text with the declared unit when their digits matter.
 
 The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
 
@@ -66,7 +71,7 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'issue-remediation', 'title': 'Issue Remediation and Closure Review', 'summary': 'Assess causal corrective actions, implementation evidence, effectiveness testing, recurrence, and independent closure gates at a fixed reference date.', 'audience': 'Issue owners, assurance reviewers, and remediation coordinators', 'decision': 'Which issues are ready for independent closure review, and which evidence, overdue obligations, or residual-risk gates remain unresolved?', 'palette': 'umber', 'report_sections': ['Closure readiness and unresolved decisions', 'Issue population and review reference date', 'Findings and remediation barriers', 'Issue lifecycle and closure gates', 'Action evidence and effectiveness results', 'Evidence causal alternatives and recurrence', 'Proposed actions and independent review', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'IssueRegister', 'columns': ['issue_id', 'severity', 'root_cause_status', 'disposition', 'approved_due_date', 'days_overdue', 'closure_gate', 'evidence_ids'], 'formats': {'approved_due_date': 'yyyy-mm-dd', 'days_overdue': '0'}, 'rows': [['I01', 'HIGH', 'Supported', 'Reopened', '2026-10-02', 7, 'Blocked: effectiveness failed', 'SYN-001'], ['I02', 'MEDIUM', 'Supported', 'Validation pending', '2026-10-10', 0, 'Blocked: retest evidence incomplete', 'SYN-001'], ['I03', 'MEDIUM', 'Supported', 'Closure review pending', '2026-10-07', 2, 'Ready for independent closure review', 'SYN-001'], ['I04', 'HIGH', 'Provisional', 'Acceptance expired', '2026-09-30', 9, 'Blocked: acceptance expired and replacement absent', 'SYN-001']]}, {'name': 'ActionEvidence', 'columns': ['action_id', 'issue_id', 'action_type', 'approved_due_date', 'evidence_status', 'completion_date', 'days_overdue', 'retest_result', 'evidence_ids'], 'formats': {'approved_due_date': 'yyyy-mm-dd', 'completion_date': 'yyyy-mm-dd', 'days_overdue': '0'}, 'rows': [['A01', 'I01', 'Implementation', '2026-09-25', 'Verified', '2026-09-28', 0, 'Not applicable', 'SYN-001'], ['A02', 'I01', 'Effectiveness', '2026-10-02', 'Failed', None, 7, 'FAIL', 'SYN-001'], ['A03', 'I02', 'Implementation', '2026-10-03', 'Verified', '2026-10-03', 0, 'Not applicable', 'SYN-001'], ['A04', 'I02', 'Effectiveness', '2026-10-10', 'Unresolved', None, 0, 'UNABLE TO CONCLUDE', 'SYN-001'], ['A05', 'I03', 'Implementation and effectiveness', '2026-09-26', 'Verified', '2026-09-26', 0, 'PASS', 'SYN-001'], ['A06', 'I04', 'Replacement', '2026-09-30', 'Not evidenced', None, 9, 'Not tested', 'SYN-001']]}], 'findings': [{'id': 'IR-F01', 'title': 'I01 failed post-change retest after historical recurrence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'R06 records a missed daily review on Oct 06 despite the implemented backup roster. A02 failed; the existing action plan also placed its deadline before the end of its six-day window.', 'recommendation': 'Investigate roster adoption and coverage execution, address the failed mechanism, and propose a feasible fresh validation plan.'}, {'id': 'IR-F02', 'title': 'Missing R10 evidence prevents complete archive validation', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'A04 has three PASS and one UNABLE TO CONCLUDE result among four opportunities. The supplied retrieval failure does not establish whether the original artifact exists.', 'recommendation': 'Recover R10 or establish its retention status; retain the four-unit denominator and unresolved gate.'}, {'id': 'IR-F03', 'title': 'Technical closure readiness awaits authorized approval', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'I03 has implementation evidence and four passing fresh retest opportunities, but no current final approval; it is two calendar days overdue at Oct 09.', 'recommendation': 'Submit the complete I03 record to the independent closure reviewer and preserve pending status until a decision is recorded.'}, {'id': 'IR-F04', 'title': 'Temporary acceptance expired without replacement evidence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'I04 acceptance expired Sep 30. Its Oct 31 extension is only proposed; no replacement artifact is supplied. I04 and A06 are nine days overdue.', 'recommendation': 'Obtain an authorized residual-risk and replacement decision, preserving the expired acceptance and original deadline history.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Complete fictional issue chronology, action criteria, decision history and fourteen retest records', 'locator': '10-worked-example.md, original issues, complete deadline history, action evidence, and raw retest ledger', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'GAO 2025 Green Book, principle 17, paragraphs 17.05–17.08; retrieved 2026-10-09', 'locator': 'https://www.gao.gov/assets/gao-25-107721.pdf', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'FFIEC BSA/AML Independent Testing; retrieved 2026-10-09', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingTheBSAAMLComplianceProgram/03', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Evidenced action completions', 'value': '3 of 6 (50.0%)', 'method': 'A01, A03 and A05 meet individual acceptance criteria; action completion is not issue closure.', 'format': '#,##0'}, {'label': 'Current authorized closures', 'value': '0 of 4 (0.0%)', 'method': 'No current final issue approval exists in the complete fictional decision register.', 'format': '#,##0'}, {'label': 'Overdue active issues', 'value': '3 of 4 (75.0%)', 'method': 'I01 7, I03 2, I04 9 calendar days past approved due dates at end-of-day Oct 09, 2026 ET.', 'format': '#,##0'}, {'label': 'Ready for closure review', 'value': '1 of 4 (25.0%)', 'method': 'I03 meets technical gates; independent human approval remains pending.', 'format': '#,##0'}], 'limitations': ['All issues, actions, authority records and retest observations are fictional.', 'The miniature retest windows do not support a future or institution-wide effectiveness claim.', 'I02 has one unresolved retest artifact; I04 has a provisional causal explanation.', 'I03 is ready for review, not closed; the assistant cannot supply independent approval.', 'Dates are evaluated at the saved Oct 09, 2026 snapshot, not renderer execution time.'], 'conclusion': 'Three of six actions are evidenced complete, but no issue is currently closed. I03 is technically ready for independent closure review; I01 failed retest, I02 has an unresolved retest record, and I04’s acceptance expired without evidenced replacement. Three of four active issues are overdue at Oct 09, 2026.', 'report_narrative': [['Three of six existing actions meet their own acceptance criteria, while all four issues remain active. I03 is ready for independent closure review. I01, I02 and I04 have distinct effectiveness, evidence and acceptance blockers.'], ['The complete fictional snapshot contains four issues and six existing actions at end-of-day Oct 09, 2026 ET. Calendar-day differences use approved current deadlines; proposed extensions do not reset the clock. Fourteen retest opportunities are fully listed.'], ['I01’s R06 retest fails despite roster implementation. I02’s R10 is unresolved. I03 lacks final approval despite technical readiness. I04’s Sep 30 acceptance expired, and its proposed Oct 31 extension has no authorization.'], ['IssueRegister shows overdue days of 7, 0, 2 and 9 for I01–I04. I01 remains Reopened after its Aug 31 closure and Sep 12 recurrence; I03 remains Closure review pending. Three active issues are overdue, or 75.0%.'], ['ActionEvidence contains three Verified actions, one Failed, one Unresolved and one Not evidenced. Current overdue days are 0, 7, 0, 0, 0 and 9. A01’s three historical late days remain separate. A02 retest has 5 PASS and 1 FAIL; A04 has 3 PASS and 1 unresolved; A05 has 4 PASS.'], ['SYN-001 preserves the causal facts, decision history and every retest ID. The backup roster did not establish effective coverage on Oct 06; the mechanism needs further assessment. R10 retrieval failure does not prove nonexistence. I04’s dependency explanation remains provisional. Public guidance supplies method context only.'], ['Proposed follow-ups address failed coverage, recover R10, submit I03 for an actual independent decision, and resolve I04’s expired disposition and replacement plan. A02’s Oct 02 deadline preceded the end of its Oct 01–06 observation window and requires a feasible revised plan without erasing the breach.'], ['QA reconciles 6 actions, 4 active issues and 14 retest units, preserving all missing outcomes. Negative controls reject proposed-date substitution, implementation-as-effectiveness and readiness-as-closure. No current final human closure decisions are supplied.']], 'suite_id': 'issue-remediation', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'IR-F01', 'proposal': 'Investigate roster adoption and coverage execution, address the failed mechanism, and propose a feasible fresh validation plan.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'IR-F02', 'proposal': 'Recover R10 or establish its retention status; retain the four-unit denominator and unresolved gate.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'IR-F03', 'proposal': 'Submit the complete I03 record to the independent closure reviewer and preserve pending status until a decision is recorded.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'IR-F04', 'proposal': 'Obtain an authorized residual-risk and replacement decision, preserving the expired acceptance and original deadline history.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'issue-remediation', 'title': 'Issue Remediation and Closure Review', 'summary': 'Assess causal corrective actions, implementation evidence, effectiveness testing, recurrence, and independent closure gates at a fixed reference date.', 'audience': 'Issue owners, assurance reviewers, and remediation coordinators', 'decision': 'Which issues are ready for independent closure review, and which evidence, overdue obligations, or residual-risk gates remain unresolved?', 'palette': 'umber', 'report_sections': ['Closure readiness and unresolved decisions', 'Issue population and review reference date', 'Findings and remediation barriers', 'Issue lifecycle and closure gates', 'Action evidence and effectiveness results', 'Evidence causal alternatives and recurrence', 'Proposed actions and independent review', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'IssueRegister', 'columns': ['issue_id', 'severity', 'root_cause_status', 'disposition', 'approved_due_date', 'days_overdue', 'closure_gate', 'evidence_ids'], 'formats': {'approved_due_date': 'yyyy-mm-dd', 'days_overdue': '0'}, 'rows': [['I01', 'HIGH', 'Supported', 'Reopened', '2026-10-02', 7, 'Blocked: effectiveness failed', 'SYN-001'], ['I02', 'MEDIUM', 'Supported', 'Validation pending', '2026-10-10', 0, 'Blocked: retest evidence incomplete', 'SYN-001'], ['I03', 'MEDIUM', 'Supported', 'Closure review pending', '2026-10-07', 2, 'Ready for independent closure review', 'SYN-001'], ['I04', 'HIGH', 'Provisional', 'Acceptance expired', '2026-09-30', 9, 'Blocked: acceptance expired and replacement absent', 'SYN-001']]}, {'name': 'ActionEvidence', 'columns': ['action_id', 'issue_id', 'action_type', 'approved_due_date', 'evidence_status', 'completion_date', 'days_overdue', 'retest_result', 'evidence_ids'], 'formats': {'approved_due_date': 'yyyy-mm-dd', 'completion_date': 'yyyy-mm-dd', 'days_overdue': '0'}, 'rows': [['A01', 'I01', 'Implementation', '2026-09-25', 'Verified', '2026-09-28', 0, 'Not applicable', 'SYN-001'], ['A02', 'I01', 'Effectiveness', '2026-10-02', 'Failed', None, 7, 'FAIL', 'SYN-001'], ['A03', 'I02', 'Implementation', '2026-10-03', 'Verified', '2026-10-03', 0, 'Not applicable', 'SYN-001'], ['A04', 'I02', 'Effectiveness', '2026-10-10', 'Unresolved', None, 0, 'UNABLE TO CONCLUDE', 'SYN-001'], ['A05', 'I03', 'Implementation and effectiveness', '2026-09-26', 'Verified', '2026-09-26', 0, 'PASS', 'SYN-001'], ['A06', 'I04', 'Replacement', '2026-09-30', 'Not evidenced', None, 9, 'Not tested', 'SYN-001']]}], 'findings': [{'id': 'IR-F01', 'title': 'I01 failed post-change retest after historical recurrence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'R06 records a missed daily review on Oct 06 despite the implemented backup roster. A02 failed; the existing action plan also placed its deadline before the end of its six-day window.', 'recommendation': 'Investigate roster adoption and coverage execution, address the failed mechanism, and propose a feasible fresh validation plan.'}, {'id': 'IR-F02', 'title': 'Missing R10 evidence prevents complete archive validation', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'A04 has three PASS and one UNABLE TO CONCLUDE result among four opportunities. The supplied retrieval failure does not establish whether the original artifact exists.', 'recommendation': 'Recover R10 or establish its retention status; retain the four-unit denominator and unresolved gate.'}, {'id': 'IR-F03', 'title': 'Technical closure readiness awaits authorized approval', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'I03 has implementation evidence and four passing fresh retest opportunities, but no current final approval; it is two calendar days overdue at Oct 09.', 'recommendation': 'Submit the complete I03 record to the independent closure reviewer and preserve pending status until a decision is recorded.'}, {'id': 'IR-F04', 'title': 'Temporary acceptance expired without replacement evidence', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'I04 acceptance expired Sep 30. Its Oct 31 extension is only proposed; no replacement artifact is supplied. I04 and A06 are nine days overdue.', 'recommendation': 'Obtain an authorized residual-risk and replacement decision, preserving the expired acceptance and original deadline history.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Complete fictional issue chronology, action criteria, decision history and fourteen retest records', 'locator': '10-worked-example.md, original issues, complete deadline history, action evidence, and raw retest ledger', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'GAO 2025 Green Book, principle 17, paragraphs 17.05–17.08; retrieved 2026-10-09', 'locator': 'https://www.gao.gov/assets/gao-25-107721.pdf', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'FFIEC BSA/AML Independent Testing; retrieved 2026-10-09', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingTheBSAAMLComplianceProgram/03', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Evidenced action completions', 'value': '3 of 6 (50.0%)', 'method': 'A01, A03 and A05 meet individual acceptance criteria; action completion is not issue closure.', 'format': '#,##0'}, {'label': 'Current authorized closures', 'value': '0 of 4 (0.0%)', 'method': 'No current final issue approval exists in the complete fictional decision register.', 'format': '#,##0'}, {'label': 'Overdue active issues', 'value': '3 of 4 (75.0%)', 'method': 'I01 7, I03 2, I04 9 calendar days past approved due dates at end-of-day Oct 09, 2026 ET.', 'format': '#,##0'}, {'label': 'Ready for closure review', 'value': '1 of 4 (25.0%)', 'method': 'I03 meets technical gates; independent human approval remains pending.', 'format': '#,##0'}], 'limitations': ['All issues, actions, authority records and retest observations are fictional.', 'The miniature retest windows do not support a future or institution-wide effectiveness claim.', 'I02 has one unresolved retest artifact; I04 has a provisional causal explanation.', 'I03 is ready for review, not closed; the assistant cannot supply independent approval.', 'Dates are evaluated at the saved Oct 09, 2026 snapshot, not renderer execution time.'], 'conclusion': 'Three of six actions are evidenced complete, but no issue is currently closed. I03 is technically ready for independent closure review; I01 failed retest, I02 has an unresolved retest record, and I04’s acceptance expired without evidenced replacement. Three of four active issues are overdue at Oct 09, 2026.', 'report_narrative': [['Three of six existing actions meet their own acceptance criteria, while all four issues remain active. I03 is ready for independent closure review. I01, I02 and I04 have distinct effectiveness, evidence and acceptance blockers.'], ['The complete fictional snapshot contains four issues and six existing actions at end-of-day Oct 09, 2026 ET. Calendar-day differences use approved current deadlines; proposed extensions do not reset the clock. Fourteen retest opportunities are fully listed.'], ['I01’s R06 retest fails despite roster implementation. I02’s R10 is unresolved. I03 lacks final approval despite technical readiness. I04’s Sep 30 acceptance expired, and its proposed Oct 31 extension has no authorization.'], ['IssueRegister shows overdue days of 7, 0, 2 and 9 for I01–I04. I01 remains Reopened after its Aug 31 closure and Sep 12 recurrence; I03 remains Closure review pending. Three active issues are overdue, or 75.0%.'], ['ActionEvidence contains three Verified actions, one Failed, one Unresolved and one Not evidenced. Current overdue days are 0, 7, 0, 0, 0 and 9. A01’s three historical late days remain separate. A02 retest has 5 PASS and 1 FAIL; A04 has 3 PASS and 1 unresolved; A05 has 4 PASS.'], ['SYN-001 preserves the causal facts, decision history and every retest ID. The backup roster did not establish effective coverage on Oct 06; the mechanism needs further assessment. R10 retrieval failure does not prove nonexistence. I04’s dependency explanation remains provisional. Public guidance supplies method context only.'], ['Proposed follow-ups address failed coverage, recover R10, submit I03 for an actual independent decision, and resolve I04’s expired disposition and replacement plan. A02’s Oct 02 deadline preceded the end of its Oct 01–06 observation window and requires a feasible revised plan without erasing the breach.'], ['QA reconciles 6 actions, 4 active issues and 14 retest units, preserving all missing outcomes. Negative controls reject proposed-date substitution, implementation-as-effectiveness and readiness-as-closure. No current final human closure decisions are supplied.']], 'suite_id': 'issue-remediation', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'IR-F01', 'proposal': 'Investigate roster adoption and coverage execution, address the failed mechanism, and propose a feasible fresh validation plan.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'IR-F02', 'proposal': 'Recover R10 or establish its retention status; retain the four-unit denominator and unresolved gate.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'IR-F03', 'proposal': 'Submit the complete I03 record to the independent closure reviewer and preserve pending status until a decision is recorded.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'IR-F04', 'proposal': 'Obtain an authorized residual-risk and replacement decision, preserving the expired acceptance and original deadline history.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -79,6 +84,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -105,8 +117,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -130,8 +142,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -147,6 +211,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -162,7 +253,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -183,6 +274,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -274,6 +366,11 @@ summary_rows = [
     ['data_label', DATA['notice'], 'Retain synthetic label for examples'],
 ]
 summary_rows += [[m['label'], m['value'], m['method']] for m in DATA['metrics']]
+summary_rows += [['conclusion', DATA['conclusion'], 'Case-specific conclusion; human disposition remains separate']]
+summary_rows += [[f'method_{i:02}', value, 'Applied method'] for i,value in enumerate(DATA['methods'],1)]
+summary_rows += [[f'report_section_{section:02}_paragraph_{paragraph:02}', value, DATA['report_sections'][section-1]]
+                 for section,paragraphs in enumerate(DATA['report_narrative'],1)
+                 for paragraph,value in enumerate(paragraphs,1)]
 summary_rows += [['limitation', value, 'Preserve in every exported format'] for value in DATA['limitations']]
 populate(summary, ['measure', 'value', 'method_or_limit'], summary_rows)
 for row_number, metric in enumerate(DATA['metrics'], 9):
@@ -328,6 +425,12 @@ qa_cols = ['check_id', 'check', 'result', 'evidence']
 populate(sheet('QA'), qa_cols, [[q['id'], q['check'], q['result'], q['evidence']] for q in DATA['qa']], 'QARegister')
 for i, t in enumerate(DATA['domain_tables'], 1):
     ws = populate(sheet(t['name']), t['columns'], t['rows'], f'DomainRegister{i}', t.get('formats'))
+    for column,spec in t.get('column_contracts',{}).items():
+        index=t['columns'].index(column)+1
+        contract=f"{spec['description']} Type: {spec['type']}. Unit: {spec['unit']}. Nullable: {spec['nullable']}."
+        if column in t.get('primary_key',[]):contract+=' Part of the primary key.'
+        if 'enum' in spec:contract+=' Allowed values: '+', '.join(map(str,spec['enum']))+'.'
+        ws.cell(1,index).comment=Comment(contract,'Toolkit')
     stats_row = len(t['rows']) + 3
     literal(ws.cell(stats_row, 1), 'Domain record count')
     literal(ws.cell(stats_row, 2), len(t['rows']))

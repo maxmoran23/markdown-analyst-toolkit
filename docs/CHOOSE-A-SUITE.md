@@ -35,6 +35,20 @@ internet connection; search and prompt generation work offline.
 | Which order or execution patterns warrant contextual review? | [Trade surveillance](../suites/trade-surveillance/) | Sequence matches do not establish intent or violations |
 | What do public ledger events show? | [Digital-asset review](../suites/digital-asset-review/) | Exact units and event identity come before valuation or attribution |
 
+## Additional monitoring process decisions
+
+| Your question | Start here | Boundary to preserve |
+| --- | --- | --- |
+| How should the exact rule and acceptance cases be specified? | [Scenario design](../suites/scenario-design/) | A risk hypothesis, implementable predicate and approved deployment are separate |
+| Did source records survive transformation and arrive within scope? | [TM data lineage](../suites/tm-data-lineage/) | Raw representations, canonical economic legs and processing exceptions have different counts |
+| Is there independent support for the system's stated use? | [Monitoring validation](../suites/monitoring-validation/) | Classification and applicable requirements depend on the actual system and current criteria |
+| Which historical periods and units require re-review? | [Lookback review](../suites/lookback-review/) | Missing periods and unresolved scope gates prevent unsupported completion claims |
+| Which network flows are supported and how far can funds be allocated? | [Network flow review](../suites/network-flow-review/) | Gross leg value, entity-boundary movement and attributed source funds are different quantities |
+| Does case analysis meet explicit quality criteria? | [Alert quality review](../suites/alert-qa/) | Agreement, adjudicated defects and operational decision authority are separate |
+
+Use the [process map](PROCESS-MAP.md) for the record-level handoffs and the
+[depth report](PROCESS-DEPTH.md) for measured method and file-size comparisons.
+
 ## When two suites are relevant
 
 Finish the first scoped analysis and preserve its complete case record. Start the

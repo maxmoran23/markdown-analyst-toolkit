@@ -15,5 +15,7 @@ jobs:
       - run: python -m pip install openpyxl==3.1.5 python-docx==1.2.0
       - run: python _maintainer/validate.py
       - run: python _maintainer/test_schema.py
+      - run: python _maintainer/test_domain_contracts.py
+      - run: python _maintainer/test_process_cases.py
       - run: python _maintainer/test_renderers.py
       - run: python _maintainer/test_packages.py

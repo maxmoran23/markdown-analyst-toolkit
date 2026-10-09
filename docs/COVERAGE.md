@@ -48,3 +48,24 @@ runtime method cannot silently depend on attaching another folder. When a case c
 boundaries, finish a scoped record, preserve its evidence, then start the next suite
 with that reviewed record as an explicit input. Do not merge judgments or multiply
 scores across suites without a documented method and authorized human review.
+
+## Process-depth expansion — 1.2.0
+
+Three existing suites receive expanded authored methods, decision paths, raw examples,
+process ledgers and embedded arithmetic checks: transaction monitoring, monitoring
+tuning and investigations. The new suites below fill distinct process decisions.
+
+| Addition | Distinct coverage | Deliberate boundary |
+| --- | --- | --- |
+| Scenario design | Observable hypothesis to precise eligibility, predicates, temporal windows, suppression and acceptance vectors | Does not choose an institutional deployment threshold |
+| TM data lineage | Source representation through transformation, canonicalization, exception handling, control totals and late reruns | Does not infer data completeness from a generic pass score |
+| Monitoring validation | System classification, conceptual/data/implementation/outcome challenge, benchmark limits and acceptance conditions | Does not assert legal independence or classify every deterministic rule as a model |
+| Lookback review | Defect interval, retrieval and canonical population, re-review, scope expansion and completion evidence | Does not treat unavailable history as reviewed or decide filings |
+| Network flow review | Node and economic-edge attribution, entity-boundary totals, balance checks and bounded allocations | Does not infer wrongdoing from graph structure or equate gross legs with unique funds |
+| Alert quality review | Criteria-based case reperformance, independent review votes, disagreement, defect taxonomy and remediation | Does not generalize a nonrepresentative packet set to all alerts |
+
+The fixed rendering system now preserves every declared domain register and narrative
+section. Typed field definitions and fixture checks reside inside the actual Markdown
+attachments. [Measured process depth](PROCESS-DEPTH.md) excludes renderer fences and
+compiled dictionaries when comparing authored prose. [Verification](VERIFICATION.md)
+states which tests actually ran.

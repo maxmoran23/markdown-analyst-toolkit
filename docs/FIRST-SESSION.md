@@ -5,7 +5,7 @@ This is a method exercise. It does not test performance on a live population.
 
 ## 1. Get one suite
 
-Download the [control-testing ZIP](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/control-testing.zip)
+Download the [control-testing ZIP](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.2.0/control-testing.zip)
 and extract it using your normal file application. You should see twelve Markdown
 files. Read the README. The numbered files have stable roles across every suite.
 

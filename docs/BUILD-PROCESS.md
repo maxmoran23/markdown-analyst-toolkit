@@ -4,9 +4,12 @@ The initial release was developed on 2026-10-09 as a companion to two existing p
 reference libraries. The aim was to preserve substantial analytical guidance within
 small topic folders that a person can attach manually to an AI chat.
 
-Release 1.1.0 adds eight suites, an offline selection guide and practical session/handoff
-guides. It also adds shared structural preflight inside the distributed Office renderers,
-tests that execute code extracted from the Markdown, and a per-file release manifest.
+Release 1.2.0 deepens transaction monitoring, tuning and investigations and adds six
+process suites. Raw fictional inputs, intermediate calculations, exception handling,
+decision records and reproducible checks are carried inside their Markdown files.
+The output templates preserve every declared domain register in Word, Excel and HTML.
+Release 1.1.0 introduced the offline selection guide, practical session/handoff guides,
+standalone Office preflight and per-file release manifest.
 The baseline below records the original adaptation; the new domain methods were reviewed
 against their own linked primary sources. See the [release notes](RELEASE-NOTES.md) and
 [current verification record](VERIFICATION.md) for the evidence and remaining limits.
@@ -41,6 +44,20 @@ hour-by-hour effort log. Parallel authoring and shared renderer work prevent hon
 allocation of elapsed time to individual suites without telemetry.
 
 ## Resource estimates without invented usage
+
+The [process-depth record](PROCESS-DEPTH.md) separately measures the seven authored
+method files against the immutable 1.1.0 baseline. It excludes fenced code and the
+compiled field dictionary from prose counts. This prevents repeated renderer code
+or specimen JSON from appearing to be new analytical guidance. The complete file
+byte counts still include everything a user receives.
+
+Nine process suites contain typed field contracts, explicit row grains, keys and
+joins. File 05 includes the complete compiled dictionary. File 10 includes raw
+inputs and a standard-library Python check that derives selected result tables.
+The maintainer test executes that exact delivered block outside the repository and
+compares full calculated rows with the specimen. Separate analytical review is
+needed to challenge whether the printed method and its expected result are sound;
+agreement between two copies of a result would not establish correctness.
 
 Every suite measures files 01–10 as UTF-8 bytes, Unicode characters and whitespace
 words, including embedded code. Its central token estimate is

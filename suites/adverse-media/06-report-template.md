@@ -1,6 +1,6 @@
 # Adverse Media — fixed report template
 
-Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.2.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -17,7 +17,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 7. **Proposed review and clarification actions**
 8. **Limitations, quality checks and human disposition**
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -47,6 +47,8 @@ The workbook retains every domain column in order; the report may present the sa
 
 ## Complete in-session renderer
 
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
+
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
 ```python
@@ -56,7 +58,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'adverse-media', 'title': 'Adverse Media', 'summary': 'Assess adverse public reporting with identity resolution, source lineage, procedural chronology and a record of corrections.', 'audience': 'Analysts reviewing bounded public adverse-information cases', 'decision': 'Which adverse events are attributable and current enough to inform a proportionate human review?', 'palette': 'slate', 'report_sections': ['Adverse-information decision brief', 'Scope, identity and search coverage', 'Material findings and competing accounts', 'Event assessment and current status', 'Source lineage and identity review', 'Evidence, chronology and corrections', 'Proposed review and clarification actions', 'Limitations, quality checks and human disposition'], 'domain_tables': [{'name': 'EventAssessment', 'columns': ['event_id', 'subject_id', 'event_summary', 'identity_state', 'procedural_status', 'adverse_origin_families', 'current_assessment', 'confidence', 'evidence_ids', 'next_step'], 'rows': [['EV-01', 'ML-041', 'Reported invoice-fraud charge', 'MATCHED', 'DISMISSED', 1, 'Charge dismissed on procedural grounds; merits not determined', 'HIGH', 'SYN-002;SYN-003;SYN-004;SYN-005', 'Preserve corrected chronology'], ['EV-02', 'ML-041', 'Administrative recordkeeping order', 'MATCHED', 'FINAL_ORDER', 1, 'Final administrative finding in supplied record; not a criminal conviction', 'HIGH', 'SYN-006', 'Review decision relevance and any later order'], ['EV-03', 'ML-904', 'Fraud conviction of a namesake', 'DIFFERENT_SUBJECT', 'EXCLUDED_IDENTITY', 0, 'Not attributable to ML-041', 'HIGH', 'SYN-001;SYN-007', 'Retain documented exclusion'], ['EV-04', 'ML-041', 'Anonymous payroll-diversion allegation', 'MATCHED', 'ALLEGATION_UNRESOLVED', 1, 'Underlying complaint unavailable; subject denial recorded', 'LOW', 'SYN-008;SYN-009', 'Obtain permitted primary support and assess response']]}, {'name': 'SourceReview', 'columns': ['source_id', 'event_id', 'family_id', 'source_role', 'identity_state', 'eligible_for_event', 'publication_date', 'evidence_id', 'assessment_note'], 'rows': [['D-01', 'CONTEXT', 'REGISTRY', 'IDENTITY', 'MATCHED', 'CONTEXT', '2026-09-30', 'SYN-001', 'Target ML-041; not adverse-event support'], ['D-02', 'EV-01', 'PROSECUTOR', 'ORIGINAL_REPORT', 'MATCHED', 'YES', '2026-09-01', 'SYN-002', 'Reports D-04 charge; no separate underlying evidence'], ['D-03', 'EV-01', 'PROSECUTOR', 'SYNDICATED_COPY', 'MATCHED', 'YES', '2026-09-02', 'SYN-003', 'Copies D-02; no new origin'], ['D-04', 'EV-01', 'PROSECUTOR', 'CHARGE_NOTICE', 'MATCHED', 'YES', '2026-09-01', 'SYN-004', 'Original allegation; does not establish guilt'], ['D-05', 'EV-01', 'COURT', 'STATUS_UPDATE', 'MATCHED', 'YES', '2026-09-20', 'SYN-005', 'Dismissal updates status; not an adverse assertion origin'], ['D-06', 'EV-02', 'ADMINISTRATIVE', 'FINAL_ORDER', 'MATCHED', 'YES', '2026-07-10', 'SYN-006', 'Recordkeeping finding; no later order supplied'], ['D-07', 'EV-03', 'OTHER_COURT', 'DIFFERENT_SUBJECT_REPORT', 'DIFFERENT_SUBJECT', 'NO', '2026-08-15', 'SYN-007', 'Explicit ML-904 identity mismatch'], ['D-08', 'EV-04', 'ANONYMOUS_BLOG', 'ALLEGATION', 'MATCHED', 'YES', '2026-09-23', 'SYN-008', 'One anonymous claim; primary support unavailable'], ['D-09', 'EV-04', 'SUBJECT', 'SUBJECT_RESPONSE', 'MATCHED', 'YES', '2026-09-24', 'SYN-009', 'Denies allegation; does not independently disprove it']]}], 'findings': [{'id': 'AM-F01', 'title': 'Later dismissal changes the charge narrative', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-004', 'SYN-005'], 'detail': 'The fictional charge was dismissed on procedural grounds on 2026-09-20; the order makes no merits determination.', 'recommendation': 'Correct current status and preserve the dated charge history.'}, {'id': 'AM-F02', 'title': 'Administrative order remains relevant within supplied scope', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-006'], 'detail': 'The fictional final administrative order records a recordkeeping finding and a USD 25,000 amount ordered, without evidence of payment or a later order.', 'recommendation': 'Assess decision relevance and obtain any later operative record.'}, {'id': 'AM-F03', 'title': 'Namesake conviction must be excluded', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-007'], 'detail': 'D-07 identifies ML-904; the target is ML-041.', 'recommendation': 'Retain the exclusion and do not attribute the conviction to the target.'}, {'id': 'AM-F04', 'title': 'Anonymous allegation remains unsupported by a primary record', 'severity': 'MEDIUM', 'confidence': 'LOW', 'claim_class': 'Reported', 'evidence_ids': ['SYN-008', 'SYN-009'], 'detail': 'D-08 alleges payroll diversion; D-09 denies it; the planned underlying-complaint search is access limited.', 'recommendation': 'Seek permitted primary support and assess the supplied response without prejudgment.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional D-01 source', 'locator': '10-worked-example.md, complete input D-01', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional D-02 source', 'locator': '10-worked-example.md, complete input D-02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional D-03 source', 'locator': '10-worked-example.md, complete input D-03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional D-04 source', 'locator': '10-worked-example.md, complete input D-04', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional D-05 source', 'locator': '10-worked-example.md, complete input D-05', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional D-06 source', 'locator': '10-worked-example.md, complete input D-06', 'claim_class': 'Observed'}, {'id': 'SYN-007', 'title': 'Fictional D-07 source', 'locator': '10-worked-example.md, complete input D-07', 'claim_class': 'Observed'}, {'id': 'SYN-008', 'title': 'Fictional D-08 source', 'locator': '10-worked-example.md, complete input D-08', 'claim_class': 'Observed'}, {'id': 'SYN-009', 'title': 'Fictional D-09 source', 'locator': '10-worked-example.md, complete input D-09', 'claim_class': 'Observed'}, {'id': 'REF-NNS', 'title': 'Wolfsberg Negative News Screening FAQs (2022)', 'locator': 'https://db.wolfsberg-group.org/assets/b3652a98-4bc6-4b42-9f05-e378a4adbd95/Negative%20News%20Screening%20FAQs%20(2022).pdf; Q4–Q5 and 02 applicability note', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Event candidates', 'value': 4, 'method': 'Distinct EV-01 through EV-04.', 'format': '#,##0'}, {'label': 'Attributable events', 'value': 3, 'method': 'Three MATCHED events; exclude EV-03 identity mismatch.', 'format': '#,##0'}, {'label': 'Eligible event-source items', 'value': '7 of 8', 'method': 'D-02 through D-09 less D-07; D-01 is context only.', 'format': '#,##0'}, {'label': 'Planned-search completion', 'value': 80.0, 'format': '0.0"%"', 'method': 'Four completed planned searches / five planned × 100.'}], 'limitations': ['All case records and events are fictional.', 'The anonymous allegation has no supplied underlying complaint.', 'The five-search plan does not establish exhaustive public coverage.', 'No authorized human disposition or external action is recorded.'], 'metadata': {'conclusion': 'Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.'}, 'report_narrative': [['Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.'], ['The review covers nine fictional source items and five planned searches through Sep 30, 2026 5:00 PM ET. Four searches are complete; the underlying complaint search is access limited.'], ['AM-F01 corrects the charge chronology using the later dismissal. AM-F02 preserves the administrative order within its stated scope. AM-F03 excludes the namesake. AM-F04 retains the anonymous allegation and denial as unresolved accounts.'], ['EventAssessment contains four candidates and three MATCHED events. EV-01 has one upstream allegation origin despite three publications; the dismissal changes status without deciding merits.'], ['SourceReview preserves nine source items. D-01 is identity context. Seven of eight event-source items are eligible, or 87.5%; that is not an adverse-event prevalence measure. D-09 is an attributed response, not corroboration of the allegation.'], ['SYN-001 through SYN-009 resolve to the complete fictional records in file 10. D-05 updates D-04; D-07 conflicts with target identity, and D-09 responds to D-08. REF-NNS provides method context only.'], ['Preserve the corrected chronology, assess the administrative order, keep the namesake excluded and obtain primary support for the anonymous claim if relevant. All actions remain proposed.'], ['All case records and events are fictional.', 'The anonymous allegation has no supplied underlying complaint.', 'The five-search plan does not establish exhaustive public coverage.', 'No authorized human disposition or external action is recorded.', 'QA must be recorded from actual checks; human disposition remains NOT REVIEWED.']], 'as_of': '2026-09-30 5:00 PM ET', 'scope': 'Nine fictional source items, four event candidates and five planned searches for ML-041 through Sep 30, 2026 5:00 PM ET. Method sources are not subject evidence.', 'suite_id': 'adverse-media', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'conclusion': 'Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'AM-F01', 'proposal': 'Correct current status and preserve the dated charge history.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'AM-F02', 'proposal': 'Assess decision relevance and obtain any later operative record.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'AM-F03', 'proposal': 'Retain the exclusion and do not attribute the conviction to the target.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'AM-F04', 'proposal': 'Seek permitted primary support and assess the supplied response without prejudgment.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'adverse-media', 'title': 'Adverse Media', 'summary': 'Assess adverse public reporting with identity resolution, source lineage, procedural chronology and a record of corrections.', 'audience': 'Analysts reviewing bounded public adverse-information cases', 'decision': 'Which adverse events are attributable and current enough to inform a proportionate human review?', 'palette': 'slate', 'report_sections': ['Adverse-information decision brief', 'Scope, identity and search coverage', 'Material findings and competing accounts', 'Event assessment and current status', 'Source lineage and identity review', 'Evidence, chronology and corrections', 'Proposed review and clarification actions', 'Limitations, quality checks and human disposition'], 'domain_tables': [{'name': 'EventAssessment', 'columns': ['event_id', 'subject_id', 'event_summary', 'identity_state', 'procedural_status', 'adverse_origin_families', 'current_assessment', 'confidence', 'evidence_ids', 'next_step'], 'rows': [['EV-01', 'ML-041', 'Reported invoice-fraud charge', 'MATCHED', 'DISMISSED', 1, 'Charge dismissed on procedural grounds; merits not determined', 'HIGH', 'SYN-002;SYN-003;SYN-004;SYN-005', 'Preserve corrected chronology'], ['EV-02', 'ML-041', 'Administrative recordkeeping order', 'MATCHED', 'FINAL_ORDER', 1, 'Final administrative finding in supplied record; not a criminal conviction', 'HIGH', 'SYN-006', 'Review decision relevance and any later order'], ['EV-03', 'ML-904', 'Fraud conviction of a namesake', 'DIFFERENT_SUBJECT', 'EXCLUDED_IDENTITY', 0, 'Not attributable to ML-041', 'HIGH', 'SYN-001;SYN-007', 'Retain documented exclusion'], ['EV-04', 'ML-041', 'Anonymous payroll-diversion allegation', 'MATCHED', 'ALLEGATION_UNRESOLVED', 1, 'Underlying complaint unavailable; subject denial recorded', 'LOW', 'SYN-008;SYN-009', 'Obtain permitted primary support and assess response']]}, {'name': 'SourceReview', 'columns': ['source_id', 'event_id', 'family_id', 'source_role', 'identity_state', 'eligible_for_event', 'publication_date', 'evidence_id', 'assessment_note'], 'rows': [['D-01', 'CONTEXT', 'REGISTRY', 'IDENTITY', 'MATCHED', 'CONTEXT', '2026-09-30', 'SYN-001', 'Target ML-041; not adverse-event support'], ['D-02', 'EV-01', 'PROSECUTOR', 'ORIGINAL_REPORT', 'MATCHED', 'YES', '2026-09-01', 'SYN-002', 'Reports D-04 charge; no separate underlying evidence'], ['D-03', 'EV-01', 'PROSECUTOR', 'SYNDICATED_COPY', 'MATCHED', 'YES', '2026-09-02', 'SYN-003', 'Copies D-02; no new origin'], ['D-04', 'EV-01', 'PROSECUTOR', 'CHARGE_NOTICE', 'MATCHED', 'YES', '2026-09-01', 'SYN-004', 'Original allegation; does not establish guilt'], ['D-05', 'EV-01', 'COURT', 'STATUS_UPDATE', 'MATCHED', 'YES', '2026-09-20', 'SYN-005', 'Dismissal updates status; not an adverse assertion origin'], ['D-06', 'EV-02', 'ADMINISTRATIVE', 'FINAL_ORDER', 'MATCHED', 'YES', '2026-07-10', 'SYN-006', 'Recordkeeping finding; no later order supplied'], ['D-07', 'EV-03', 'OTHER_COURT', 'DIFFERENT_SUBJECT_REPORT', 'DIFFERENT_SUBJECT', 'NO', '2026-08-15', 'SYN-007', 'Explicit ML-904 identity mismatch'], ['D-08', 'EV-04', 'ANONYMOUS_BLOG', 'ALLEGATION', 'MATCHED', 'YES', '2026-09-23', 'SYN-008', 'One anonymous claim; primary support unavailable'], ['D-09', 'EV-04', 'SUBJECT', 'SUBJECT_RESPONSE', 'MATCHED', 'YES', '2026-09-24', 'SYN-009', 'Denies allegation; does not independently disprove it']]}], 'findings': [{'id': 'AM-F01', 'title': 'Later dismissal changes the charge narrative', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-004', 'SYN-005'], 'detail': 'The fictional charge was dismissed on procedural grounds on 2026-09-20; the order makes no merits determination.', 'recommendation': 'Correct current status and preserve the dated charge history.'}, {'id': 'AM-F02', 'title': 'Administrative order remains relevant within supplied scope', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-006'], 'detail': 'The fictional final administrative order records a recordkeeping finding and a USD 25,000 amount ordered, without evidence of payment or a later order.', 'recommendation': 'Assess decision relevance and obtain any later operative record.'}, {'id': 'AM-F03', 'title': 'Namesake conviction must be excluded', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-007'], 'detail': 'D-07 identifies ML-904; the target is ML-041.', 'recommendation': 'Retain the exclusion and do not attribute the conviction to the target.'}, {'id': 'AM-F04', 'title': 'Anonymous allegation remains unsupported by a primary record', 'severity': 'MEDIUM', 'confidence': 'LOW', 'claim_class': 'Reported', 'evidence_ids': ['SYN-008', 'SYN-009'], 'detail': 'D-08 alleges payroll diversion; D-09 denies it; the planned underlying-complaint search is access limited.', 'recommendation': 'Seek permitted primary support and assess the supplied response without prejudgment.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional D-01 source', 'locator': '10-worked-example.md, complete input D-01', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional D-02 source', 'locator': '10-worked-example.md, complete input D-02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional D-03 source', 'locator': '10-worked-example.md, complete input D-03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional D-04 source', 'locator': '10-worked-example.md, complete input D-04', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional D-05 source', 'locator': '10-worked-example.md, complete input D-05', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional D-06 source', 'locator': '10-worked-example.md, complete input D-06', 'claim_class': 'Observed'}, {'id': 'SYN-007', 'title': 'Fictional D-07 source', 'locator': '10-worked-example.md, complete input D-07', 'claim_class': 'Observed'}, {'id': 'SYN-008', 'title': 'Fictional D-08 source', 'locator': '10-worked-example.md, complete input D-08', 'claim_class': 'Observed'}, {'id': 'SYN-009', 'title': 'Fictional D-09 source', 'locator': '10-worked-example.md, complete input D-09', 'claim_class': 'Observed'}, {'id': 'REF-NNS', 'title': 'Wolfsberg Negative News Screening FAQs (2022)', 'locator': 'https://db.wolfsberg-group.org/assets/b3652a98-4bc6-4b42-9f05-e378a4adbd95/Negative%20News%20Screening%20FAQs%20(2022).pdf; Q4–Q5 and 02 applicability note', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Event candidates', 'value': 4, 'method': 'Distinct EV-01 through EV-04.', 'format': '#,##0'}, {'label': 'Attributable events', 'value': 3, 'method': 'Three MATCHED events; exclude EV-03 identity mismatch.', 'format': '#,##0'}, {'label': 'Eligible event-source items', 'value': '7 of 8', 'method': 'D-02 through D-09 less D-07; D-01 is context only.', 'format': '#,##0'}, {'label': 'Planned-search completion', 'value': 80.0, 'format': '0.0"%"', 'method': 'Four completed planned searches / five planned × 100.'}], 'limitations': ['All case records and events are fictional.', 'The anonymous allegation has no supplied underlying complaint.', 'The five-search plan does not establish exhaustive public coverage.', 'No authorized human disposition or external action is recorded.'], 'metadata': {'conclusion': 'Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.'}, 'report_narrative': [['Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.'], ['The review covers nine fictional source items and five planned searches through Sep 30, 2026 5:00 PM ET. Four searches are complete; the underlying complaint search is access limited.'], ['AM-F01 corrects the charge chronology using the later dismissal. AM-F02 preserves the administrative order within its stated scope. AM-F03 excludes the namesake. AM-F04 retains the anonymous allegation and denial as unresolved accounts.'], ['EventAssessment contains four candidates and three MATCHED events. EV-01 has one upstream allegation origin despite three publications; the dismissal changes status without deciding merits.'], ['SourceReview preserves nine source items. D-01 is identity context. Seven of eight event-source items are eligible, or 87.5%; that is not an adverse-event prevalence measure. D-09 is an attributed response, not corroboration of the allegation.'], ['SYN-001 through SYN-009 resolve to the complete fictional records in file 10. D-05 updates D-04; D-07 conflicts with target identity, and D-09 responds to D-08. REF-NNS provides method context only.'], ['Preserve the corrected chronology, assess the administrative order, keep the namesake excluded and obtain primary support for the anonymous claim if relevant. All actions remain proposed.'], ['All case records and events are fictional.', 'The anonymous allegation has no supplied underlying complaint.', 'The five-search plan does not establish exhaustive public coverage.', 'No authorized human disposition or external action is recorded.', 'QA must be recorded from actual checks; human disposition remains NOT REVIEWED.']], 'as_of': '2026-09-30 5:00 PM ET', 'scope': 'Nine fictional source items, four event candidates and five planned searches for ML-041 through Sep 30, 2026 5:00 PM ET. Method sources are not subject evidence.', 'suite_id': 'adverse-media', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'conclusion': 'Three of four fictional event candidates are attributable to ML-041. One charge was dismissed, one administrative order remains operative in the supplied record, and one anonymous allegation remains unresolved. The namesake conviction is excluded.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'AM-F01', 'proposal': 'Correct current status and preserve the dated charge history.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'AM-F02', 'proposal': 'Assess decision relevance and obtain any later operative record.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'AM-F03', 'proposal': 'Retain the exclusion and do not attribute the conviction to the target.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'AM-F04', 'proposal': 'Seek permitted primary support and assess the supplied response without prejudgment.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -69,6 +71,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -95,8 +104,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -120,8 +129,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -137,6 +198,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -152,7 +240,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -173,6 +261,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -220,10 +309,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -249,7 +338,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -286,13 +376,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -301,7 +397,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

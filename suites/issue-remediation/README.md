@@ -42,9 +42,11 @@ Actual build-token consumption, elapsed build time, and monetary cost are unknow
 <!-- BUILD:START -->
 ## Build and attachment budget
 
-The ten instructional files contain **18,448 words** and approximately **39,504 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **158,016–395,040 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
+The ten instructional files contain **20,732 words** and approximately **47,546 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **190,184–475,460 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
 
-Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.1.0/docs/VERIFICATION.md) records what was actually tested.
+The seven authored method files (01–05, 09 and 10) contain **8,736 prose/table words**, excluding fenced code and the compiled field dictionary. This separates method depth from repeated renderer code and embedded fixture payloads. Their complete file size is **58,644 UTF-8 bytes**. Counts measure content, not analytical validity.
 
-[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/issue-remediation.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
+Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.2.0/docs/VERIFICATION.md) records what was actually tested.
+
+[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.2.0/issue-remediation.zip). Unzip and attach the files for the current stage in file 01; files 01–10 contain the complete instructions. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
 <!-- BUILD:END -->

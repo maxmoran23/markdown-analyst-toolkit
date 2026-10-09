@@ -1,53 +1,141 @@
 # Analysis method — Monitoring Scenario and Threshold Review
 
-## 1. Define the detection question
+The following is an authored operational method for the supplied analytical task. Its sequence and fixture parameters are toolkit choices, not an assertion that a regulator prescribes these exact steps. Execute each applicable stage and retain a specific reason when a stage is blocked or outside scope. The completed specimen in file 10 shows the full record trail.
 
-State the behavior the scenario seeks to identify, the eligible activities, the unit of analysis, the time window, and what a useful alert would mean. Distinguish an observed pattern from an allegation of wrongdoing. Separate detection capability from investigation quality and reporting decisions. A scenario can detect a review-worthy pattern without determining whether a filing is required.
+## M01: Freeze the analytical unit
 
-Write the candidate predicate unambiguously. For the fixture it is score greater than or equal to threshold. Equality matters: U04 with score60 alerts under BASE60; U05 with score50 alerts under LOW50. Define missing score treatment, duplicate suppression, aggregation across transactions, and overlapping windows before comparing counts. A change to an aggregation window is a method change, not merely a new threshold.
+Define one record as one eligible customer-window with one score at the cutoff. Preserve the window start, end, grouping identity and source controls in a real case. In the fixture, U01 through U36 are already the supplied units; there is no implied transaction-level reconstruction.
 
-## 2. Audit data and labels before metrics
+**Exact specimen checkpoint.** Reconcile 36 =29 known +4 UNKNOWN +3 CENSORED. Count the positive and negative labels separately:16 and 13. Every candidate must start from the same 36 records.
 
-Reconcile eligible population, scored population, labelled subset, unknown labels, excluded units, and candidate outputs. Count distinct units and distinct groups. Inspect extreme scores, missing features, unexpected reference values, stale profiles, and repeated units. If customer baselines are missing, do not replace them with an assumed maximum anomaly unless that is an explicit approved design whose effects are evaluated.
+**Failure or competing explanation.** If a candidate drops records with unknown labels before calculating workload, its apparent workload advantage is invalid because those records still exist operationally.
 
-Review how labels were obtained. Synthetic labels are known by construction and useful for arithmetic and branch tests. They are not independent evidence of real-world target prevalence or coverage. Labels generated from the scenario's own rule conditions can make apparent recall perfect by definition. State this circularity and obtain independent evidence before performance conclusions.
+## M02: Lock eligibility before scores
 
-Inspect negative labels as carefully as positives. A closed alert can mean insufficient information, a documented explanation, or an operational decision; it is not universally a true negative. An unfiled case is not automatically negative. Use the declared rubric and preserve unresolved labels as UNKNOWN.
+Write the inclusion predicate independently of whether a unit scores high or already alerted. Eligibility may depend on product, time, ownership or channel, but not on the outcome you are trying to evaluate. Preserve each excluded unit and reason outside the core comparison.
 
-## 3. Hold the comparison frame constant
+**Exact specimen checkpoint.** All 36 fixture units are eligible. The score cutoff is a candidate decision applied after eligibility, not an eligibility filter.
 
-Apply each candidate to the same eligible scored population and the same labelled evaluation subset. If a candidate changes eligibility or data dependencies, show both the shared comparison frame and the changed-coverage population. A candidate that drops difficult records cannot claim a fair performance improvement on the remaining easier sample.
+**Failure or competing explanation.** If an excluded unit is later found to carry the relevant risk mechanism, create a coverage issue and re-scope the comparison; do not silently append it to the best-performing candidate only.
 
-Keep tuning and evaluation separate. When thresholds are chosen after seeing evaluation results, the observed winner is selected on that dataset and may overstate future performance. Record the candidates tried, the selection criterion, and the final locked candidate. A fresh holdout or later period is needed for an independent assessment. If it is unavailable, describe the results as exploratory.
+## M03: Protect dependence groups
 
-Group correlated records. Multiple windows for one customer can share activity and labels. Randomly splitting those rows may let the same pattern appear in both development and holdout. Use group-aware and time-aware partitioning suited to the question. Do not compute a narrow binomial interval that treats dependent windows as independent without justification.
+Assign all related units to the same partition where the intended evaluation assumes group independence. Inspect cross-account and overlapping-window relationships instead of trusting unique row IDs. A row can be unique while its information is duplicated elsewhere.
 
-## 4. Build confusion matrices
+**Exact specimen checkpoint.** G01 through G06 are TRAIN, G07 through G12 VALIDATION, and G13 through G18 HOLDOUT. Each group has two units and no cross-partition membership.
 
-On the labelled subset, TP is an alerted POSITIVE; FP is an alerted NEGATIVE; FN is a nonalerted POSITIVE; TN is a nonalerted NEGATIVE. Verify TP+FP+FN+TN equals the number of evaluable labelled units. UNKNOWN units do not enter these four cells. Count them separately, including which ones each candidate alerts.
+**Failure or competing explanation.** If G01 appears in HOLDOUT after a join, freeze interpretation of protected performance until the overlap is removed or a dependence-aware method is justified.
 
-Precision = TP/(TP+FP). Recall = TP/(TP+FN). False-positive rate = FP/(FP+TN). Labelled alert rate = (TP+FP)/labelled units. Total-population alert rate = candidate alerts across all scored eligible units / all scored eligible units. These denominators are different. An alert conversion rate based on filings is a different outcome and should not be relabeled precision.
+## M04: Separate candidate development from evaluation
 
-A zero denominator yields null. No predicted positives makes precision undefined, not100%. No known positives makes recall undefined, not100%. Report counts alongside ratios so a one-case change remains visible. Round display only after calculations. A percentage-point change is the difference between percentages; a relative change divides by the baseline value.
+Use training material to define candidate ideas, validation material for documented comparison, and protected holdout evidence only after candidate and decision rules are frozen. Record the order of access and every revision.
 
-## 5. Compare incremental cases and capacity
+**Exact specimen checkpoint.** The specimen stipulates all four candidates were declared before protected results. That stipulation is an illustrative premise, not evidence that an actual organization operated this way.
 
-For each challenger list newly alerted units, no-longer-alerted units, retained alerts, and retained nonalerts relative to baseline. Attach labels and relevant risk characteristics. A higher threshold may reduce workload while dropping a known positive; show that loss directly rather than hiding it in an average score. A lower threshold may recover a positive while creating additional review workload.
+**Failure or competing explanation.** If LOW50 was selected after inspecting HOLDOUT labels, report the selection honestly and obtain a new protected evaluation; do not call the old holdout untouched.
 
-Estimate workload from unique review opportunities after the actual deduplication logic, not raw rule hits. Multiple scenarios can alert on one case. If handling time is assumed, show it as an estimate: alerts times minutes per alert divided by 60 gives hours. Separate first-level handling, escalation, quality review, and rework if they materially differ. Do not assume an unchanged average handling time for a materially different mix of cases.
+## M05: Construct the available-label set
 
-Capacity is a constraint, not permission to suppress risk. If a candidate exceeds capacity, identify staffing, prioritization, phasing, data improvement, or scenario redesign alternatives. If no candidate meets both coverage and operational constraints, recommend additional work rather than declaring the least bad candidate production-ready.
+Use POSITIVE and NEGATIVE only when the supplied rubric and cutoff support that state. Keep UNKNOWN for unavailable evidence and CENSORED for outcomes whose observation window has not matured. Neither is a negative.
 
-## 6. Bound what unknown labels could change
+**Exact specimen checkpoint.** TRAIN has 10 known labels, VALIDATION10 and HOLDOUT9. Their sum is 29; the unavailable counts are 2,2 and 3.
 
-For the tiny fixture, enumerate the four possible label assignments to U07 and U08 to show sensitivity. This gives bounds conditional on treating every unknown as either positive or negative under the same rubric. It is not a confidence interval and does not estimate unknown real-world prevalence.
+**Failure or competing explanation.** If an unknown unit later becomes positive, update the label version and all affected matrices; preserve the old cutoff results rather than rewriting history.
 
-For BASE60, known TP2 and known positives3, U07 alerts and U08 does not. The lowest full-fixture recall is 2/4=50.0% when U07 is negative and U08 positive. The highest is 3/4=75.0% when U07 is positive and U08 negative. For HIGH75 the corresponding range is 25.0% to 50.0%. For LOW50 it is 75.0% to 100%. These ranges demonstrate why100% recall on three known positives cannot prove complete coverage.
+## M06: Apply the inclusive score predicate
 
-For a larger dataset, report unknown-label counts and select a defensible review design. Do not substitute invented labels or an unsupported confidence band. Weighted estimators require actual selection probabilities and appropriate variance methods; if unavailable, keep descriptive subset metrics.
+For each candidate, select the threshold using the frozen segment and compare score>=threshold. Do not round the score before comparison unless the specification says to. The fixture scores are integers, but the rule also defines equality and nearby decimals.
 
-## 7. Challenge robustness and drift
+**Exact specimen checkpoint.** BASE60 uses 60 everywhere; HIGH75 uses 75; LOW50 uses 50; SEGMENTED uses 55 for RETAIL,60 for SMALL_BUSINESS and 65 for CORRESPONDENT.
 
-Inspect performance by relevant strata, time periods, data sources, customer groups, and behavioral variants. A stable aggregate can conceal a weak subgroup. Small cells require counts and uncertainty, not overconfident rankings. Examine adjacent thresholds and feature perturbations to detect cliff effects. A missing value, changed currency unit, daylight-saving boundary, or late transaction can change a windowed rule even when the threshold is unchanged.
+**Failure or competing explanation.** A score 60 is a BASE60 hit. A score 59.999 is not. Converting 59.999 to 60 for display must not change the stored predicate result.
 
-Define post-change monitoring before proposing deployment: population and alert counts, score distribution, data defects, sampled below-threshold review, backlog, handling time, label drift, and known-case capture. Specify human escalation and rollback triggers with evidence requirements. A successful fixture run supports implementation consistency on the fixture only. It does not replace independent validation or ongoing review.
+## M07: Calculate confusion matrices at unit grain
+
+Within each partition, TP means a known positive raw hit, FP a known negative raw hit, FN a known positive nonhit and TN a known negative nonhit. Sum all four and compare with the known-label denominator before computing rates.
+
+**Exact specimen checkpoint.** For ALL BASE60 the matrix isTP11 FP9 FN5 TN4. Precision 11/20=55.0%; recall 11/16=68.8%. Seven unavailable labels are outside this matrix.
+
+**Failure or competing explanation.** A merged case containing two raw hit units contributes two units to the unit matrix. Replacing those with one case changes the grain and invalidates direct comparison.
+
+## M08: Measure raw workload separately
+
+Count every eligible predicate hit whether its outcome is positive, negative, unknown or censored. This is a detection-stage count, not a case count or an analyst productivity measure.
+
+**Exact specimen checkpoint.** Raw hits are 21 for BASE60,11 for HIGH75,27 for LOW50 and 19 for SEGMENTED. These denominators are 36 units, not 29 known labels.
+
+**Failure or competing explanation.** If a report labels 21 as a false-positive count, reject the statement: it includes known positives and unavailable outcomes as well as negatives.
+
+## M09: Replay suppression before merge
+
+Apply the supplied suppression list to raw hits and preserve the eliminated unit IDs and reason. A suppression may be authorized in a real process, but its existence in an extract does not establish validity.
+
+**Exact specimen checkpoint.** G17 removes U33 and U34 when they hit. U33 is a known positive hit for all candidates. U34 hits BASE60, HIGH75, LOW50 and SEGMENTED; two hits are removed from each.
+
+**Failure or competing explanation.** If a candidate appears to save two alerts solely because G17 was omitted upstream, recover the suppressed ledger and restate both raw and retained results.
+
+## M10: Merge only within the declared group
+
+Create one queued case per candidate and retained group. Select the lexicographically smallest hit unit as lead. Keep the children and their IDs in the case lineage. Do not merge across candidates, partitions or unrelated groups.
+
+**Exact specimen checkpoint.** Queued cases are 11,8,17 and 9 respectively. A case-level workload reduction can arise even if raw coverage is unchanged.
+
+**Failure or competing explanation.** A nonhit sibling is not automatically a detected unit because its group has a case. Credit requires explicit evidence that review scope included that sibling and its relevant activity.
+
+## M11: Calculate workload from routed cases
+
+For each queued group, add the segment lead time and 0.25 hours for each additional retained hit after the first. Sum group costs without rounding intermediate values. The fixture assumes all group units share a segment.
+
+**Exact specimen checkpoint.** BASE60 requires 19.5 hours, HIGH7511.75, LOW5027.0 and SEGMENTED14.5 over the full supplied frame. The illustrative combined capacity is 15 hours.
+
+**Failure or competing explanation.** Do not set a threshold solely to make workload fit capacity. A lower workload can hide missed positives, incomplete labels, unauthorized suppression or a changed unit of counting.
+
+## M12: Preserve segment and incremental effects
+
+Compare candidate and baseline hit sets by exact IDs, partition and segment. Report added known positives, removed known positives, changed negative hits and unavailable outcomes separately.
+
+**Exact specimen checkpoint.** SEGMENTED gains RETAIL U03 relative to BASE60 but loses CORRESPONDENT U11 and U23 and removes UNKNOWN U35. The aggregate known-positive count falls 11 to 10.
+
+**Failure or competing explanation.** A favorable average cannot establish that a segment-specific loss is acceptable. Request explicit rationale and human risk judgment for each material segment effect.
+
+## M13: Review below-threshold activity
+
+Construct the complete nonhit frame for a named reference candidate, fix the selection design and preserve all unselected records. Explain whether the design is probability-based, purposive or a constructed test.
+
+**Exact specimen checkpoint.** BASE60 has 15 nonhits. Assigned ranks select U03,U07,U15,U20,U28,U36. Selected outcomes: 3 POSITIVE, 1 NEGATIVE, 1 UNKNOWN and 1 CENSORED. Nine frame units are not reviewed in this draw.
+
+**Failure or competing explanation.** Do not divide three positives by four known selected labels and call 75% the population missed-positive rate; selection is illustrative and two selected outcomes are unavailable.
+
+## M14: Use uncertainty methods only when justified
+
+Choose the estimand and sampling design before an interval. Binomial intervals assume a relevant trial model; finite-population sampling without replacement may require a hypergeometric treatment. Dependence, deliberate selection and incomplete labels can invalidate a simple interval.
+
+**Exact specimen checkpoint.** No confidence interval is attached to the 36-unit designed fixture. File 10 includes separate mathematical demonstrations labeled as such, with their assumptions and exact inputs.
+
+**Failure or competing explanation.** A narrow interval from thousands of correlated windows does not prove precision if the effective independent information is much smaller or outcomes are selected after alerting.
+
+## M15: Challenge capacity and sensitivity together
+
+Vary one assumption at a time, then evaluate combined plausible changes. Keep unit coverage and routed workload side by side. Examine larger arrival volume, slower review, loss of suppression authority and more complete labels as separate scenarios.
+
+**Exact specimen checkpoint.** Removing G17 suppression adds one correspondent lead and one child, or 2.25 hours, to every candidate. It restores known positive U33 to the routed numerator.
+
+**Failure or competing explanation.** Do not treat an unknown future capacity as an exact number. Supply a range and the conditions under which the chosen candidate would cease to fit it.
+
+## M16: Define change and monitoring gates
+
+Tie a recommendation to data completeness, label design, candidate freeze, routing evidence, implementation replay, capacity plan and human authorization. A candidate can be promising while every deployment gate remains unresolved.
+
+**Exact specimen checkpoint.** LOW50 is further-validation-only. HIGH75 and SEGMENTED are not supported from this case. BASE60 remains a descriptive baseline, not an endorsed live configuration.
+
+**Failure or competing explanation.** A new approved threshold without post-change input controls and rollback evidence can create an unobserved coverage gap; keep the implementation and monitoring dependencies visible.
+
+## Calculation order and invariant handling
+
+The calculation order is population freeze, partition and segment lookup, label classification, candidate predicate, raw matrix and hit count, suppression, merge, workload, incremental comparison, below-threshold review and decision gates. Changing that order can change the meaning of results. For example, suppressing G17 before the raw matrix makes the threshold look less effective while hiding the routing defect. Merging before countingTP andFP changes the unit of analysis. Removing unavailable labels before workload understates operational activity.
+
+LetH(c) be the set of eligible units with score at least the candidate’s segment threshold. LetK be the units with known positive or negative labels. The raw confusion matrix usesH(c) intersectK. LetS be the suppression group set. Retained hitsR(c) areH(c) whose group is not inS. Queued casesQ(c) are the distinct candidate-group pairs represented inR(c). Workload is the sum acrossQ(c) of lead hours plus 0.25 times the number of retained child hits beyond the lead. These are nested but differently grained objects; never replace one denominator with another.
+
+Precision usesTP/(TP+FP). Recall usesTP/(TP+FN). Known-label false-positive rate, if requested, usesFP/(FP+TN), which is not one minus precision. Alert yield and escalation rate require separately defined downstream outcomes and cannot be inferred from the supplied labels. Retained-positive coverage uses known positive raw hits that survive suppression divided by all known positives; it does not credit unhit siblings. Population effectiveness cannot be calculated because the labels are incomplete and the fixture is designed rather than representative.
+
+For an added or removed unit, preserve the baseline hit, candidate hit, label state, segment, partition, routing state and workload contribution. Workload is not additive by raw unit alone because removing a lead can promote a child without eliminating the case’s lead cost. Recompute the whole affected group. If U01 is removed while U02 stillhits, the group still incurs its one-hour lead cost; only the extra 0.25 child cost disappears. This is why summing nominal per-alert savings can overstate capacity relief.

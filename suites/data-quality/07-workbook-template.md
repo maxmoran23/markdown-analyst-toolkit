@@ -1,6 +1,6 @@
 # Data Quality and Fitness for Use — fixed workbook template
 
-Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.2.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -43,15 +43,20 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 - The Dashboard calculates counts from the Findings severity column using `COUNTIF`. Counts cover **supplied findings**, not the entire transaction/customer population. Use the exact source scope in denominators.
 - This is a snapshot generator: after adding or removing records, regenerate the workbook so formulas, validations, filters and chart ranges include every row. Do not assume inserting a row extends all ranges.
 - Summary business measures come from validated input calculations. Preserve each method and limitation alongside the value. Recompute them from source when adapting; never retain a specimen metric by accident.
+- Summary also retains the conclusion, every method and all eight report sections' narrative paragraphs in ordered, individually identified rows. Preserve their exact section names in `method_or_limit`; a workbook handoff must retain the reasoning alongside the domain tables.
 - `openpyxl` writes formulas but does not calculate them. Request recalculation in Excel or the available spreadsheet engine, inspect results, and record the outcome. If unavailable, label formula-cache/display behavior **NOT TESTED**; the independently computed check does not prove Excel behavior.
 
 ## Complete in-session renderer
+
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
 The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
 
 Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+All output formats limit declared decimal display places to 15. This is a portable rendering boundary, not a claim of 15-decimal calculation accuracy. Keep more precise source quantities as exact text with the declared unit when their digits matter.
 
 The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
 
@@ -66,7 +71,7 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'data-quality', 'title': 'Data Quality and Fitness for Use', 'summary': 'Assess whether a defined dataset can support a specific analytical or control purpose, with record-level defects and explicit release restrictions.', 'audience': 'Data stewards, control analysts, and review teams', 'decision': 'Is the supplied dataset sufficiently supported for the stated use, and which defects require human resolution?', 'palette': 'teal', 'report_sections': ['Fitness recommendation and restrictions', 'Scope data contract and method', 'Material defects and findings', 'Record population and lineage', 'Rule outcomes and hard gates', 'Evidence and source limitations', 'Remediation reconciliation and retest', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'DataRecords', 'columns': ['record_id', 'customer_id', 'entity_type', 'full_name', 'date_of_birth', 'country_code', 'last_refresh'], 'rows': [['D01', 'P001', 'INDIVIDUAL', 'Aster Vale', '1985-04-12', 'US', '2026-09-20'], ['D02', 'P002', 'INDIVIDUAL', None, '1990-02-30', 'CA', '2026-09-20'], ['D03', 'P003', 'INDIVIDUAL', 'Briar Lake', '1977-08-03', 'ZZ', '2024-09-30'], ['D04', 'P004', 'ENTITY', 'Cedar Sample Ltd', None, 'GB', '2026-09-20'], ['D05', 'P005', 'INDIVIDUAL', 'Dune Rowan', '1988-06-11', 'US', '2026-09-20'], ['D06', 'P005', 'INDIVIDUAL', 'Dune Rowan', '1988-06-11', 'US', '2026-09-20']]}, {'name': 'RuleResults', 'columns': ['rule_id', 'dimension', 'eligible_count', 'defect_count', 'defect_rate', 'critical', 'gate_result'], 'rows': [['DQ01', 'Completeness', 6, 1, 0.16666666666666666, True, 'RESTRICT'], ['DQ02', 'Validity', 6, 1, 0.16666666666666666, True, 'RESTRICT'], ['DQ03', 'Validity', 5, 1, 0.2, True, 'RESTRICT'], ['DQ04', 'Uniqueness', 6, 2, 0.3333333333333333, True, 'RESTRICT'], ['DQ05', 'Timeliness', 6, 1, 0.16666666666666666, False, 'REVIEW']], 'formats': {'defect_rate': '0.0%'}}], 'findings': [{'id': 'DQ-F01', 'title': 'Critical validity and completeness defects prevent an unrestricted recommendation', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'D02 has a blank name and impossible date; D03 has a code outside the fictional approved set.', 'recommendation': 'Propose restricted use pending source-owner correction and record-level retest.'}, {'id': 'DQ-F02', 'title': 'Duplicated customer key affects two supplied records', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'P005 appears on D05 and D06 where the contract requires one row per customer. Two affected rows form one duplicate group and one excess row.', 'recommendation': 'Resolve source lineage before any merge or removal; reconcile corrected counts.'}, {'id': 'DQ-F03', 'title': 'One refresh date exceeds the illustrative freshness horizon', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'D03 is 730 days old at 2026-09-30 against a 365-day illustration.', 'recommendation': 'Obtain current evidence or document a permitted limitation for the intended use.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-record customer extract and rule contract', 'locator': '10-worked-example.md, complete input and rule outcomes', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'BCBS Principles for effective risk data aggregation and risk reporting', 'locator': 'https://www.bis.org/publ/bcbs239.pdf', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'BCBS 239 implementation newsletter, 2026', 'locator': 'https://www.bis.org/publications/implementation-principles-effective-risk-data-aggregation-and-risk-reporting-bcbs-239-principles', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Supplied rows', 'value': '6', 'method': 'Count all original record IDs, retaining both duplicate-group members.', 'format': '#,##0'}, {'label': 'Critical-affected rows', 'value': '4 of 6 (66.7%)', 'method': 'Distinct union D02,D03,D05,D06 / all six records.', 'format': '#,##0'}, {'label': 'Passing rule checks', 'value': '23 of 29 (79.3%)', 'method': 'Eligible rule checks29 minus six failures; diagnostic only, no release authority.', 'format': '#,##0'}], 'limitations': ['The allowed codes and 365-day horizon are fictional contractual examples.', 'The check inventory cannot detect every possible data defect.', 'Duplicate keys establish a contract breach, not authority to merge records.', 'No source-system correction or feed restriction was executed.'], 'conclusion': 'Four of six fictional records are affected by critical defects, so the evidence supports a restricted-use recommendation. The 79.3% diagnostic check-pass rate cannot override critical gates; correction and acceptance remain human decisions.', 'report_narrative': [['Four of six fictional records are affected by critical defects. The draft recommendation is restricted use pending source-confirmed correction and human acceptance; a 79.3% diagnostic check-pass rate cannot override the critical gates.'], ['The extract has six active rows, five distinct customer keys, and a one-row-per-customer contract. The fixture uses five rules, a limited US/CA/GB code set, and a 365-day freshness horizon; these are illustrative contractual choices.'], ['D02 has a blank name and impossible birth date; D03 has an unapproved code and stale refresh date; D05 and D06 share the same customer key. Duplicate keys breach this contract but do not authorize a merge or deletion.'], ['DataRecords preserves all six original rows, including nulls and invalid date text. There are no exclusions. The key P005 forms one duplicate group, two affected rows, and one excess row; these counts describe different aspects of the defect.'], ['Rule eligibility totals 6 + 6 + 5 + 6 + 6 = 29 checks; six fail and 23 pass. The ENTITY row D04 is outside the individual birth-date denominator. Critical affected IDs are the distinct union D02, D03, D05, D06, or 4/6 = 66.7%.'], ['SYN-001 supports the record-level arithmetic and rule outcomes. The public BCBS sources provide method context only; they do not prescribe the fictional code list, freshness horizon, or zero-failure gates. Upstream real-world accuracy is outside this fixture.'], ['Propose source-owner correction for D02 and D03, lineage resolution for P005, and current refresh evidence. Retest the corrected extract and reconcile any approved removal to the original six records; do not improve rates by silently dropping defects.'], ['QA checks calendar validity, conditional eligibility, duplicate accounting, and distinct affected-row totals. Actual feed acceptance, source correction, or use restrictions require an authorized human decision; no production action occurred.']], 'suite_id': 'data-quality', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'DQ-F01', 'proposal': 'Propose restricted use pending source-owner correction and record-level retest.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'DQ-F02', 'proposal': 'Resolve source lineage before any merge or removal; reconcile corrected counts.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'DQ-F03', 'proposal': 'Obtain current evidence or document a permitted limitation for the intended use.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'data-quality', 'title': 'Data Quality and Fitness for Use', 'summary': 'Assess whether a defined dataset can support a specific analytical or control purpose, with record-level defects and explicit release restrictions.', 'audience': 'Data stewards, control analysts, and review teams', 'decision': 'Is the supplied dataset sufficiently supported for the stated use, and which defects require human resolution?', 'palette': 'teal', 'report_sections': ['Fitness recommendation and restrictions', 'Scope data contract and method', 'Material defects and findings', 'Record population and lineage', 'Rule outcomes and hard gates', 'Evidence and source limitations', 'Remediation reconciliation and retest', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'DataRecords', 'columns': ['record_id', 'customer_id', 'entity_type', 'full_name', 'date_of_birth', 'country_code', 'last_refresh'], 'rows': [['D01', 'P001', 'INDIVIDUAL', 'Aster Vale', '1985-04-12', 'US', '2026-09-20'], ['D02', 'P002', 'INDIVIDUAL', None, '1990-02-30', 'CA', '2026-09-20'], ['D03', 'P003', 'INDIVIDUAL', 'Briar Lake', '1977-08-03', 'ZZ', '2024-09-30'], ['D04', 'P004', 'ENTITY', 'Cedar Sample Ltd', None, 'GB', '2026-09-20'], ['D05', 'P005', 'INDIVIDUAL', 'Dune Rowan', '1988-06-11', 'US', '2026-09-20'], ['D06', 'P005', 'INDIVIDUAL', 'Dune Rowan', '1988-06-11', 'US', '2026-09-20']]}, {'name': 'RuleResults', 'columns': ['rule_id', 'dimension', 'eligible_count', 'defect_count', 'defect_rate', 'critical', 'gate_result'], 'rows': [['DQ01', 'Completeness', 6, 1, 0.16666666666666666, True, 'RESTRICT'], ['DQ02', 'Validity', 6, 1, 0.16666666666666666, True, 'RESTRICT'], ['DQ03', 'Validity', 5, 1, 0.2, True, 'RESTRICT'], ['DQ04', 'Uniqueness', 6, 2, 0.3333333333333333, True, 'RESTRICT'], ['DQ05', 'Timeliness', 6, 1, 0.16666666666666666, False, 'REVIEW']], 'formats': {'defect_rate': '0.0%'}}], 'findings': [{'id': 'DQ-F01', 'title': 'Critical validity and completeness defects prevent an unrestricted recommendation', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'D02 has a blank name and impossible date; D03 has a code outside the fictional approved set.', 'recommendation': 'Propose restricted use pending source-owner correction and record-level retest.'}, {'id': 'DQ-F02', 'title': 'Duplicated customer key affects two supplied records', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'P005 appears on D05 and D06 where the contract requires one row per customer. Two affected rows form one duplicate group and one excess row.', 'recommendation': 'Resolve source lineage before any merge or removal; reconcile corrected counts.'}, {'id': 'DQ-F03', 'title': 'One refresh date exceeds the illustrative freshness horizon', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'D03 is 730 days old at 2026-09-30 against a 365-day illustration.', 'recommendation': 'Obtain current evidence or document a permitted limitation for the intended use.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-record customer extract and rule contract', 'locator': '10-worked-example.md, complete input and rule outcomes', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'BCBS Principles for effective risk data aggregation and risk reporting', 'locator': 'https://www.bis.org/publ/bcbs239.pdf', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'BCBS 239 implementation newsletter, 2026', 'locator': 'https://www.bis.org/publications/implementation-principles-effective-risk-data-aggregation-and-risk-reporting-bcbs-239-principles', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Supplied rows', 'value': '6', 'method': 'Count all original record IDs, retaining both duplicate-group members.', 'format': '#,##0'}, {'label': 'Critical-affected rows', 'value': '4 of 6 (66.7%)', 'method': 'Distinct union D02,D03,D05,D06 / all six records.', 'format': '#,##0'}, {'label': 'Passing rule checks', 'value': '23 of 29 (79.3%)', 'method': 'Eligible rule checks29 minus six failures; diagnostic only, no release authority.', 'format': '#,##0'}], 'limitations': ['The allowed codes and 365-day horizon are fictional contractual examples.', 'The check inventory cannot detect every possible data defect.', 'Duplicate keys establish a contract breach, not authority to merge records.', 'No source-system correction or feed restriction was executed.'], 'conclusion': 'Four of six fictional records are affected by critical defects, so the evidence supports a restricted-use recommendation. The 79.3% diagnostic check-pass rate cannot override critical gates; correction and acceptance remain human decisions.', 'report_narrative': [['Four of six fictional records are affected by critical defects. The draft recommendation is restricted use pending source-confirmed correction and human acceptance; a 79.3% diagnostic check-pass rate cannot override the critical gates.'], ['The extract has six active rows, five distinct customer keys, and a one-row-per-customer contract. The fixture uses five rules, a limited US/CA/GB code set, and a 365-day freshness horizon; these are illustrative contractual choices.'], ['D02 has a blank name and impossible birth date; D03 has an unapproved code and stale refresh date; D05 and D06 share the same customer key. Duplicate keys breach this contract but do not authorize a merge or deletion.'], ['DataRecords preserves all six original rows, including nulls and invalid date text. There are no exclusions. The key P005 forms one duplicate group, two affected rows, and one excess row; these counts describe different aspects of the defect.'], ['Rule eligibility totals 6 + 6 + 5 + 6 + 6 = 29 checks; six fail and 23 pass. The ENTITY row D04 is outside the individual birth-date denominator. Critical affected IDs are the distinct union D02, D03, D05, D06, or 4/6 = 66.7%.'], ['SYN-001 supports the record-level arithmetic and rule outcomes. The public BCBS sources provide method context only; they do not prescribe the fictional code list, freshness horizon, or zero-failure gates. Upstream real-world accuracy is outside this fixture.'], ['Propose source-owner correction for D02 and D03, lineage resolution for P005, and current refresh evidence. Retest the corrected extract and reconcile any approved removal to the original six records; do not improve rates by silently dropping defects.'], ['QA checks calendar validity, conditional eligibility, duplicate accounting, and distinct affected-row totals. Actual feed acceptance, source correction, or use restrictions require an authorized human decision; no production action occurred.']], 'suite_id': 'data-quality', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'DQ-F01', 'proposal': 'Propose restricted use pending source-owner correction and record-level retest.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'DQ-F02', 'proposal': 'Resolve source lineage before any merge or removal; reconcile corrected counts.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'DQ-F03', 'proposal': 'Obtain current evidence or document a permitted limitation for the intended use.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -79,6 +84,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -105,8 +117,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -130,8 +142,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -147,6 +211,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -162,7 +253,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -183,6 +274,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -274,6 +366,11 @@ summary_rows = [
     ['data_label', DATA['notice'], 'Retain synthetic label for examples'],
 ]
 summary_rows += [[m['label'], m['value'], m['method']] for m in DATA['metrics']]
+summary_rows += [['conclusion', DATA['conclusion'], 'Case-specific conclusion; human disposition remains separate']]
+summary_rows += [[f'method_{i:02}', value, 'Applied method'] for i,value in enumerate(DATA['methods'],1)]
+summary_rows += [[f'report_section_{section:02}_paragraph_{paragraph:02}', value, DATA['report_sections'][section-1]]
+                 for section,paragraphs in enumerate(DATA['report_narrative'],1)
+                 for paragraph,value in enumerate(paragraphs,1)]
 summary_rows += [['limitation', value, 'Preserve in every exported format'] for value in DATA['limitations']]
 populate(summary, ['measure', 'value', 'method_or_limit'], summary_rows)
 for row_number, metric in enumerate(DATA['metrics'], 9):
@@ -328,6 +425,12 @@ qa_cols = ['check_id', 'check', 'result', 'evidence']
 populate(sheet('QA'), qa_cols, [[q['id'], q['check'], q['result'], q['evidence']] for q in DATA['qa']], 'QARegister')
 for i, t in enumerate(DATA['domain_tables'], 1):
     ws = populate(sheet(t['name']), t['columns'], t['rows'], f'DomainRegister{i}', t.get('formats'))
+    for column,spec in t.get('column_contracts',{}).items():
+        index=t['columns'].index(column)+1
+        contract=f"{spec['description']} Type: {spec['type']}. Unit: {spec['unit']}. Nullable: {spec['nullable']}."
+        if column in t.get('primary_key',[]):contract+=' Part of the primary key.'
+        if 'enum' in spec:contract+=' Allowed values: '+', '.join(map(str,spec['enum']))+'.'
+        ws.cell(1,index).comment=Comment(contract,'Toolkit')
     stats_row = len(t['rows']) + 3
     literal(ws.cell(stats_row, 1), 'Domain record count')
     literal(ws.cell(stats_row, 2), len(t['rows']))

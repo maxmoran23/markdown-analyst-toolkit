@@ -87,6 +87,11 @@ summary_rows = [
     ['data_label', DATA['notice'], 'Retain synthetic label for examples'],
 ]
 summary_rows += [[m['label'], m['value'], m['method']] for m in DATA['metrics']]
+summary_rows += [['conclusion', DATA['conclusion'], 'Case-specific conclusion; human disposition remains separate']]
+summary_rows += [[f'method_{i:02}', value, 'Applied method'] for i,value in enumerate(DATA['methods'],1)]
+summary_rows += [[f'report_section_{section:02}_paragraph_{paragraph:02}', value, DATA['report_sections'][section-1]]
+                 for section,paragraphs in enumerate(DATA['report_narrative'],1)
+                 for paragraph,value in enumerate(paragraphs,1)]
 summary_rows += [['limitation', value, 'Preserve in every exported format'] for value in DATA['limitations']]
 populate(summary, ['measure', 'value', 'method_or_limit'], summary_rows)
 for row_number, metric in enumerate(DATA['metrics'], 9):
@@ -141,6 +146,12 @@ qa_cols = ['check_id', 'check', 'result', 'evidence']
 populate(sheet('QA'), qa_cols, [[q['id'], q['check'], q['result'], q['evidence']] for q in DATA['qa']], 'QARegister')
 for i, t in enumerate(DATA['domain_tables'], 1):
     ws = populate(sheet(t['name']), t['columns'], t['rows'], f'DomainRegister{i}', t.get('formats'))
+    for column,spec in t.get('column_contracts',{}).items():
+        index=t['columns'].index(column)+1
+        contract=f"{spec['description']} Type: {spec['type']}. Unit: {spec['unit']}. Nullable: {spec['nullable']}."
+        if column in t.get('primary_key',[]):contract+=' Part of the primary key.'
+        if 'enum' in spec:contract+=' Allowed values: '+', '.join(map(str,spec['enum']))+'.'
+        ws.cell(1,index).comment=Comment(contract,'Toolkit')
     stats_row = len(t['rows']) + 3
     literal(ws.cell(stats_row, 1), 'Domain record count')
     literal(ws.cell(stats_row, 2), len(t['rows']))

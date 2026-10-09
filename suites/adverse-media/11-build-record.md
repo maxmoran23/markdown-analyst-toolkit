@@ -1,18 +1,21 @@
 # Adverse Media — build record
 
-Version 1.1.0. Build date: 2026-10-09. This file documents the suite and is not required as a chat attachment.
+Version 1.2.0. Build date: 2026-10-09. This file documents the suite and is not required as a chat attachment.
 
 ## Measured content and estimated resources
 
 | Measure | Result | Method / limitation |
 | --- | --- | --- |
 | Instructional files | 10 | Files 01–10; README and this record excluded |
-| Instructional words | 16,771 | Whitespace-separated tokens, including code |
-| UTF-8 bytes | 150,764 | Sum of files 01–10 |
-| Characters | 150,717 | Unicode characters across files 01–10 |
-| Estimated attachment tokens | 37,680 | Ceiling(characters / 4); not a tokenizer measurement |
-| Context sensitivity range | 30,144–50,239 | Characters / 5 to characters / 3; not a guaranteed bound |
-| Illustrative build-token budget | 150,720–376,800 | Planning heuristic: 4–10 times final context estimate for drafting, review and revision; **not observed consumption**, actual usage may fall outside |
+| Instructional words | 19,055 | Whitespace-separated tokens, including code |
+| Authored method prose | 6,971 | Files 01–05, 09 and 10; excludes fences and compiled dictionary |
+| Complete authored-file bytes | 48,882 | Seven method files, including their fixture code and compiled dictionary |
+| Domain registers and rows | 2 registers / 13 rows | Populated fictional specimen; volume does not prove quality |
+| UTF-8 bytes | 182,933 | Sum of files 01–10 |
+| Characters | 182,886 | Unicode characters across files 01–10 |
+| Estimated attachment tokens | 45,722 | Ceiling(characters / 4); not a tokenizer measurement |
+| Context sensitivity range | 36,578–60,962 | Characters / 5 to characters / 3; not a guaranteed bound |
+| Illustrative build-token budget | 182,888–457,220 | Planning heuristic: 4–10 times final context estimate for drafting, review and revision; **not observed consumption**, actual usage may fall outside |
 | Actual authoring/reasoning/input tokens | Not available | No complete per-suite generation telemetry captured |
 | Actual monetary build cost | Not available | No token billing attribution or assumed model price |
 | Elapsed effort | Not attributed per suite | Parallel authoring and shared template work overlap |
@@ -30,7 +33,7 @@ The build-budget range is intentionally an estimate of resources one might reser
 | 5. Review | Defined falsifiable analytical and delivery checks | File 09; actual release checks are listed in the root verification record |
 | 6. Package | Measured files, embedded renderers and created checksummed bundles | This record, release assets and root verification record |
 
-Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.1.0/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
+Stage order describes the workflow, not a fabricated hourly timeline. A listed acceptance test is not evidence it passed. See [release verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.2.0/docs/VERIFICATION.md) for checks actually performed and limits, including lack of testing in an enterprise Copilot tenant.
 
 ## Instructional file integrity
 
@@ -41,9 +44,9 @@ Stage order describes the workflow, not a fabricated hourly timeline. A listed a
 | `03-analysis-method.md` | `8f9bd8c151aa9ebdb4af61ed3fdf210af2d5b4dd6e95305af50c404d1524f956` |
 | `04-decision-rules.md` | `deec37c422ccb1245d799e2de082218b1e19842d4218c6827186e9ccf62c8e71` |
 | `05-output-contract.md` | `146585bfb9dcf054b979e519f247342f7c5851adff80073233e0e2090593643d` |
-| `06-report-template.md` | `c186d39cf28ad1d6e579ace0ac5042cbbc1af6fc22a13e4a8f7a0ef3817dcb34` |
-| `07-workbook-template.md` | `727a7ff5d3afec53461d50aa98ec2085505a4750b3719d154fea6b55f2441121` |
-| `08-dashboard-template.md` | `afc5a31aa6c8f482992c58bd18fac036c7719eb3d2ffe7fed6db6ccbca555829` |
+| `06-report-template.md` | `b42633580b336bb823450b8993ac09236ac66850b822ac99c674e368194f0381` |
+| `07-workbook-template.md` | `8f815a993d52891011329115e84ce561d34037b3513bd53748474a7a6ac9aa1f` |
+| `08-dashboard-template.md` | `136a57709ca59572ec70c0d9f035055135ceaae4b64b9f3180bde5a42b474d57` |
 | `09-quality-review.md` | `86748af18c73bb45539a5646406cd5e65d44ea8e3bf4801b987ca3416a264d17` |
 | `10-worked-example.md` | `fdbc8163ff3522dbd9f9de652871fce4e3a3d91e8076036d4c5f3263c027aed9` |
 

@@ -1,6 +1,6 @@
 # Correspondent Banking — fixed report template
 
-Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.2.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -17,7 +17,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 7. **Proposed relationship-specific actions**
 8. **Limitations, quality checks and human disposition**
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -47,6 +47,8 @@ The workbook retains every domain column in order; the report may present the sa
 
 ## Complete in-session renderer
 
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
+
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
 ```python
@@ -56,7 +58,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'correspondent-banking', 'title': 'Correspondent Banking', 'summary': 'Review respondent-bank relationships, nested access and payment-information gaps using a bounded, risk-based evidence record.', 'audience': 'Analysts preparing generic correspondent relationship review materials', 'decision': 'Which relationship-specific transparency and due-diligence gaps need authorized follow-up before a human disposition?', 'palette': 'teal', 'report_sections': ['Correspondent relationship decision brief', 'Scope, legal applicability and payment population', 'Material relationship and transparency findings', 'Respondent relationship assessment', 'Payment transparency and nested access', 'Evidence and criterion provenance', 'Proposed relationship-specific actions', 'Limitations, quality checks and human disposition'], 'domain_tables': [{'name': 'RelationshipReview', 'columns': ['respondent_id', 'respondent_name', 'services', 'nested_declared', 'physical_presence', 'regulated_affiliate', 'control_evidence', 'assessment', 'evidence_ids'], 'rows': [['CB01', 'Cedar Basin Bank', 'Commercial payments and NB-01 nested access', 'YES', 'DOCUMENTED', 'NOT_ASSESSED', 'Policy and limited operating test supplied', 'LIMITED_SUPPORT', 'SYN-001;SYN-005;SYN-006'], ['CB02', 'Delta Reach Bank', 'Commercial and remittance payments; no declared nested access', 'NO', 'UNKNOWN', 'UNKNOWN', 'Questionnaire only; operating test absent', 'FOLLOW_UP', 'SYN-002;SYN-005'], ['CB03', 'Islet Digital Bank', 'Own treasury payments', 'NO', 'NONE_REPORTED', 'DOCUMENTED', 'Affiliation and consolidated-supervision statement supplied', 'LEGAL_CLASSIFICATION_REVIEW', 'SYN-003;SYN-005'], ['CB04', 'Orchard Plain Bank', 'Own treasury payments', 'NO', 'DOCUMENTED', 'NOT_ASSESSED', 'Scoped control test supplied', 'LIMITED_SUPPORT', 'SYN-004;SYN-005']]}, {'name': 'PaymentReview', 'columns': ['payment_id', 'respondent_id', 'underlying_bank_id', 'amount', 'currency', 'initial_missing', 'cutoff_missing', 'nested_state', 'review_state', 'evidence_ids'], 'rows': [['P01', 'CB01', 'NONE_DECLARED', 100000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P02', 'CB01', 'NB-01', 50000, 'USD', 'originator_identifier', 'NONE', 'DISCLOSED', 'REPAIRED', 'SYN-005;SYN-006'], ['P03', 'CB01', 'NB-01', 25000, 'USD', 'NONE', 'NONE', 'DISCLOSED', 'COMPLETE', 'SYN-005'], ['P04', 'CB01', 'NONE_DECLARED', 25000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P05', 'CB02', 'NB-02', 60000, 'USD', 'originator_identifier', 'originator_identifier', 'UNDECLARED_OBSERVED', 'GAP_OPEN', 'SYN-005'], ['P06', 'CB02', 'NB-02', 40000, 'USD', 'NONE', 'NONE', 'UNDECLARED_OBSERVED', 'COMPLETE', 'SYN-005'], ['P07', 'CB02', 'NONE_DECLARED', 20000, 'USD', 'beneficiary_identifier', 'beneficiary_identifier', 'NOT_INDICATED', 'GAP_OPEN', 'SYN-005'], ['P08', 'CB03', 'NONE_DECLARED', 30000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P09', 'CB03', 'NONE_DECLARED', 70000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P10', 'CB04', 'NONE_DECLARED', 80000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005']], 'formats': {'amount': '#,##0.00'}}], 'findings': [{'id': 'CB-F01', 'title': 'CB02 has undeclared nested access and open field gaps', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-002', 'SYN-005'], 'detail': 'Two NB-02 payments total USD 100,000; P05 and P07 retain missing illustrative identity fields totaling USD 80,000 at cutoff.', 'recommendation': 'Clarify NB-02 access authority and obtain missing fields through an authorized process.'}, {'id': 'CB-F02', 'title': 'CB01 historical field gap is repaired', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-005', 'SYN-006'], 'detail': 'P02 initially lacked originator identifier; a linked Sep 09 repair supplies it before cutoff.', 'recommendation': 'Preserve the initial defect and review whether the repair process needs further testing.'}, {'id': 'CB-F03', 'title': 'CB03 requires scoped legal classification', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-003'], 'detail': 'No separate physical presence is reported, but affiliation and consolidated-supervision support are supplied.', 'recommendation': 'Assess the applicable regulated-affiliate definition; do not infer prohibition or approval.'}, {'id': 'CB-F04', 'title': 'CB04 provides a supported ordinary-activity control', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-004', 'SYN-005'], 'detail': 'P10 is a complete own-treasury payment within the stated service scope.', 'recommendation': 'Retain in the population and seek ordinary human disposition.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional respondent profile CB01', 'locator': '10-worked-example.md, profile CB01', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional respondent profile CB02', 'locator': '10-worked-example.md, profile CB02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional respondent profile CB03', 'locator': '10-worked-example.md, profile CB03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional respondent profile CB04', 'locator': '10-worked-example.md, profile CB04', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional complete initial payment population', 'locator': '10-worked-example.md, payment rows P01 through P10 and role note', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional P02 repair', 'locator': '10-worked-example.md, repair R01', 'claim_class': 'Observed'}, {'id': 'REF-FATF-CB', 'title': 'FATF correspondent banking guidance, October 2016', 'locator': 'https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-Correspondent-Banking-Services.pdf; paragraphs 1–4, 9', 'claim_class': 'Observed'}, {'id': 'REF-SHELL', 'title': 'FFIEC foreign shell-bank manual section', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/12; applicability in 02', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Payments reviewed', 'value': 10, 'method': 'Ten distinct payment IDs P01–P10.', 'format': '#,##0'}, {'label': 'Reviewed value USD', 'value': 500000, 'format': '$#,##0.00', 'method': 'Sum all ten USD payment amounts.'}, {'label': 'Cutoff gap count rate', 'value': 20.0, 'format': '0.0"%"', 'method': 'P05 and P07 / 10 payments × 100.'}, {'label': 'Cutoff gap value USD', 'value': 80000, 'format': '$#,##0.00', 'method': 'P05 60,000 + P07 20,000; 16.0% of USD 500,000.'}], 'limitations': ['All respondent profiles, payments and repairs are fictional.', 'The four-field criterion is illustrative and does not establish legal message compliance.', 'CB02 physical presence and control operation are not established.', 'No relationship approval, restriction, communication or human disposition is recorded.', 'Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification.'], 'metadata': {'conclusion': 'CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.'}, 'report_narrative': [['CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.'], ['The fictional review covers four respondents and ten USD payments totaling USD 500,000 through Sep 10, 2026 5:00 PM ET. The four-field criterion is an analytic convention, not a full legal compliance test.'], ['CB-F01 identifies two distinct questions at CB02: service authority and current message fields. CB-F02 preserves an initial defect after repair. CB-F03 keeps regulated-affiliate classification open. CB-F04 retains ordinary treasury activity.'], ['RelationshipReview separates unknown presence at CB02 from reported absence plus affiliate support at CB03. Neither condition produces an automatic shell-bank or exit conclusion.'], ['PaymentReview records three initial gaps, USD 130,000 and 30.0% by count. After the P02 repair, two gaps remain, USD 80,000 and 20.0% by count. Four nested payments total USD 175,000; USD 100,000 was undeclared at the relevant dates.', 'The separate P06 role-uncertainty variation in file 10 leaves baseline metrics unchanged until explicitly selected; its UNRESOLVED state is distinct from field completeness and from confirmed nested activity.'], ['SYN-001 through SYN-004 support the four relationship profiles. SYN-005 supplies every initial payment and its role; SYN-006 supplies the single pre-cutoff repair. The two REF sources provide bounded methodological context.'], ['Propose CB02 access clarification and field completion, CB01 process review, CB03 legal classification and ordinary CB04 review. No action has been issued or executed.'], ['All respondent profiles, payments and repairs are fictional.', 'The four-field criterion is illustrative and does not establish legal message compliance.', 'CB02 physical presence and control operation are not established.', 'No relationship approval, restriction, communication or human disposition is recorded.', 'Actual QA outcomes and a named human disposition remain to be recorded.', 'Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification.']], 'as_of': '2026-09-10 5:00 PM ET', 'scope': 'Four fictional respondent profiles, ten USD payments and one linked repair through Sep 10, 2026 5:00 PM ET. Four-field completeness is an illustrative analytic criterion.', 'suite_id': 'correspondent-banking', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'conclusion': 'CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'CB-F01', 'proposal': 'Clarify NB-02 access authority and obtain missing fields through an authorized process.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'CB-F02', 'proposal': 'Preserve the initial defect and review whether the repair process needs further testing.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'CB-F03', 'proposal': 'Assess the applicable regulated-affiliate definition; do not infer prohibition or approval.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'CB-F04', 'proposal': 'Retain in the population and seek ordinary human disposition.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'correspondent-banking', 'title': 'Correspondent Banking', 'summary': 'Review respondent-bank relationships, nested access and payment-information gaps using a bounded, risk-based evidence record.', 'audience': 'Analysts preparing generic correspondent relationship review materials', 'decision': 'Which relationship-specific transparency and due-diligence gaps need authorized follow-up before a human disposition?', 'palette': 'teal', 'report_sections': ['Correspondent relationship decision brief', 'Scope, legal applicability and payment population', 'Material relationship and transparency findings', 'Respondent relationship assessment', 'Payment transparency and nested access', 'Evidence and criterion provenance', 'Proposed relationship-specific actions', 'Limitations, quality checks and human disposition'], 'domain_tables': [{'name': 'RelationshipReview', 'columns': ['respondent_id', 'respondent_name', 'services', 'nested_declared', 'physical_presence', 'regulated_affiliate', 'control_evidence', 'assessment', 'evidence_ids'], 'rows': [['CB01', 'Cedar Basin Bank', 'Commercial payments and NB-01 nested access', 'YES', 'DOCUMENTED', 'NOT_ASSESSED', 'Policy and limited operating test supplied', 'LIMITED_SUPPORT', 'SYN-001;SYN-005;SYN-006'], ['CB02', 'Delta Reach Bank', 'Commercial and remittance payments; no declared nested access', 'NO', 'UNKNOWN', 'UNKNOWN', 'Questionnaire only; operating test absent', 'FOLLOW_UP', 'SYN-002;SYN-005'], ['CB03', 'Islet Digital Bank', 'Own treasury payments', 'NO', 'NONE_REPORTED', 'DOCUMENTED', 'Affiliation and consolidated-supervision statement supplied', 'LEGAL_CLASSIFICATION_REVIEW', 'SYN-003;SYN-005'], ['CB04', 'Orchard Plain Bank', 'Own treasury payments', 'NO', 'DOCUMENTED', 'NOT_ASSESSED', 'Scoped control test supplied', 'LIMITED_SUPPORT', 'SYN-004;SYN-005']]}, {'name': 'PaymentReview', 'columns': ['payment_id', 'respondent_id', 'underlying_bank_id', 'amount', 'currency', 'initial_missing', 'cutoff_missing', 'nested_state', 'review_state', 'evidence_ids'], 'rows': [['P01', 'CB01', 'NONE_DECLARED', 100000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P02', 'CB01', 'NB-01', 50000, 'USD', 'originator_identifier', 'NONE', 'DISCLOSED', 'REPAIRED', 'SYN-005;SYN-006'], ['P03', 'CB01', 'NB-01', 25000, 'USD', 'NONE', 'NONE', 'DISCLOSED', 'COMPLETE', 'SYN-005'], ['P04', 'CB01', 'NONE_DECLARED', 25000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P05', 'CB02', 'NB-02', 60000, 'USD', 'originator_identifier', 'originator_identifier', 'UNDECLARED_OBSERVED', 'GAP_OPEN', 'SYN-005'], ['P06', 'CB02', 'NB-02', 40000, 'USD', 'NONE', 'NONE', 'UNDECLARED_OBSERVED', 'COMPLETE', 'SYN-005'], ['P07', 'CB02', 'NONE_DECLARED', 20000, 'USD', 'beneficiary_identifier', 'beneficiary_identifier', 'NOT_INDICATED', 'GAP_OPEN', 'SYN-005'], ['P08', 'CB03', 'NONE_DECLARED', 30000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P09', 'CB03', 'NONE_DECLARED', 70000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005'], ['P10', 'CB04', 'NONE_DECLARED', 80000, 'USD', 'NONE', 'NONE', 'NOT_INDICATED', 'COMPLETE', 'SYN-005']], 'formats': {'amount': '#,##0.00'}}], 'findings': [{'id': 'CB-F01', 'title': 'CB02 has undeclared nested access and open field gaps', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-002', 'SYN-005'], 'detail': 'Two NB-02 payments total USD 100,000; P05 and P07 retain missing illustrative identity fields totaling USD 80,000 at cutoff.', 'recommendation': 'Clarify NB-02 access authority and obtain missing fields through an authorized process.'}, {'id': 'CB-F02', 'title': 'CB01 historical field gap is repaired', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-005', 'SYN-006'], 'detail': 'P02 initially lacked originator identifier; a linked Sep 09 repair supplies it before cutoff.', 'recommendation': 'Preserve the initial defect and review whether the repair process needs further testing.'}, {'id': 'CB-F03', 'title': 'CB03 requires scoped legal classification', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-003'], 'detail': 'No separate physical presence is reported, but affiliation and consolidated-supervision support are supplied.', 'recommendation': 'Assess the applicable regulated-affiliate definition; do not infer prohibition or approval.'}, {'id': 'CB-F04', 'title': 'CB04 provides a supported ordinary-activity control', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-004', 'SYN-005'], 'detail': 'P10 is a complete own-treasury payment within the stated service scope.', 'recommendation': 'Retain in the population and seek ordinary human disposition.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional respondent profile CB01', 'locator': '10-worked-example.md, profile CB01', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional respondent profile CB02', 'locator': '10-worked-example.md, profile CB02', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional respondent profile CB03', 'locator': '10-worked-example.md, profile CB03', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional respondent profile CB04', 'locator': '10-worked-example.md, profile CB04', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional complete initial payment population', 'locator': '10-worked-example.md, payment rows P01 through P10 and role note', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional P02 repair', 'locator': '10-worked-example.md, repair R01', 'claim_class': 'Observed'}, {'id': 'REF-FATF-CB', 'title': 'FATF correspondent banking guidance, October 2016', 'locator': 'https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-Correspondent-Banking-Services.pdf; paragraphs 1–4, 9', 'claim_class': 'Observed'}, {'id': 'REF-SHELL', 'title': 'FFIEC foreign shell-bank manual section', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/12; applicability in 02', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Payments reviewed', 'value': 10, 'method': 'Ten distinct payment IDs P01–P10.', 'format': '#,##0'}, {'label': 'Reviewed value USD', 'value': 500000, 'format': '$#,##0.00', 'method': 'Sum all ten USD payment amounts.'}, {'label': 'Cutoff gap count rate', 'value': 20.0, 'format': '0.0"%"', 'method': 'P05 and P07 / 10 payments × 100.'}, {'label': 'Cutoff gap value USD', 'value': 80000, 'format': '$#,##0.00', 'method': 'P05 60,000 + P07 20,000; 16.0% of USD 500,000.'}], 'limitations': ['All respondent profiles, payments and repairs are fictional.', 'The four-field criterion is illustrative and does not establish legal message compliance.', 'CB02 physical presence and control operation are not established.', 'No relationship approval, restriction, communication or human disposition is recorded.', 'Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification.'], 'metadata': {'conclusion': 'CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.'}, 'report_narrative': [['CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.'], ['The fictional review covers four respondents and ten USD payments totaling USD 500,000 through Sep 10, 2026 5:00 PM ET. The four-field criterion is an analytic convention, not a full legal compliance test.'], ['CB-F01 identifies two distinct questions at CB02: service authority and current message fields. CB-F02 preserves an initial defect after repair. CB-F03 keeps regulated-affiliate classification open. CB-F04 retains ordinary treasury activity.'], ['RelationshipReview separates unknown presence at CB02 from reported absence plus affiliate support at CB03. Neither condition produces an automatic shell-bank or exit conclusion.'], ['PaymentReview records three initial gaps, USD 130,000 and 30.0% by count. After the P02 repair, two gaps remain, USD 80,000 and 20.0% by count. Four nested payments total USD 175,000; USD 100,000 was undeclared at the relevant dates.', 'The separate P06 role-uncertainty variation in file 10 leaves baseline metrics unchanged until explicitly selected; its UNRESOLVED state is distinct from field completeness and from confirmed nested activity.'], ['SYN-001 through SYN-004 support the four relationship profiles. SYN-005 supplies every initial payment and its role; SYN-006 supplies the single pre-cutoff repair. The two REF sources provide bounded methodological context.'], ['Propose CB02 access clarification and field completion, CB01 process review, CB03 legal classification and ordinary CB04 review. No action has been issued or executed.'], ['All respondent profiles, payments and repairs are fictional.', 'The four-field criterion is illustrative and does not establish legal message compliance.', 'CB02 physical presence and control operation are not established.', 'No relationship approval, restriction, communication or human disposition is recorded.', 'Actual QA outcomes and a named human disposition remain to be recorded.', 'Nested-role uncertainty must use UNRESOLVED; four-field COMPLETE is not a resolved nesting classification.']], 'as_of': '2026-09-10 5:00 PM ET', 'scope': 'Four fictional respondent profiles, ten USD payments and one linked repair through Sep 10, 2026 5:00 PM ET. Four-field completeness is an illustrative analytic criterion.', 'suite_id': 'correspondent-banking', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'conclusion': 'CB02 needs targeted follow-up on USD 100,000 of undeclared nested activity and two open field gaps totaling USD 80,000. CB01 has one repaired historical defect. CB03 requires legal classification review, and CB04 supplies the ordinary-activity control.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'CB-F01', 'proposal': 'Clarify NB-02 access authority and obtain missing fields through an authorized process.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'CB-F02', 'proposal': 'Preserve the initial defect and review whether the repair process needs further testing.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'CB-F03', 'proposal': 'Assess the applicable regulated-affiliate definition; do not infer prohibition or approval.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-004', 'finding_id': 'CB-F04', 'proposal': 'Retain in the population and seek ordinary human disposition.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -69,6 +71,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -95,8 +104,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -120,8 +129,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -137,6 +198,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -152,7 +240,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -173,6 +261,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -220,10 +309,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -249,7 +338,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -286,13 +376,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -301,7 +397,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

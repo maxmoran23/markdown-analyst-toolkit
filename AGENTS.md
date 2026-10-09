@@ -27,3 +27,11 @@ drift. Test package bytes against their source and preserve prior release eviden
 Build token usage is unknown unless backed by actual telemetry. Content token estimates
 are a different measure and must be labeled with their calculation and exclusions.
 Record build stages and verification outcomes honestly. Never invent duration or cost.
+
+Deep process tables declare complete `column_contracts`, primary keys and exact joins.
+Their compiled field dictionary in file05 is generated; edit the catalog definitions.
+Preserve every domain table and row in all three renderers, including empty schemas,
+nulls, narrative sections and QA identifiers. File10 fixture checks are delivered
+inside the attachment and derive their checked rows from raw fictional inputs.
+Measure authored prose separately from code fences, repeated payloads and generated
+dictionaries; size alone does not demonstrate quality.

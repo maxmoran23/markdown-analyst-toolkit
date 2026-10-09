@@ -39,10 +39,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -68,7 +68,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -105,13 +106,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -120,7 +127,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

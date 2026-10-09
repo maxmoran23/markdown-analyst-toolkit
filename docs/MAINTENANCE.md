@@ -7,12 +7,13 @@ optional release tooling, not a user setup requirement.
 
 | Content | Authority | Generated outputs |
 | --- | --- | --- |
-| Domain guidance | Suite files 01–05, 09–10 and authored README | None; editorial review required |
-| Synthetic specimen and schema | `_maintainer/catalog/<suite>.json` | Report, workbook and dashboard example payloads |
+| Domain guidance | Suite files 01–05, 09–10 and authored README | Editorial review; generated FIELD_CONTRACTS block in 05 is maintained separately |
+| Synthetic specimen and typed field contract | `_maintainer/catalog/<suite>.json` | Complete renderer payloads and compiled dictionary in file 05 |
 | Rendering code | `_maintainer/templates/` | Complete blocks in suite files 06–08 |
 | Build-resource method | `_maintainer/build.py` | File 11 and README budget block |
 | Release identity | `_maintainer/release.json` | Version/date labels, download links and manifest |
-| Structural preflight | `_maintainer/schema.py` | Self-contained checks inside both Office renderers |
+| Structural preflight | `_maintainer/schema.py` and `templates/case-validation.js` | Self-contained Python and browser checks |
+| Authored-depth measurement | `depth.py`, `depth-baseline.json` and `process-suites.json` | `docs/PROCESS-DEPTH.md`; excludes fenced code and compiled dictionary from prose |
 | Finder metadata and layout | `_maintainer/library.py` and `templates/finder.html` | Root `suite-finder.html` |
 | Verification claims | `docs/VERIFICATION.md` | Authored only after actual checks |
 
@@ -30,8 +31,11 @@ available. They are not part of the manual chat workflow.
 python _maintainer/build.py
 python _maintainer/budgets.py
 python _maintainer/library.py
+python _maintainer/depth.py
 python _maintainer/validate.py
 python _maintainer/test_schema.py
+python _maintainer/test_domain_contracts.py
+python _maintainer/test_process_cases.py
 python _maintainer/test_renderers.py
 python _maintainer/test_packages.py
 ```
@@ -82,3 +86,29 @@ Keep per-suite build cost honest. The content estimator is characters divided by
 The 4–10× reproduction envelope is a heuristic planning assumption, not telemetry.
 Replace unavailable generation-token fields only with complete attributable metering;
 do not infer cost or hours from file length, a model name, or a polished result.
+
+## Deep process contracts
+
+A table with `column_contracts` defines every column exactly once. Each field declares
+primitive type, nullability, unit and description, plus an optional enum or numerical
+bound. A `primary_key` is required. `foreign_keys` name exact referenced columns;
+compound keys must be complete or entirely null where permitted. Non-null evidence
+keys resolve to the common Evidence register. Raw malformed source values remain
+text in a raw field; derived numbers cannot use that exception.
+
+The report places the first legacy table in section4 and remaining legacy tables in
+section5. A table may explicitly set `report_section` to4 or5. Every declared table
+is emitted; the maximum is12. The workbook preserves all tables after its six common
+sheets. HTML creates a section and navigation target for every table, preserves the
+eight narrative sections, exposes field definitions and exports the complete case.
+
+Each selected process suite includes one complete Python fixture checker in file10
+between FIXTURE_CHECK markers. It derives `CHECKED_TABLES` from the printed raw case;
+tests execute the actual block and compare its complete derived rows to the catalog.
+Assertions copied from the renderer output are not an independent arithmetic check.
+Independent domain review must inspect this distinction.
+
+The schema validates declared representations and joins. It cannot infer whether a
+field definition is substantively correct, whether an evidence source is true, whether
+a missing unknown state is needed, or whether the chosen denominator answers the question.
+Those are domain-review responsibilities.

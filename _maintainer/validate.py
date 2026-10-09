@@ -5,7 +5,7 @@ from pathlib import Path
 import re
 import sys
 from urllib.parse import unquote
-from build import ROOT, COMMON, generate, RELEASE, RELEASE_DATE, VERSION
+from build import ROOT, COMMON, generate, RELEASE, RELEASE_DATE, VERSION, authored_metrics, field_contract_md, replace_block
 from datetime import date
 from schema import case_errors
 
@@ -25,6 +25,8 @@ def validate(root=ROOT, check_generated=True):
     catalogs=sorted((root/'_maintainer/catalog').glob('*.json'))
     folders={p.name for p in (root/'suites').iterdir() if p.is_dir()}
     parsed=[]
+    process_path=root/'_maintainer/process-suites.json'
+    process=json.loads(process_path.read_text()) if process_path.exists() else {'suites':[]}
     for path in catalogs:
         try:data=json.loads(path.read_text())
         except (json.JSONDecodeError,UnicodeDecodeError) as exc:
@@ -35,6 +37,7 @@ def validate(root=ROOT, check_generated=True):
         if path.stem!=data['slug']:errors.append(f'{path.name}: filename must match suite slug')
         parsed.append((path,data))
     catalog_slugs={data['slug'] for _,data in parsed}
+    if not set(process['suites']).issubset(catalog_slugs):errors.append('declared process suite missing from valid catalogs')
     if len(catalog_slugs)!=len(parsed):errors.append('duplicate catalog suite slug')
     if folders != catalog_slugs:
         errors.append('suite/catalog inventory mismatch: '+str(sorted(folders ^ catalog_slugs)))
@@ -46,6 +49,16 @@ def validate(root=ROOT, check_generated=True):
         if actual!=sorted(EXPECTED):
             errors.append(f'{folder.name}: attachment inventory mismatch {actual}');continue
         contract=(folder/'05-output-contract.md').read_text()
+        if any(t.get('column_contracts') for t in data['domain_tables']):
+            if replace_block(contract,'FIELD_CONTRACTS',field_contract_md(data))!=contract:
+                errors.append(folder.name+': compiled field dictionary drift')
+        if data['slug'] in process['suites']:
+            if authored_metrics(folder)['words']<process['minimum_authored_prose_words']:
+                errors.append(folder.name+': authored method depth below declared minimum')
+            if len(data['domain_tables'])<process['minimum_domain_tables'] or any(not t.get('column_contracts') or not t.get('grain') or not t['rows'] for t in data['domain_tables']):
+                errors.append(folder.name+': process registers must be populated, fully typed and declare their exact grain')
+            if '<!-- FIXTURE_CHECK:START -->' not in (folder/'10-worked-example.md').read_text():
+                errors.append(folder.name+': missing embedded fixture check')
         for heading in data['report_sections']:
             if heading not in contract:
                 errors.append(f'{folder.name}: report heading absent from output contract: {heading}')
@@ -85,10 +98,12 @@ def validate(root=ROOT, check_generated=True):
     if check_generated and not errors:
         from budgets import build as check_budgets
         from library import generate as check_finder, GROUPS
+        from depth import generate as check_depth
         if catalog_slugs!={slug for slugs in GROUPS.values() for slug in slugs}:errors.append('finder inventory mismatch')
         if generate(check=True):errors.append('generated file drift')
         if check_budgets(check=True):errors.append('content budget drift')
         if check_finder(check=True):errors.append('finder drift')
+        if check_depth(check=True):errors.append('process depth drift')
     return errors
 
 if __name__=='__main__':

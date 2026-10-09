@@ -4,7 +4,7 @@
 
 All facts below are fictional and collectively form SYN-001. No real person, customer, legal entity, license, or register is represented. The subject is Meridian Paperlight Services, internal ID ENTITY-Q, fictional registry number Q-410. The decision is whether a public-source profile is sufficiently complete to support a human assessment of a proposed research-service relationship as of 2026-09-30.
 
-The fictional register extract records ENTITY-Q active. A company disclosure supplies ownership and reports monthly receipts of $600.00,000. A separate group brochure refers to a license held by ENTITY-R. An article alleges a proceeding but provides no order. No control-right documents, complete ultimate ownership records, or independently verified financial statements are supplied.
+The fictional register extract records ENTITY-Q active. A company disclosure supplies ownership and reports monthly receipts of $600,000.00. A separate group brochure refers to a license held by ENTITY-R. An article alleges a proceeding but provides no order. No control-right documents, complete ultimate ownership records, or independently verified financial statements are supplied.
 
 ## Ownership input
 
@@ -26,7 +26,7 @@ Person A's estimated economic interest in ENTITY-Q is 0.60 × 0.70 = 0.42 = 42.0
 
 The amount-based resolution metric is 90.0%. It describes the supplied comparable-equity graph. It is not a confidence estimate, a legal beneficial-owner determination, or a statement that 90.0% of diligence is complete. Control rights remain unassessed for the whole structure.
 
-The company reports monthly receipts of $600.00,000. If every month were identical, the annualized run rate would be 600,000 × 12 = $7,200.00,000. Classify this Estimated and explain the constant-month assumption. Do not label it audited annual revenue or use it to infer profitability, solvency, or source of wealth. No operating-cost, seasonality, or accounting-basis evidence was supplied.
+The company reports monthly receipts of $600,000.00. If every month were identical, the annualized run rate would be 600,000 × 12 = $7,200,000.00. Classify this Estimated and explain the constant-month assumption. Do not label it audited annual revenue or use it to infer profitability, solvency, or source of wealth. No operating-cost, seasonality, or accounting-basis evidence was supplied.
 
 ## Expected profile assessment
 

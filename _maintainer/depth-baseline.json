@@ -1,0 +1,102 @@
+{
+  "version": "1.1.0",
+  "commit": "4a783f41b4dcf1fcff057dfbed4064fe4ebca92a",
+  "suites": {
+    "adverse-media": {
+      "authored_prose_words": 6971,
+      "authored_file_bytes": 48882
+    },
+    "control-testing": {
+      "authored_prose_words": 6769,
+      "authored_file_bytes": 45103
+    },
+    "correspondent-banking": {
+      "authored_prose_words": 7758,
+      "authored_file_bytes": 54432
+    },
+    "customer-risk-review": {
+      "authored_prose_words": 7538,
+      "authored_file_bytes": 50414
+    },
+    "data-quality": {
+      "authored_prose_words": 6504,
+      "authored_file_bytes": 43160
+    },
+    "digital-asset-review": {
+      "authored_prose_words": 6866,
+      "authored_file_bytes": 46930
+    },
+    "entity-due-diligence": {
+      "authored_prose_words": 6477,
+      "authored_file_bytes": 45623
+    },
+    "fraud-review": {
+      "authored_prose_words": 6739,
+      "authored_file_bytes": 47801
+    },
+    "investigations": {
+      "authored_prose_words": 6491,
+      "authored_file_bytes": 45368
+    },
+    "issue-remediation": {
+      "authored_prose_words": 8736,
+      "authored_file_bytes": 58644
+    },
+    "jurisdiction-risk": {
+      "authored_prose_words": 7335,
+      "authored_file_bytes": 50137
+    },
+    "monitoring-tuning": {
+      "authored_prose_words": 6367,
+      "authored_file_bytes": 43599
+    },
+    "new-product-risk": {
+      "authored_prose_words": 6536,
+      "authored_file_bytes": 44934
+    },
+    "osint-research": {
+      "authored_prose_words": 6401,
+      "authored_file_bytes": 44015
+    },
+    "ownership-analysis": {
+      "authored_prose_words": 7234,
+      "authored_file_bytes": 49828
+    },
+    "regulatory-change": {
+      "authored_prose_words": 6677,
+      "authored_file_bytes": 46206
+    },
+    "sampling-assurance": {
+      "authored_prose_words": 7847,
+      "authored_file_bytes": 52730
+    },
+    "sanctions-review": {
+      "authored_prose_words": 6589,
+      "authored_file_bytes": 45647
+    },
+    "source-wealth-funds": {
+      "authored_prose_words": 8032,
+      "authored_file_bytes": 54335
+    },
+    "third-party-risk": {
+      "authored_prose_words": 6740,
+      "authored_file_bytes": 46736
+    },
+    "trade-finance-review": {
+      "authored_prose_words": 9138,
+      "authored_file_bytes": 62199
+    },
+    "trade-surveillance": {
+      "authored_prose_words": 7292,
+      "authored_file_bytes": 50253
+    },
+    "transaction-monitoring": {
+      "authored_prose_words": 6574,
+      "authored_file_bytes": 45237
+    },
+    "typology-red-flags": {
+      "authored_prose_words": 6561,
+      "authored_file_bytes": 45491
+    }
+  }
+}

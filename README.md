@@ -8,8 +8,8 @@ workbook or dashboard using a fixed method and template.
 
 - **What it does:** gives an assistant a complete written guide for one analytical
   job, including the questions to ask, how to evaluate evidence, and what to produce.
-- **How you use it:** download one topic folder and attach files 01–10 to a chat.
-  The other two files explain the suite and document its build.
+- **How you use it:** download one topic folder and attach the files for the current stage.
+  Files 01–10 contain the full instructions; two more files explain the suite and build.
 - **What you get:** a structured draft, traceable findings, fixed spreadsheet columns,
   a consistent report, and a dashboard with light and dark themes where file creation
   is available.
@@ -19,12 +19,12 @@ workbook or dashboard using a fixed method and template.
   rendering guidance; normal use requires no terminal, connector, scheduled job or
   repository integration.
 
-[Start here](docs/START-HERE.md) · [Download suites](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/tag/v1.1.0)
+[Start here](docs/START-HERE.md) · [Download suites](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/tag/v1.2.0)
 · [What was verified](docs/VERIFICATION.md) · [How the library was built](docs/BUILD-PROCESS.md)
 
 **New to the library?** Follow the [fictional first-session walkthrough](docs/FIRST-SESSION.md),
 or [choose by the question you need to answer](docs/CHOOSE-A-SUITE.md).
-Download the [offline suite finder](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/suite-finder.html)
+Download the [offline suite finder](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.2.0/suite-finder.html)
 and open the saved HTML file in a browser to search topics and copy the right attachment
 prompt. Its search and prompts work offline; downloading a suite requires internet access.
 
@@ -58,9 +58,32 @@ prompt. Its search and prompts work offline; downloading a suite requires intern
 | [Trade finance review](suites/trade-finance-review/) | Do the trade documents, goods and payments reconcile, and what explains anomalies? | Trade-document reconciliation and anomaly review |
 | [Sampling assurance](suites/sampling-assurance/) | What can this sample establish about its defined population? | Sample design and selection results |
 | [Issue remediation](suites/issue-remediation/) | What evidence supports implementation, effectiveness and a closure decision? | Issue conditions and validation evidence |
+| [Scenario design](suites/scenario-design/) | How can a risk hypothesis become an exact, testable monitoring rule? | Predicates, window membership, test vectors and acceptance gates |
+| [TM data lineage](suites/tm-data-lineage/) | Did the right records survive every source-to-monitoring transformation? | Source ledger, transformation outcomes, control totals and rerun impact |
+| [Monitoring validation](suites/monitoring-validation/) | What independent evidence supports the design, implementation and stated use? | System classification, validation tests, benchmarks and limitations |
+| [Lookback review](suites/lookback-review/) | What historical scope is affected, and what evidence supports completion? | Retrieval coverage, canonical cases, re-review and scope decisions |
+| [Network flow review](suites/network-flow-review/) | Which economic flows and connections are supported, and where is allocation ambiguous? | Nodes, canonical edges, entity totals, balances and allocation bounds |
+| [Alert quality review](suites/alert-qa/) | Did the case analysis and disposition meet explicit review criteria? | Review votes, criterion defects, disagreement and remediation |
 
 These are analytical functions. Administrative inbox management, calendar indexing,
 routine scheduling and external delivery are outside this library's scope.
+
+## Detailed monitoring and investigation processes
+
+Transaction monitoring, monitoring tuning and investigations now have substantially
+expanded methods, decision branches, complete fictional records and executable example
+checks. Six additional suites cover scenario design, source-to-monitoring lineage,
+independent validation, historical lookbacks, network flows and alert quality.
+
+The [process map](docs/PROCESS-MAP.md) defines each task's inputs, outputs and handoff
+boundaries. The [depth report](docs/PROCESS-DEPTH.md) measures authored method growth
+separately from renderer code and lists every process register. Each expanded suite's
+file 05 includes a complete typed field dictionary; file 10 includes the calculation
+check used to reproduce its derived example records.
+
+Use the staged workflow for these larger suites. Preserve the complete case record
+between analysis and rendering; attach only the selected output template. Context
+capacity and actual file creation must still be checked in the current session.
 
 ## Every suite has the same file roles
 
@@ -146,5 +169,5 @@ Licensed under [MIT](LICENSE). Sources linked inside the suites retain their own
 the repository paraphrases methods and does not redistribute source publications.
 
 <!-- METRICS:START -->
-**Measured instructional library:** 24 suites, 288 suite Markdown files, **392,963 words** in files 01–10. Each suite has ten instructional attachments. [Per-suite context budgets](docs/CONTENT-BUDGET.md) separate the full package, analysis stage and rendering stages. Word counts include code; repeated renderers are intentional.
+**Measured instructional library:** 30 suites, 360 suite Markdown files, **812,717 words** in files 01–10. Each suite has ten instructional attachments. [Per-suite context budgets](docs/CONTENT-BUDGET.md) separate the full package, analysis stage and rendering stages. Word counts include code; repeated renderers are intentional.
 <!-- METRICS:END -->

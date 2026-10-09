@@ -1,6 +1,6 @@
 # Sampling Design and Assurance Review — fixed workbook template
 
-Version 1.1.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
+Version 1.2.0. The workbook is a generated review snapshot with visible evidence and explicit open decisions. Use an in-session file-creation capability; no terminal, repository checkout or automation is needed.
 
 ## Exact workbook schema
 
@@ -43,15 +43,20 @@ Create these sheets in this order. Preserve field spelling and column order. Fil
 - The Dashboard calculates counts from the Findings severity column using `COUNTIF`. Counts cover **supplied findings**, not the entire transaction/customer population. Use the exact source scope in denominators.
 - This is a snapshot generator: after adding or removing records, regenerate the workbook so formulas, validations, filters and chart ranges include every row. Do not assume inserting a row extends all ranges.
 - Summary business measures come from validated input calculations. Preserve each method and limitation alongside the value. Recompute them from source when adapting; never retain a specimen metric by accident.
+- Summary also retains the conclusion, every method and all eight report sections' narrative paragraphs in ordered, individually identified rows. Preserve their exact section names in `method_or_limit`; a workbook handoff must retain the reasoning alongside the domain tables.
 - `openpyxl` writes formulas but does not calculate them. Request recalculation in Excel or the available spreadsheet engine, inspect results, and record the outcome. If unavailable, label formula-cache/display behavior **NOT TESTED**; the independently computed check does not prove Excel behavior.
 
 ## Complete in-session renderer
+
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
 
 Use this block when `openpyxl` is already available in the chat's Python capability. No installation is required or assumed. When unavailable, ask the assistant's approved workbook capability to implement the same schema and style. If that is unavailable too, emit one copy-ready table per sheet and state **XLSX not created**. Never label CSV as a multi-sheet workbook.
 
 The renderer checks required fields, identifiers, evidence joins, sheet names and finite numbers before writing. It rejects cell text above Excel's 32,767-character limit rather than silently truncating evidence. Preserve the complete source separately and put an attributed summary with its exact source locator in the workbook. Passing these structural checks does not establish that a claim or calculation is correct.
 
 Excel numeric precision is limited to 15 significant digits. This renderer rejects numeric magnitudes of 10^15 or larger. Store exact large integers, identifiers and atomic token quantities as text under an explicitly documented domain type and unit. Fractional numeric values remain floating-point approximations; preserve the original source string whenever all decimal digits are material and apply the stated calculation precision before display.
+
+All output formats limit declared decimal display places to 15. This is a portable rendering boundary, not a claim of 15-decimal calculation accuracy. Keep more precise source quantities as exact text with the declared unit when their digits matter.
 
 The storage limits are documented in [Microsoft's Excel specifications](https://support.microsoft.com/en-us/excel/excel-specifications-and-limits). They do not establish the behavior of every available file reader; inspect the actual delivered file.
 
@@ -66,7 +71,7 @@ from openpyxl.formatting.rule import CellIsRule
 from openpyxl.workbook.properties import CalcProperties
 from openpyxl.comments import Comment
 
-DATA = {'slug': 'sampling-assurance', 'title': 'Sampling Design and Assurance Review', 'summary': 'Review a complete selection frame, probability design, missing assessments, and the assurance supported by exact finite-population calculations.', 'audience': 'Reviewers, control testers, and analysts designing selections', 'decision': 'What population conclusion does the selection support, and what evidence or design still blocks assurance?', 'palette': 'slate', 'report_sections': ['Assurance conclusion and restrictions', 'Population scope and selection design', 'Findings and inference barriers', 'Stratum coverage and bounds', 'Selected unit results', 'Evidence and competing interpretations', 'Further testing and reviewer decisions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'SamplingStrata', 'columns': ['stratum_id', 'population_count', 'probability_selected_count', 'pass_count', 'fail_count', 'unassessed_count', 'inclusion_probability', 'upper_bound', 'conclusion'], 'formats': {'inclusion_probability': '0.0%', 'upper_bound': '0.0%'}, 'rows': [['H', 4, 3, 1, 1, 1, 0.75, None, 'H04 unresolved; no completed-outcome bound'], ['L', 8, 4, 4, 0, 0, 0.5, 0.375, '95% finite upper bound 37.5%; 25.0% assurance threshold not demonstrated']]}, {'name': 'SampleResults', 'columns': ['sample_id', 'stratum_id', 'population_id', 'selection_basis', 'inclusion_probability', 'result', 'evidence_ids'], 'formats': {'inclusion_probability': '0.0%'}, 'rows': [['S01', 'H', 'H01', 'Probability', 0.75, 'PASS', 'SYN-001'], ['S02', 'H', 'H03', 'Probability', 0.75, 'FAIL', 'SYN-001'], ['S03', 'H', 'H04', 'Probability', 0.75, 'UNABLE TO CONCLUDE', 'SYN-001'], ['S04', 'L', 'L02', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S05', 'L', 'L04', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S06', 'L', 'L06', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S07', 'L', 'L08', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S08', 'L', 'L07', 'Judgmental supplement', None, 'FAIL', 'SYN-001']]}], 'findings': [{'id': 'SA-F01', 'title': 'Two observed approval-separation failures in distinct selection categories', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'H03 fails in the seven-unit original probability selection; targeted L07 adds a separate observed failure. Both use the preparer role as reviewer.', 'recommendation': 'Investigate the separation failure mechanism and assess the affected scope without pooling targeted results into the probability sample.'}, {'id': 'SA-F02', 'title': 'H04 missing evidence prevents a completed-outcome H assessment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'The original H sample contains one pass, one fail, and one unresolved assessment. The owner statement does not establish execution.', 'recommendation': 'Recover contemporaneous H04 evidence or retain the missingness restriction and obtain an approved treatment.'}, {'id': 'SA-F03', 'title': 'L upper bound does not demonstrate the requested assurance threshold', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001', 'REF-002'], 'detail': 'For N=8, n=4, x=0, the largest D with hypergeometric lower-tail probability above 0.05 is 3. The one-sided 95% finite upper bound is 37.5%, exceeding the illustrative 25.0% criterion.', 'recommendation': 'Have an authorized reviewer approve a further design or accept the restricted conclusion; the result does not prove the true rate exceeds 25.0%.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Complete fictional frame, recorded draw ranks, criteria, and selected evidence', 'locator': '10-worked-example.md, complete frame, selection replay, and complete selected outcomes', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'NIST confidence intervals for proportions; retrieved 2026-10-09', 'locator': 'https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'NIST hypergeometric cumulative distribution; retrieved 2026-10-09, pp. 1–2', 'locator': 'https://itl.nist.gov/div898/software/dataplot/refman2/ch8/hypcdf.pdf', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'FFIEC Risk-Focused BSA/AML Supervision; retrieved 2026-10-09', 'locator': 'https://bsaaml.ffiec.gov/manual/ScopingAndPlanning/02', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Original probability sample', 'value': '7 of 12 (58.3%)', 'method': 'Original distinct selections / eligible frame; excludes L07 supplement.', 'format': '#,##0'}, {'label': 'Primary unresolved assessment', 'value': '1 of 7 (14.3%)', 'method': 'H04 UNABLE TO CONCLUDE / all original selections.', 'format': '#,##0'}, {'label': 'L finite upper bound', 'value': 0.375, 'format': '0.0%', 'method': 'One-sided 95%; N=8,n=4,x=0; largest D with C(8-D,4)/C(8,4)>0.05 is 3; bound 3/8.'}, {'label': 'Distinct reviewed units', 'value': '8 of 12 (66.7%)', 'method': 'Seven original plus one targeted; descriptive coverage, not an eight-unit probability sample.', 'format': '#,##0'}], 'limitations': ['Fictional uniform draw ranks permit conditional replay but do not prove real-world randomization.', 'H04 is unresolved; H and overall completed-outcome confidence bounds are withheld.', 'L07 is targeted and remains outside the original probability inference.', 'The 11.1% and 22.2% weighted completion scenarios are point-estimate sensitivity results, not confidence limits.', 'No independent human approval or live frame validation is supplied.'], 'conclusion': 'The seven-unit probability sample contains one confirmed exception and one unresolved assessment; a separate targeted review adds one exception. L’s one-sided 95% finite upper bound is 37.5%, above the illustrative 25.0% assurance criterion. H and overall inference remain restricted; human review is pending.', 'report_narrative': [['One confirmed exception and one unresolved assessment occur in the seven-unit probability selection; targeted L07 adds a second observed exception. L’s conditional 95% upper bound is 37.5%, so this exercise does not demonstrate the requested 25.0% assurance.'], ['The complete fictional September frame contains four H and eight L approval opportunities. Zero-based lexicographic combination ranks 2 and 49 select three H and four L units under stipulated independent uniform draws. Inclusion probabilities are 0.75 and 0.5.', 'The complete SYN-001 frame is H01 (Sep 02, 2026; Probability; prep P1/review Q1 before release), H02 (Sep 08; unselected; not inspected), H03 (Sep 16; Probability; prep P3/review P3 before release), H04 (Sep 24; Probability; owner assertion only, execution artifact missing); L01 (Sep 01; unselected; not inspected), L02 (Sep 04; Probability; prep P2/review Q2 before release), L03 (Sep 09; unselected; not inspected), L04 (Sep 11; Probability; prep P4/review Q4 before release), L05 (Sep 17; unselected; not inspected), L06 (Sep 21; Probability; prep P6/review Q6 before release), L07 (Sep 25; Judgmental supplement; prep P7/review P7 before release), and L08 (Sep 29; Probability; prep P8/review Q8 before release). All abbreviated dates are in 2026. H02, L01, L03 and L05 outcomes remain unknown; unselected is not passed. The fixture stipulates this twelve-unit frame matches its master schedule with no duplicates or exclusions.'], ['H03 and targeted L07 use the same role to prepare and approve. H04 has only an owner assertion and no execution artifact. The L assurance restriction is a statistical decision outcome, not proof that its true failure fraction exceeds 25.0%.'], ['SamplingStrata reconciles H as 3=1+1+1 and L as 4=4+0+0. H’s bound is null. For L, D=3 gives a zero-failure tail of 5/70 and D=4 gives 1/70; the strict alpha=0.05 inversion produces U=3 and U/8=37.5%.'], ['SampleResults contains seven Probability rows and one Judgmental supplement row. Primary confirmed failure share is 1/7=14.3%; all reviewed failures are 2/8=25.0%, a descriptive mixed-selection share. Neither replaces a properly weighted population estimate.'], ['SYN-001 preserves every frame ID and selected observation. H04 could reflect missing retention or missing execution; neither explanation is resolved. NIST supplies method context. The binomial contrast 1-0.05^(1/4)=52.7% uses a different model and is not the finite bound.'], ['Recover H04 evidence, investigate the approval-separation mechanism, and have an authorized reviewer decide whether further testing is warranted. Weighted hypothetical completion estimates are 1/9=11.1% if H04 passes and 2/9=22.2% if it fails; sampling uncertainty remains.'], ['QA must preserve 12 frame units, 7 original selections, and 8 distinct reviewed units, with L07 kept separate. Negative controls reject unweighted pooling, missing-as-pass, and a 95% judgmental claim. Human method approval and final disposition remain unrecorded.']], 'suite_id': 'sampling-assurance', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'SA-F01', 'proposal': 'Investigate the separation failure mechanism and assess the affected scope without pooling targeted results into the probability sample.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'SA-F02', 'proposal': 'Recover contemporaneous H04 evidence or retain the missingness restriction and obtain an approved treatment.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'SA-F03', 'proposal': 'Have an authorized reviewer approve a further design or accept the restricted conclusion; the result does not prove the true rate exceeds 25.0%.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'sampling-assurance', 'title': 'Sampling Design and Assurance Review', 'summary': 'Review a complete selection frame, probability design, missing assessments, and the assurance supported by exact finite-population calculations.', 'audience': 'Reviewers, control testers, and analysts designing selections', 'decision': 'What population conclusion does the selection support, and what evidence or design still blocks assurance?', 'palette': 'slate', 'report_sections': ['Assurance conclusion and restrictions', 'Population scope and selection design', 'Findings and inference barriers', 'Stratum coverage and bounds', 'Selected unit results', 'Evidence and competing interpretations', 'Further testing and reviewer decisions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'SamplingStrata', 'columns': ['stratum_id', 'population_count', 'probability_selected_count', 'pass_count', 'fail_count', 'unassessed_count', 'inclusion_probability', 'upper_bound', 'conclusion'], 'formats': {'inclusion_probability': '0.0%', 'upper_bound': '0.0%'}, 'rows': [['H', 4, 3, 1, 1, 1, 0.75, None, 'H04 unresolved; no completed-outcome bound'], ['L', 8, 4, 4, 0, 0, 0.5, 0.375, '95% finite upper bound 37.5%; 25.0% assurance threshold not demonstrated']]}, {'name': 'SampleResults', 'columns': ['sample_id', 'stratum_id', 'population_id', 'selection_basis', 'inclusion_probability', 'result', 'evidence_ids'], 'formats': {'inclusion_probability': '0.0%'}, 'rows': [['S01', 'H', 'H01', 'Probability', 0.75, 'PASS', 'SYN-001'], ['S02', 'H', 'H03', 'Probability', 0.75, 'FAIL', 'SYN-001'], ['S03', 'H', 'H04', 'Probability', 0.75, 'UNABLE TO CONCLUDE', 'SYN-001'], ['S04', 'L', 'L02', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S05', 'L', 'L04', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S06', 'L', 'L06', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S07', 'L', 'L08', 'Probability', 0.5, 'PASS', 'SYN-001'], ['S08', 'L', 'L07', 'Judgmental supplement', None, 'FAIL', 'SYN-001']]}], 'findings': [{'id': 'SA-F01', 'title': 'Two observed approval-separation failures in distinct selection categories', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'H03 fails in the seven-unit original probability selection; targeted L07 adds a separate observed failure. Both use the preparer role as reviewer.', 'recommendation': 'Investigate the separation failure mechanism and assess the affected scope without pooling targeted results into the probability sample.'}, {'id': 'SA-F02', 'title': 'H04 missing evidence prevents a completed-outcome H assessment', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'The original H sample contains one pass, one fail, and one unresolved assessment. The owner statement does not establish execution.', 'recommendation': 'Recover contemporaneous H04 evidence or retain the missingness restriction and obtain an approved treatment.'}, {'id': 'SA-F03', 'title': 'L upper bound does not demonstrate the requested assurance threshold', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Estimated', 'evidence_ids': ['SYN-001', 'REF-002'], 'detail': 'For N=8, n=4, x=0, the largest D with hypergeometric lower-tail probability above 0.05 is 3. The one-sided 95% finite upper bound is 37.5%, exceeding the illustrative 25.0% criterion.', 'recommendation': 'Have an authorized reviewer approve a further design or accept the restricted conclusion; the result does not prove the true rate exceeds 25.0%.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Complete fictional frame, recorded draw ranks, criteria, and selected evidence', 'locator': '10-worked-example.md, complete frame, selection replay, and complete selected outcomes', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'NIST confidence intervals for proportions; retrieved 2026-10-09', 'locator': 'https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'NIST hypergeometric cumulative distribution; retrieved 2026-10-09, pp. 1–2', 'locator': 'https://itl.nist.gov/div898/software/dataplot/refman2/ch8/hypcdf.pdf', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'FFIEC Risk-Focused BSA/AML Supervision; retrieved 2026-10-09', 'locator': 'https://bsaaml.ffiec.gov/manual/ScopingAndPlanning/02', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Original probability sample', 'value': '7 of 12 (58.3%)', 'method': 'Original distinct selections / eligible frame; excludes L07 supplement.', 'format': '#,##0'}, {'label': 'Primary unresolved assessment', 'value': '1 of 7 (14.3%)', 'method': 'H04 UNABLE TO CONCLUDE / all original selections.', 'format': '#,##0'}, {'label': 'L finite upper bound', 'value': 0.375, 'format': '0.0%', 'method': 'One-sided 95%; N=8,n=4,x=0; largest D with C(8-D,4)/C(8,4)>0.05 is 3; bound 3/8.'}, {'label': 'Distinct reviewed units', 'value': '8 of 12 (66.7%)', 'method': 'Seven original plus one targeted; descriptive coverage, not an eight-unit probability sample.', 'format': '#,##0'}], 'limitations': ['Fictional uniform draw ranks permit conditional replay but do not prove real-world randomization.', 'H04 is unresolved; H and overall completed-outcome confidence bounds are withheld.', 'L07 is targeted and remains outside the original probability inference.', 'The 11.1% and 22.2% weighted completion scenarios are point-estimate sensitivity results, not confidence limits.', 'No independent human approval or live frame validation is supplied.'], 'conclusion': 'The seven-unit probability sample contains one confirmed exception and one unresolved assessment; a separate targeted review adds one exception. L’s one-sided 95% finite upper bound is 37.5%, above the illustrative 25.0% assurance criterion. H and overall inference remain restricted; human review is pending.', 'report_narrative': [['One confirmed exception and one unresolved assessment occur in the seven-unit probability selection; targeted L07 adds a second observed exception. L’s conditional 95% upper bound is 37.5%, so this exercise does not demonstrate the requested 25.0% assurance.'], ['The complete fictional September frame contains four H and eight L approval opportunities. Zero-based lexicographic combination ranks 2 and 49 select three H and four L units under stipulated independent uniform draws. Inclusion probabilities are 0.75 and 0.5.', 'The complete SYN-001 frame is H01 (Sep 02, 2026; Probability; prep P1/review Q1 before release), H02 (Sep 08; unselected; not inspected), H03 (Sep 16; Probability; prep P3/review P3 before release), H04 (Sep 24; Probability; owner assertion only, execution artifact missing); L01 (Sep 01; unselected; not inspected), L02 (Sep 04; Probability; prep P2/review Q2 before release), L03 (Sep 09; unselected; not inspected), L04 (Sep 11; Probability; prep P4/review Q4 before release), L05 (Sep 17; unselected; not inspected), L06 (Sep 21; Probability; prep P6/review Q6 before release), L07 (Sep 25; Judgmental supplement; prep P7/review P7 before release), and L08 (Sep 29; Probability; prep P8/review Q8 before release). All abbreviated dates are in 2026. H02, L01, L03 and L05 outcomes remain unknown; unselected is not passed. The fixture stipulates this twelve-unit frame matches its master schedule with no duplicates or exclusions.'], ['H03 and targeted L07 use the same role to prepare and approve. H04 has only an owner assertion and no execution artifact. The L assurance restriction is a statistical decision outcome, not proof that its true failure fraction exceeds 25.0%.'], ['SamplingStrata reconciles H as 3=1+1+1 and L as 4=4+0+0. H’s bound is null. For L, D=3 gives a zero-failure tail of 5/70 and D=4 gives 1/70; the strict alpha=0.05 inversion produces U=3 and U/8=37.5%.'], ['SampleResults contains seven Probability rows and one Judgmental supplement row. Primary confirmed failure share is 1/7=14.3%; all reviewed failures are 2/8=25.0%, a descriptive mixed-selection share. Neither replaces a properly weighted population estimate.'], ['SYN-001 preserves every frame ID and selected observation. H04 could reflect missing retention or missing execution; neither explanation is resolved. NIST supplies method context. The binomial contrast 1-0.05^(1/4)=52.7% uses a different model and is not the finite bound.'], ['Recover H04 evidence, investigate the approval-separation mechanism, and have an authorized reviewer decide whether further testing is warranted. Weighted hypothetical completion estimates are 1/9=11.1% if H04 passes and 2/9=22.2% if it fails; sampling uncertainty remains.'], ['QA must preserve 12 frame units, 7 original selections, and 8 distinct reviewed units, with L07 kept separate. Negative controls reject unweighted pooling, missing-as-pass, and a 95% judgmental claim. Human method approval and final disposition remain unrecorded.']], 'suite_id': 'sampling-assurance', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'SA-F01', 'proposal': 'Investigate the separation failure mechanism and assess the affected scope without pooling targeted results into the probability sample.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'SA-F02', 'proposal': 'Recover contemporaneous H04 evidence or retain the missingness restriction and obtain an approved treatment.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'SA-F03', 'proposal': 'Have an authorized reviewer approve a further design or accept the restricted conclusion; the result does not prove the true rate exceeds 25.0%.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -79,6 +84,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -105,8 +117,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -130,8 +142,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -147,6 +211,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -162,7 +253,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -183,6 +274,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -274,6 +366,11 @@ summary_rows = [
     ['data_label', DATA['notice'], 'Retain synthetic label for examples'],
 ]
 summary_rows += [[m['label'], m['value'], m['method']] for m in DATA['metrics']]
+summary_rows += [['conclusion', DATA['conclusion'], 'Case-specific conclusion; human disposition remains separate']]
+summary_rows += [[f'method_{i:02}', value, 'Applied method'] for i,value in enumerate(DATA['methods'],1)]
+summary_rows += [[f'report_section_{section:02}_paragraph_{paragraph:02}', value, DATA['report_sections'][section-1]]
+                 for section,paragraphs in enumerate(DATA['report_narrative'],1)
+                 for paragraph,value in enumerate(paragraphs,1)]
 summary_rows += [['limitation', value, 'Preserve in every exported format'] for value in DATA['limitations']]
 populate(summary, ['measure', 'value', 'method_or_limit'], summary_rows)
 for row_number, metric in enumerate(DATA['metrics'], 9):
@@ -328,6 +425,12 @@ qa_cols = ['check_id', 'check', 'result', 'evidence']
 populate(sheet('QA'), qa_cols, [[q['id'], q['check'], q['result'], q['evidence']] for q in DATA['qa']], 'QARegister')
 for i, t in enumerate(DATA['domain_tables'], 1):
     ws = populate(sheet(t['name']), t['columns'], t['rows'], f'DomainRegister{i}', t.get('formats'))
+    for column,spec in t.get('column_contracts',{}).items():
+        index=t['columns'].index(column)+1
+        contract=f"{spec['description']} Type: {spec['type']}. Unit: {spec['unit']}. Nullable: {spec['nullable']}."
+        if column in t.get('primary_key',[]):contract+=' Part of the primary key.'
+        if 'enum' in spec:contract+=' Allowed values: '+', '.join(map(str,spec['enum']))+'.'
+        ws.cell(1,index).comment=Comment(contract,'Toolkit')
     stats_row = len(t['rows']) + 3
     literal(ws.cell(stats_row, 1), 'Domain record count')
     literal(ws.cell(stats_row, 2), len(t['rows']))

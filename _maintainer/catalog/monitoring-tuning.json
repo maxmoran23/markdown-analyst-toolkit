@@ -1,246 +1,2983 @@
 {
   "slug": "monitoring-tuning",
   "title": "Monitoring Scenario and Threshold Review",
-  "summary": "Compare monitoring candidates on a documented evaluation set while keeping workload, coverage limits, and human deployment decisions distinct.",
-  "audience": "Monitoring analysts, scenario owners, and independent reviewers",
-  "decision": "Which candidate deserves further validation, and what evidence is missing before a human change decision?",
+  "summary": "Evaluate complete monitoring candidates through protected partitions, labels, routing, workload, below-threshold review and human change gates.",
+  "audience": "Monitoring analysts, independent challenge reviewers and accountable human decision makers",
+  "decision": "Which frozen candidate merits further validation, and which data, routing or governance gaps block a human change decision?",
   "palette": "indigo",
+  "as_of": "2026-10-09",
+  "scope": "Complete fictional inputs printed in file 10 only. Public authorities provide context, not evidence about the fictional subjects or an institution-specific mandate.",
   "report_sections": [
     "Candidate recommendation and restrictions",
-    "Evaluation scope and comparison method",
-    "Coverage and workload findings",
-    "Candidate performance comparison",
-    "Labelled units and review provenance",
-    "Evidence uncertainty and blind spots",
+    "Evaluation scope and partition controls",
+    "Coverage workload and routing findings",
+    "Complete candidate and population registers",
+    "Below-threshold review and decision gates",
+    "Evidence provenance uncertainty and blind spots",
     "Validation and change proposals",
     "Limitations quality review and human disposition"
   ],
   "domain_tables": [
     {
-      "name": "CandidateMetrics",
-      "columns": [
-        "candidate_id",
-        "threshold",
-        "labelled_alerts",
-        "tp",
-        "fp",
-        "fn",
-        "tn",
-        "precision",
-        "recall",
-        "population_alerts"
-      ],
-      "rows": [
-        [
-          "BASE60",
-          60,
-          4,
-          2,
-          2,
-          1,
-          1,
-          0.5,
-          0.6666666666666666,
-          5
-        ],
-        [
-          "HIGH75",
-          75,
-          2,
-          1,
-          1,
-          2,
-          2,
-          0.5,
-          0.3333333333333333,
-          3
-        ],
-        [
-          "LOW50",
-          50,
-          5,
-          3,
-          2,
-          0,
-          1,
-          0.6,
-          1.0,
-          6
-        ]
-      ],
-      "formats": {
-        "precision": "0.0%",
-        "recall": "0.0%"
-      }
-    },
-    {
-      "name": "LabelledUnits",
+      "name": "Population",
       "columns": [
         "unit_id",
         "group_id",
+        "partition",
+        "segment",
         "score",
         "label",
-        "label_source",
+        "label_basis",
+        "eligible",
+        "suppressed",
+        "review_hours",
         "evidence_ids"
+      ],
+      "column_contracts": {
+        "unit_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "One scored customer-window; never a transaction count."
+        },
+        "group_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Frozen merge/dependence group containing two units in one partition."
+        },
+        "partition": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Prospectively assigned evaluation partition.",
+          "enum": [
+            "TRAIN",
+            "VALIDATION",
+            "HOLDOUT"
+          ]
+        },
+        "segment": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Frozen customer segment.",
+          "enum": [
+            "RETAIL",
+            "SMALL_BUSINESS",
+            "CORRESPONDENT"
+          ]
+        },
+        "score": {
+          "type": "number",
+          "nullable": false,
+          "unit": "score",
+          "description": "Supplied deterministic score on a 0 to 100 scale."
+        },
+        "label": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Available fictional review outcome as of cutoff.",
+          "enum": [
+            "POSITIVE",
+            "NEGATIVE",
+            "UNKNOWN",
+            "CENSORED"
+          ]
+        },
+        "label_basis": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Provenance or reason the label is not mature."
+        },
+        "eligible": {
+          "type": "boolean",
+          "nullable": false,
+          "unit": "flag",
+          "description": "Whether the supplied unit meets the frozen population predicate."
+        },
+        "suppressed": {
+          "type": "boolean",
+          "nullable": false,
+          "unit": "flag",
+          "description": "Whether group G17 is removed by the illustrative suppression list."
+        },
+        "review_hours": {
+          "type": "number",
+          "nullable": false,
+          "unit": "hours",
+          "description": "Fixed lead-case workload assumption by segment, before merge additions."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Supporting synthetic source IDs."
+        }
+      },
+      "primary_key": [
+        "unit_id"
       ],
       "rows": [
         [
           "U01",
           "G01",
-          90,
+          "TRAIN",
+          "RETAIL",
+          82,
           "POSITIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1,
           "SYN-001"
         ],
         [
           "U02",
-          "G02",
-          80,
+          "G01",
+          "TRAIN",
+          "RETAIL",
+          67,
           "NEGATIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1,
           "SYN-001"
         ],
         [
           "U03",
-          "G03",
-          70,
+          "G02",
+          "TRAIN",
+          "RETAIL",
+          56,
           "POSITIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1,
           "SYN-001"
         ],
         [
           "U04",
-          "G04",
-          60,
+          "G02",
+          "TRAIN",
+          "RETAIL",
+          32,
           "NEGATIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1,
           "SYN-001"
         ],
         [
           "U05",
-          "G05",
-          50,
+          "G03",
+          "TRAIN",
+          "SMALL_BUSINESS",
+          88,
           "POSITIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
           "SYN-001"
         ],
         [
           "U06",
-          "G06",
-          40,
+          "G03",
+          "TRAIN",
+          "SMALL_BUSINESS",
+          72,
           "NEGATIVE",
-          "Fictional reviewer fixture",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U07",
+          "G04",
+          "TRAIN",
+          "SMALL_BUSINESS",
+          58,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U08",
+          "G04",
+          "TRAIN",
+          "SMALL_BUSINESS",
+          44,
+          "UNKNOWN",
+          "Review evidence unavailable",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U09",
+          "G05",
+          "TRAIN",
+          "CORRESPONDENT",
+          93,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U10",
+          "G05",
+          "TRAIN",
+          "CORRESPONDENT",
+          77,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U11",
+          "G06",
+          "TRAIN",
+          "CORRESPONDENT",
+          63,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U12",
+          "G06",
+          "TRAIN",
+          "CORRESPONDENT",
+          39,
+          "CENSORED",
+          "Outcome window not mature",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U13",
+          "G07",
+          "VALIDATION",
+          "RETAIL",
+          79,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U14",
+          "G07",
+          "VALIDATION",
+          "RETAIL",
+          64,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U15",
+          "G08",
+          "VALIDATION",
+          "RETAIL",
+          54,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U16",
+          "G08",
+          "VALIDATION",
+          "RETAIL",
+          28,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U17",
+          "G09",
+          "VALIDATION",
+          "SMALL_BUSINESS",
+          86,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U18",
+          "G09",
+          "VALIDATION",
+          "SMALL_BUSINESS",
+          69,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U19",
+          "G10",
+          "VALIDATION",
+          "SMALL_BUSINESS",
+          57,
+          "UNKNOWN",
+          "Review evidence unavailable",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U20",
+          "G10",
+          "VALIDATION",
+          "SMALL_BUSINESS",
+          42,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U21",
+          "G11",
+          "VALIDATION",
+          "CORRESPONDENT",
+          91,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U22",
+          "G11",
+          "VALIDATION",
+          "CORRESPONDENT",
+          74,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U23",
+          "G12",
+          "VALIDATION",
+          "CORRESPONDENT",
+          61,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U24",
+          "G12",
+          "VALIDATION",
+          "CORRESPONDENT",
+          36,
+          "CENSORED",
+          "Outcome window not mature",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U25",
+          "G13",
+          "HOLDOUT",
+          "RETAIL",
+          81,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U26",
+          "G13",
+          "HOLDOUT",
+          "RETAIL",
+          66,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U27",
+          "G14",
+          "HOLDOUT",
+          "RETAIL",
+          53,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U28",
+          "G14",
+          "HOLDOUT",
+          "RETAIL",
+          31,
+          "UNKNOWN",
+          "Review evidence unavailable",
+          true,
+          false,
+          1,
+          "SYN-001"
+        ],
+        [
+          "U29",
+          "G15",
+          "HOLDOUT",
+          "SMALL_BUSINESS",
+          84,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U30",
+          "G15",
+          "HOLDOUT",
+          "SMALL_BUSINESS",
+          71,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U31",
+          "G16",
+          "HOLDOUT",
+          "SMALL_BUSINESS",
+          59,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U32",
+          "G16",
+          "HOLDOUT",
+          "SMALL_BUSINESS",
+          41,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          false,
+          1.5,
+          "SYN-001"
+        ],
+        [
+          "U33",
+          "G17",
+          "HOLDOUT",
+          "CORRESPONDENT",
+          94,
+          "POSITIVE",
+          "Fictional closed review",
+          true,
+          true,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U34",
+          "G17",
+          "HOLDOUT",
+          "CORRESPONDENT",
+          76,
+          "NEGATIVE",
+          "Fictional closed review",
+          true,
+          true,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U35",
+          "G18",
+          "HOLDOUT",
+          "CORRESPONDENT",
+          62,
+          "UNKNOWN",
+          "Review evidence unavailable",
+          true,
+          false,
+          2,
+          "SYN-001"
+        ],
+        [
+          "U36",
+          "G18",
+          "HOLDOUT",
+          "CORRESPONDENT",
+          37,
+          "CENSORED",
+          "Outcome window not mature",
+          true,
+          false,
+          2,
           "SYN-001"
         ]
-      ]
+      ],
+      "formats": {
+        "review_hours": "0.00"
+      },
+      "grain": "One eligible scored customer-window unit, identified by unit_id, before candidate selection or routing."
+    },
+    {
+      "name": "Candidates",
+      "columns": [
+        "candidate_id",
+        "retail_threshold",
+        "business_threshold",
+        "correspondent_threshold",
+        "comparator",
+        "freeze_state",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "candidate_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Frozen candidate key."
+        },
+        "retail_threshold": {
+          "type": "number",
+          "nullable": false,
+          "unit": "score",
+          "description": "Inclusive RETAIL score cutoff."
+        },
+        "business_threshold": {
+          "type": "number",
+          "nullable": false,
+          "unit": "score",
+          "description": "Inclusive SMALL_BUSINESS score cutoff."
+        },
+        "correspondent_threshold": {
+          "type": "number",
+          "nullable": false,
+          "unit": "score",
+          "description": "Inclusive CORRESPONDENT score cutoff."
+        },
+        "comparator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact comparison operator.",
+          "enum": [
+            "GREATER_OR_EQUAL"
+          ]
+        },
+        "freeze_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "All candidates declared before examining protected results.",
+          "enum": [
+            "ILLUSTRATIVE_PREFROZEN"
+          ]
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Parameter evidence ID."
+        }
+      },
+      "primary_key": [
+        "candidate_id"
+      ],
+      "rows": [
+        [
+          "BASE60",
+          60,
+          60,
+          60,
+          "GREATER_OR_EQUAL",
+          "ILLUSTRATIVE_PREFROZEN",
+          "SYN-002"
+        ],
+        [
+          "HIGH75",
+          75,
+          75,
+          75,
+          "GREATER_OR_EQUAL",
+          "ILLUSTRATIVE_PREFROZEN",
+          "SYN-002"
+        ],
+        [
+          "LOW50",
+          50,
+          50,
+          50,
+          "GREATER_OR_EQUAL",
+          "ILLUSTRATIVE_PREFROZEN",
+          "SYN-002"
+        ],
+        [
+          "SEGMENTED",
+          55,
+          60,
+          65,
+          "GREATER_OR_EQUAL",
+          "ILLUSTRATIVE_PREFROZEN",
+          "SYN-002"
+        ]
+      ],
+      "grain": "One frozen candidate configuration, identified by candidate_id, containing all three segment thresholds."
+    },
+    {
+      "name": "CandidateMetrics",
+      "columns": [
+        "candidate_id",
+        "partition",
+        "population_n",
+        "known_n",
+        "tp",
+        "fp",
+        "fn",
+        "tn",
+        "unknown_n",
+        "raw_hits",
+        "retained_hits",
+        "queued_cases",
+        "workload_hours",
+        "precision",
+        "recall",
+        "retained_positive_hits"
+      ],
+      "column_contracts": {
+        "candidate_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Candidate key."
+        },
+        "partition": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evaluation partition or ALL descriptive reconciliation.",
+          "enum": [
+            "TRAIN",
+            "VALIDATION",
+            "HOLDOUT",
+            "ALL"
+          ]
+        },
+        "population_n": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "All eligible supplied units in this partition."
+        },
+        "known_n": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "POSITIVE plus NEGATIVE units only."
+        },
+        "tp": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Known positive unit meeting the raw predicate before routing."
+        },
+        "fp": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Known negative unit meeting the raw predicate."
+        },
+        "fn": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Known positive unit below the raw predicate."
+        },
+        "tn": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Known negative unit below the raw predicate."
+        },
+        "unknown_n": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "UNKNOWN plus CENSORED units outside the confusion matrix."
+        },
+        "raw_hits": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "All units meeting the predicate, including unavailable labels."
+        },
+        "retained_hits": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Raw hits remaining after suppression, before group merge."
+        },
+        "queued_cases": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Distinct retained group IDs; not a unit count."
+        },
+        "workload_hours": {
+          "type": "number",
+          "nullable": false,
+          "unit": "hours",
+          "description": "Lead hours plus 0.25 hours for every additional retained unit in a group."
+        },
+        "precision": {
+          "type": "number",
+          "nullable": true,
+          "unit": "ratio",
+          "description": "TP divided by TP plus FP on available labels."
+        },
+        "recall": {
+          "type": "number",
+          "nullable": true,
+          "unit": "ratio",
+          "description": "TP divided by TP plus FN on available labels."
+        },
+        "retained_positive_hits": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Known positive units reaching a queued case; this does not credit unhit siblings."
+        }
+      },
+      "primary_key": [
+        "candidate_id",
+        "partition"
+      ],
+      "rows": [
+        [
+          "BASE60",
+          "TRAIN",
+          12,
+          10,
+          4,
+          3,
+          2,
+          1,
+          2,
+          7,
+          7,
+          4,
+          7.25,
+          0.5714285714285714,
+          0.6666666666666666,
+          4
+        ],
+        [
+          "BASE60",
+          "VALIDATION",
+          12,
+          10,
+          4,
+          3,
+          1,
+          2,
+          2,
+          7,
+          7,
+          4,
+          7.25,
+          0.5714285714285714,
+          0.8,
+          4
+        ],
+        [
+          "BASE60",
+          "HOLDOUT",
+          12,
+          9,
+          3,
+          3,
+          2,
+          1,
+          3,
+          7,
+          5,
+          3,
+          5.0,
+          0.5,
+          0.6,
+          2
+        ],
+        [
+          "BASE60",
+          "ALL",
+          36,
+          29,
+          11,
+          9,
+          5,
+          4,
+          7,
+          21,
+          19,
+          11,
+          19.5,
+          0.55,
+          0.6875,
+          10
+        ],
+        [
+          "HIGH75",
+          "TRAIN",
+          12,
+          10,
+          3,
+          1,
+          3,
+          3,
+          2,
+          4,
+          4,
+          3,
+          4.75,
+          0.75,
+          0.5,
+          3
+        ],
+        [
+          "HIGH75",
+          "VALIDATION",
+          12,
+          10,
+          3,
+          0,
+          2,
+          5,
+          2,
+          3,
+          3,
+          3,
+          4.5,
+          1.0,
+          0.6,
+          3
+        ],
+        [
+          "HIGH75",
+          "HOLDOUT",
+          12,
+          9,
+          3,
+          1,
+          2,
+          3,
+          3,
+          4,
+          2,
+          2,
+          2.5,
+          0.75,
+          0.6,
+          2
+        ],
+        [
+          "HIGH75",
+          "ALL",
+          36,
+          29,
+          9,
+          2,
+          7,
+          11,
+          7,
+          11,
+          9,
+          8,
+          11.75,
+          0.8181818181818182,
+          0.5625,
+          8
+        ],
+        [
+          "LOW50",
+          "TRAIN",
+          12,
+          10,
+          6,
+          3,
+          0,
+          1,
+          2,
+          9,
+          9,
+          6,
+          9.75,
+          0.6666666666666666,
+          1.0,
+          6
+        ],
+        [
+          "LOW50",
+          "VALIDATION",
+          12,
+          10,
+          5,
+          3,
+          0,
+          2,
+          2,
+          9,
+          9,
+          6,
+          9.75,
+          0.625,
+          1.0,
+          5
+        ],
+        [
+          "LOW50",
+          "HOLDOUT",
+          12,
+          9,
+          5,
+          3,
+          0,
+          1,
+          3,
+          9,
+          7,
+          5,
+          7.5,
+          0.625,
+          1.0,
+          4
+        ],
+        [
+          "LOW50",
+          "ALL",
+          36,
+          29,
+          16,
+          9,
+          0,
+          4,
+          7,
+          27,
+          25,
+          17,
+          27.0,
+          0.64,
+          1.0,
+          15
+        ],
+        [
+          "SEGMENTED",
+          "TRAIN",
+          12,
+          10,
+          4,
+          3,
+          2,
+          1,
+          2,
+          7,
+          7,
+          4,
+          6.25,
+          0.5714285714285714,
+          0.6666666666666666,
+          4
+        ],
+        [
+          "SEGMENTED",
+          "VALIDATION",
+          12,
+          10,
+          3,
+          3,
+          2,
+          2,
+          2,
+          6,
+          6,
+          3,
+          5.25,
+          0.5,
+          0.6,
+          3
+        ],
+        [
+          "SEGMENTED",
+          "HOLDOUT",
+          12,
+          9,
+          3,
+          3,
+          2,
+          1,
+          3,
+          6,
+          4,
+          2,
+          3.0,
+          0.5,
+          0.6,
+          2
+        ],
+        [
+          "SEGMENTED",
+          "ALL",
+          36,
+          29,
+          10,
+          9,
+          6,
+          4,
+          7,
+          19,
+          17,
+          9,
+          14.5,
+          0.5263157894736842,
+          0.625,
+          9
+        ]
+      ],
+      "formats": {
+        "workload_hours": "0.00",
+        "precision": "0.0%",
+        "recall": "0.0%"
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "candidate_id"
+          ],
+          "table": "Candidates",
+          "references": [
+            "candidate_id"
+          ]
+        }
+      ],
+      "grain": "One candidate_id and partition combination, including a separately labeled ALL reconciliation across the three partitions."
+    },
+    {
+      "name": "AlertRouting",
+      "columns": [
+        "hit_id",
+        "candidate_id",
+        "unit_id",
+        "group_id",
+        "route_state",
+        "case_id",
+        "lead_unit_id",
+        "routing_basis",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "hit_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique candidate-unit raw hit key."
+        },
+        "candidate_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Candidate responsible for this raw hit."
+        },
+        "unit_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact scored unit; lookup label separately."
+        },
+        "group_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Frozen group used for merging only within a partition."
+        },
+        "route_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Mutually exclusive hit routing outcome.",
+          "enum": [
+            "SUPPRESSED",
+            "QUEUED_LEAD",
+            "MERGED_CHILD"
+          ]
+        },
+        "case_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Candidate-group queued case key; null for suppressed hits."
+        },
+        "lead_unit_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Smallest hit unit ID in the retained group; null when suppressed."
+        },
+        "routing_basis": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evidence or missing authorization underlying the route."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Sources for routing inputs and predicate lineage."
+        }
+      },
+      "primary_key": [
+        "hit_id"
+      ],
+      "rows": [
+        [
+          "BASE60-U01",
+          "BASE60",
+          "U01",
+          "G01",
+          "QUEUED_LEAD",
+          "BASE60-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U02",
+          "BASE60",
+          "U02",
+          "G01",
+          "MERGED_CHILD",
+          "BASE60-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U05",
+          "BASE60",
+          "U05",
+          "G03",
+          "QUEUED_LEAD",
+          "BASE60-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U06",
+          "BASE60",
+          "U06",
+          "G03",
+          "MERGED_CHILD",
+          "BASE60-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U09",
+          "BASE60",
+          "U09",
+          "G05",
+          "QUEUED_LEAD",
+          "BASE60-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U10",
+          "BASE60",
+          "U10",
+          "G05",
+          "MERGED_CHILD",
+          "BASE60-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U11",
+          "BASE60",
+          "U11",
+          "G06",
+          "QUEUED_LEAD",
+          "BASE60-G06",
+          "U11",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U13",
+          "BASE60",
+          "U13",
+          "G07",
+          "QUEUED_LEAD",
+          "BASE60-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U14",
+          "BASE60",
+          "U14",
+          "G07",
+          "MERGED_CHILD",
+          "BASE60-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U17",
+          "BASE60",
+          "U17",
+          "G09",
+          "QUEUED_LEAD",
+          "BASE60-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U18",
+          "BASE60",
+          "U18",
+          "G09",
+          "MERGED_CHILD",
+          "BASE60-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U21",
+          "BASE60",
+          "U21",
+          "G11",
+          "QUEUED_LEAD",
+          "BASE60-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U22",
+          "BASE60",
+          "U22",
+          "G11",
+          "MERGED_CHILD",
+          "BASE60-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U23",
+          "BASE60",
+          "U23",
+          "G12",
+          "QUEUED_LEAD",
+          "BASE60-G12",
+          "U23",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U25",
+          "BASE60",
+          "U25",
+          "G13",
+          "QUEUED_LEAD",
+          "BASE60-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U26",
+          "BASE60",
+          "U26",
+          "G13",
+          "MERGED_CHILD",
+          "BASE60-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U29",
+          "BASE60",
+          "U29",
+          "G15",
+          "QUEUED_LEAD",
+          "BASE60-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U30",
+          "BASE60",
+          "U30",
+          "G15",
+          "MERGED_CHILD",
+          "BASE60-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U33",
+          "BASE60",
+          "U33",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U34",
+          "BASE60",
+          "U34",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "BASE60-U35",
+          "BASE60",
+          "U35",
+          "G18",
+          "QUEUED_LEAD",
+          "BASE60-G18",
+          "U35",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U01",
+          "HIGH75",
+          "U01",
+          "G01",
+          "QUEUED_LEAD",
+          "HIGH75-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U05",
+          "HIGH75",
+          "U05",
+          "G03",
+          "QUEUED_LEAD",
+          "HIGH75-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U09",
+          "HIGH75",
+          "U09",
+          "G05",
+          "QUEUED_LEAD",
+          "HIGH75-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U10",
+          "HIGH75",
+          "U10",
+          "G05",
+          "MERGED_CHILD",
+          "HIGH75-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U13",
+          "HIGH75",
+          "U13",
+          "G07",
+          "QUEUED_LEAD",
+          "HIGH75-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U17",
+          "HIGH75",
+          "U17",
+          "G09",
+          "QUEUED_LEAD",
+          "HIGH75-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U21",
+          "HIGH75",
+          "U21",
+          "G11",
+          "QUEUED_LEAD",
+          "HIGH75-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U25",
+          "HIGH75",
+          "U25",
+          "G13",
+          "QUEUED_LEAD",
+          "HIGH75-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U29",
+          "HIGH75",
+          "U29",
+          "G15",
+          "QUEUED_LEAD",
+          "HIGH75-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U33",
+          "HIGH75",
+          "U33",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75-U34",
+          "HIGH75",
+          "U34",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U01",
+          "LOW50",
+          "U01",
+          "G01",
+          "QUEUED_LEAD",
+          "LOW50-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U02",
+          "LOW50",
+          "U02",
+          "G01",
+          "MERGED_CHILD",
+          "LOW50-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U03",
+          "LOW50",
+          "U03",
+          "G02",
+          "QUEUED_LEAD",
+          "LOW50-G02",
+          "U03",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U05",
+          "LOW50",
+          "U05",
+          "G03",
+          "QUEUED_LEAD",
+          "LOW50-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U06",
+          "LOW50",
+          "U06",
+          "G03",
+          "MERGED_CHILD",
+          "LOW50-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U07",
+          "LOW50",
+          "U07",
+          "G04",
+          "QUEUED_LEAD",
+          "LOW50-G04",
+          "U07",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U09",
+          "LOW50",
+          "U09",
+          "G05",
+          "QUEUED_LEAD",
+          "LOW50-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U10",
+          "LOW50",
+          "U10",
+          "G05",
+          "MERGED_CHILD",
+          "LOW50-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U11",
+          "LOW50",
+          "U11",
+          "G06",
+          "QUEUED_LEAD",
+          "LOW50-G06",
+          "U11",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U13",
+          "LOW50",
+          "U13",
+          "G07",
+          "QUEUED_LEAD",
+          "LOW50-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U14",
+          "LOW50",
+          "U14",
+          "G07",
+          "MERGED_CHILD",
+          "LOW50-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U15",
+          "LOW50",
+          "U15",
+          "G08",
+          "QUEUED_LEAD",
+          "LOW50-G08",
+          "U15",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U17",
+          "LOW50",
+          "U17",
+          "G09",
+          "QUEUED_LEAD",
+          "LOW50-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U18",
+          "LOW50",
+          "U18",
+          "G09",
+          "MERGED_CHILD",
+          "LOW50-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U19",
+          "LOW50",
+          "U19",
+          "G10",
+          "QUEUED_LEAD",
+          "LOW50-G10",
+          "U19",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U21",
+          "LOW50",
+          "U21",
+          "G11",
+          "QUEUED_LEAD",
+          "LOW50-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U22",
+          "LOW50",
+          "U22",
+          "G11",
+          "MERGED_CHILD",
+          "LOW50-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U23",
+          "LOW50",
+          "U23",
+          "G12",
+          "QUEUED_LEAD",
+          "LOW50-G12",
+          "U23",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U25",
+          "LOW50",
+          "U25",
+          "G13",
+          "QUEUED_LEAD",
+          "LOW50-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U26",
+          "LOW50",
+          "U26",
+          "G13",
+          "MERGED_CHILD",
+          "LOW50-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U27",
+          "LOW50",
+          "U27",
+          "G14",
+          "QUEUED_LEAD",
+          "LOW50-G14",
+          "U27",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U29",
+          "LOW50",
+          "U29",
+          "G15",
+          "QUEUED_LEAD",
+          "LOW50-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U30",
+          "LOW50",
+          "U30",
+          "G15",
+          "MERGED_CHILD",
+          "LOW50-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U31",
+          "LOW50",
+          "U31",
+          "G16",
+          "QUEUED_LEAD",
+          "LOW50-G16",
+          "U31",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U33",
+          "LOW50",
+          "U33",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U34",
+          "LOW50",
+          "U34",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "LOW50-U35",
+          "LOW50",
+          "U35",
+          "G18",
+          "QUEUED_LEAD",
+          "LOW50-G18",
+          "U35",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U01",
+          "SEGMENTED",
+          "U01",
+          "G01",
+          "QUEUED_LEAD",
+          "SEGMENTED-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U02",
+          "SEGMENTED",
+          "U02",
+          "G01",
+          "MERGED_CHILD",
+          "SEGMENTED-G01",
+          "U01",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U03",
+          "SEGMENTED",
+          "U03",
+          "G02",
+          "QUEUED_LEAD",
+          "SEGMENTED-G02",
+          "U03",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U05",
+          "SEGMENTED",
+          "U05",
+          "G03",
+          "QUEUED_LEAD",
+          "SEGMENTED-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U06",
+          "SEGMENTED",
+          "U06",
+          "G03",
+          "MERGED_CHILD",
+          "SEGMENTED-G03",
+          "U05",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U09",
+          "SEGMENTED",
+          "U09",
+          "G05",
+          "QUEUED_LEAD",
+          "SEGMENTED-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U10",
+          "SEGMENTED",
+          "U10",
+          "G05",
+          "MERGED_CHILD",
+          "SEGMENTED-G05",
+          "U09",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U13",
+          "SEGMENTED",
+          "U13",
+          "G07",
+          "QUEUED_LEAD",
+          "SEGMENTED-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U14",
+          "SEGMENTED",
+          "U14",
+          "G07",
+          "MERGED_CHILD",
+          "SEGMENTED-G07",
+          "U13",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U17",
+          "SEGMENTED",
+          "U17",
+          "G09",
+          "QUEUED_LEAD",
+          "SEGMENTED-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U18",
+          "SEGMENTED",
+          "U18",
+          "G09",
+          "MERGED_CHILD",
+          "SEGMENTED-G09",
+          "U17",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U21",
+          "SEGMENTED",
+          "U21",
+          "G11",
+          "QUEUED_LEAD",
+          "SEGMENTED-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U22",
+          "SEGMENTED",
+          "U22",
+          "G11",
+          "MERGED_CHILD",
+          "SEGMENTED-G11",
+          "U21",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U25",
+          "SEGMENTED",
+          "U25",
+          "G13",
+          "QUEUED_LEAD",
+          "SEGMENTED-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U26",
+          "SEGMENTED",
+          "U26",
+          "G13",
+          "MERGED_CHILD",
+          "SEGMENTED-G13",
+          "U25",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U29",
+          "SEGMENTED",
+          "U29",
+          "G15",
+          "QUEUED_LEAD",
+          "SEGMENTED-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U30",
+          "SEGMENTED",
+          "U30",
+          "G15",
+          "MERGED_CHILD",
+          "SEGMENTED-G15",
+          "U29",
+          "Same frozen group and partition",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U33",
+          "SEGMENTED",
+          "U33",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SEGMENTED-U34",
+          "SEGMENTED",
+          "U34",
+          "G17",
+          "SUPPRESSED",
+          null,
+          null,
+          "Unexpired authorization absent",
+          "SYN-001;SYN-003"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "candidate_id"
+          ],
+          "table": "Candidates",
+          "references": [
+            "candidate_id"
+          ]
+        },
+        {
+          "columns": [
+            "unit_id"
+          ],
+          "table": "Population",
+          "references": [
+            "unit_id"
+          ]
+        },
+        {
+          "columns": [
+            "lead_unit_id"
+          ],
+          "table": "Population",
+          "references": [
+            "unit_id"
+          ]
+        }
+      ],
+      "grain": "One raw candidate-unit hit, identified by hit_id, with its suppression or merged-case route."
+    },
+    {
+      "name": "BelowThreshold",
+      "columns": [
+        "draw_id",
+        "unit_id",
+        "partition",
+        "frame_n",
+        "rank",
+        "selected",
+        "review_label",
+        "design",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "draw_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique frame-row identifier."
+        },
+        "unit_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "BASE60 nonhit unit."
+        },
+        "partition": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Frozen stratum; five nonhits per partition.",
+          "enum": [
+            "TRAIN",
+            "VALIDATION",
+            "HOLDOUT"
+          ]
+        },
+        "frame_n": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Complete number of eligible nonhits in this stratum."
+        },
+        "rank": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "rank",
+          "description": "Supplied distinct rank within the stratum."
+        },
+        "selected": {
+          "type": "boolean",
+          "nullable": false,
+          "unit": "flag",
+          "description": "True for ranks one and two."
+        },
+        "review_label": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Observed selected-row outcome or NOT_REVIEWED for unselected records.",
+          "enum": [
+            "POSITIVE",
+            "NEGATIVE",
+            "UNKNOWN",
+            "CENSORED",
+            "NOT_REVIEWED"
+          ]
+        },
+        "design": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Fixture rank list is illustrative; it makes no random-sampling claim.",
+          "enum": [
+            "ILLUSTRATIVE_RANK"
+          ]
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Complete supplied frame and draw record."
+        }
+      },
+      "primary_key": [
+        "draw_id"
+      ],
+      "rows": [
+        [
+          "BTL-U03",
+          "U03",
+          "TRAIN",
+          5,
+          1,
+          true,
+          "POSITIVE",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U04",
+          "U04",
+          "TRAIN",
+          5,
+          3,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U07",
+          "U07",
+          "TRAIN",
+          5,
+          2,
+          true,
+          "POSITIVE",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U08",
+          "U08",
+          "TRAIN",
+          5,
+          4,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U12",
+          "U12",
+          "TRAIN",
+          5,
+          5,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U15",
+          "U15",
+          "VALIDATION",
+          5,
+          1,
+          true,
+          "POSITIVE",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U16",
+          "U16",
+          "VALIDATION",
+          5,
+          3,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U19",
+          "U19",
+          "VALIDATION",
+          5,
+          4,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U20",
+          "U20",
+          "VALIDATION",
+          5,
+          2,
+          true,
+          "NEGATIVE",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U24",
+          "U24",
+          "VALIDATION",
+          5,
+          5,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U27",
+          "U27",
+          "HOLDOUT",
+          5,
+          3,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U28",
+          "U28",
+          "HOLDOUT",
+          5,
+          1,
+          true,
+          "UNKNOWN",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U31",
+          "U31",
+          "HOLDOUT",
+          5,
+          4,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U32",
+          "U32",
+          "HOLDOUT",
+          5,
+          5,
+          false,
+          "NOT_REVIEWED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ],
+        [
+          "BTL-U36",
+          "U36",
+          "HOLDOUT",
+          5,
+          2,
+          true,
+          "CENSORED",
+          "ILLUSTRATIVE_RANK",
+          "SYN-004"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "unit_id"
+          ],
+          "table": "Population",
+          "references": [
+            "unit_id"
+          ]
+        }
+      ],
+      "grain": "One unit in the complete BASE60 nonhit frame within its frozen partition, whether selected for review or not."
+    },
+    {
+      "name": "CandidateDecisions",
+      "columns": [
+        "candidate_id",
+        "decision_state",
+        "coverage_gate",
+        "capacity_gate",
+        "routing_gate",
+        "next_evidence",
+        "human_disposition",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "candidate_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Candidate key."
+        },
+        "decision_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Current proposed analytical recommendation.",
+          "enum": [
+            "BASELINE_ONLY",
+            "DO_NOT_SUPPORT",
+            "FURTHER_VALIDATION_ONLY"
+          ]
+        },
+        "coverage_gate": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit known-positive and unknown-label assessment."
+        },
+        "capacity_gate": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Illustrative hours gate; never the only selection criterion."
+        },
+        "routing_gate": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Status of suppression verification."
+        },
+        "next_evidence": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Concrete prerequisite for further consideration."
+        },
+        "human_disposition": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Operational approval is absent.",
+          "enum": [
+            "NOT_RECORDED"
+          ]
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Sources underlying the recommendation."
+        }
+      },
+      "primary_key": [
+        "candidate_id"
+      ],
+      "rows": [
+        [
+          "BASE60",
+          "BASELINE_ONLY",
+          "Raw known recall 11/16; retained positive hits 10",
+          "ALL workload 19.5 hours; illustrative combined capacity 15 hours; no staffing-only selection",
+          "G17 authorization unverified",
+          "Resolve suppression and missing labels before change assessment",
+          "NOT_RECORDED",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "HIGH75",
+          "DO_NOT_SUPPORT",
+          "Raw known recall 9/16; retained positive hits 8",
+          "ALL workload 11.75 hours; illustrative combined capacity 15 hours; no staffing-only selection",
+          "G17 authorization unverified",
+          "Challenge losses U11 and U23 against gains; no automatic acceptance",
+          "NOT_RECORDED",
+          "SYN-001;SYN-002;SYN-003"
+        ],
+        [
+          "LOW50",
+          "FURTHER_VALIDATION_ONLY",
+          "Raw known recall 16/16; retained positive hits 15",
+          "ALL workload 27 hours; illustrative combined capacity 15 hours; no staffing-only selection",
+          "G17 authorization unverified",
+          "Representative labels, routing repair, capacity and protected retest",
+          "NOT_RECORDED",
+          "SYN-001;SYN-002;SYN-003"
+        ],
+        [
+          "SEGMENTED",
+          "DO_NOT_SUPPORT",
+          "Raw known recall 10/16; retained positive hits 9",
+          "ALL workload 14.5 hours; illustrative combined capacity 15 hours; no staffing-only selection",
+          "G17 authorization unverified",
+          "Resolve correspondent sensitivity and RETAIL boundary changes",
+          "NOT_RECORDED",
+          "SYN-001;SYN-002;SYN-003"
+        ]
+      ],
+      "foreign_keys": [
+        {
+          "columns": [
+            "candidate_id"
+          ],
+          "table": "Candidates",
+          "references": [
+            "candidate_id"
+          ]
+        }
+      ],
+      "grain": "One proposed analytical disposition for one candidate_id at the case cutoff; this is not a human deployment approval."
+    },
+    {
+      "name": "EvidenceProvenance",
+      "columns": [
+        "source_id",
+        "source_kind",
+        "as_of",
+        "availability",
+        "unit_count",
+        "grain",
+        "limitation",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "source_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable source ID resolving to the Evidence register."
+        },
+        "source_kind": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Nature of supplied material.",
+          "enum": [
+            "SYNTHETIC_INPUT",
+            "SYNTHETIC_CALCULATION",
+            "SYNTHETIC_DECISION"
+          ]
+        },
+        "as_of": {
+          "type": "text",
+          "nullable": false,
+          "unit": "date",
+          "description": "Evidence cutoff expressed as ISO date, not a receipt timestamp."
+        },
+        "availability": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Supplied scope status.",
+          "enum": [
+            "COMPLETE_FIXTURE",
+            "PARTIAL_FIXTURE"
+          ]
+        },
+        "unit_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Count at the explicitly named grain."
+        },
+        "grain": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "The counting unit for this row."
+        },
+        "limitation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "What this source cannot establish."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "The same source ID, checked against the Evidence register."
+        }
+      },
+      "primary_key": [
+        "source_id"
+      ],
+      "rows": [
+        [
+          "SYN-001",
+          "SYNTHETIC_INPUT",
+          "2026-10-09",
+          "COMPLETE_FIXTURE",
+          36,
+          "scored customer-window units",
+          "Labels are fictional and dependent within merge groups.",
+          "SYN-001"
+        ],
+        [
+          "SYN-002",
+          "SYNTHETIC_INPUT",
+          "2026-10-09",
+          "COMPLETE_FIXTURE",
+          4,
+          "candidate configurations",
+          "Parameter values are illustrative, not approved live settings.",
+          "SYN-002"
+        ],
+        [
+          "SYN-003",
+          "SYNTHETIC_INPUT",
+          "2026-10-09",
+          "PARTIAL_FIXTURE",
+          1,
+          "suppressed group",
+          "Suppression exists in the fixture but authorization and expiry evidence are absent.",
+          "SYN-003"
+        ],
+        [
+          "SYN-004",
+          "SYNTHETIC_INPUT",
+          "2026-10-09",
+          "COMPLETE_FIXTURE",
+          15,
+          "BASE60 below-threshold frame units",
+          "Six assigned ranks are selected; design does not establish probability sampling.",
+          "SYN-004"
+        ]
+      ],
+      "grain": "One synthetic source_id with its own declared counting unit and availability limit."
+    },
+    {
+      "name": "ProcessQA",
+      "columns": [
+        "check_id",
+        "check_scope",
+        "expected",
+        "actual",
+        "status",
+        "reviewer",
+        "evidence_ids"
+      ],
+      "column_contracts": {
+        "check_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable QA check identifier."
+        },
+        "check_scope": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact records or decision being checked."
+        },
+        "expected": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Reference result calculated before inspecting presentation."
+        },
+        "actual": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Observed synthetic result; no operational execution is implied."
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Comparison state.",
+          "enum": [
+            "PASS",
+            "FAIL",
+            "REVIEW_REQUIRED",
+            "NOT_TESTED"
+          ]
+        },
+        "reviewer": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Fictional review role or NOT_RECORDED; never an actual approval."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Semicolon-delimited source IDs resolving to Evidence."
+        }
+      },
+      "primary_key": [
+        "check_id"
+      ],
+      "rows": [
+        [
+          "MT-Q01",
+          "Population conservation",
+          "36 = 29 known + 4 UNKNOWN + 3 CENSORED",
+          "36 = 29 + 4 + 3",
+          "PASS",
+          "Fictional checker",
+          "SYN-001"
+        ],
+        [
+          "MT-Q02",
+          "Partition segregation",
+          "12 units per partition; no group crosses partitions",
+          "TRAIN12 VALIDATION12 HOLDOUT12; groups disjoint",
+          "PASS",
+          "Fictional checker",
+          "SYN-001"
+        ],
+        [
+          "MT-Q03",
+          "Candidate matrices",
+          "Each TP+FP+FN+TN equals known_n",
+          "All sixteen matrices reconcile",
+          "PASS",
+          "Fictional checker",
+          "SYN-001;SYN-002"
+        ],
+        [
+          "MT-Q04",
+          "Suppression authority",
+          "Current authorization plus expiry and coverage evidence",
+          "No authorization supplied for G17",
+          "FAIL",
+          "Fictional checker",
+          "SYN-003"
+        ],
+        [
+          "MT-Q05",
+          "Below-threshold frame",
+          "15 frame units; 6 selected; 9 not reviewed",
+          "15 = 6 + 9; selected outcomes P3 N1 U1 C1",
+          "PASS",
+          "Fictional checker",
+          "SYN-004"
+        ],
+        [
+          "MT-Q06",
+          "Holdout authorization",
+          "Protected review record and separate human decision",
+          "Only an illustrative prefreeze is supplied",
+          "REVIEW_REQUIRED",
+          "NOT_RECORDED",
+          "SYN-002"
+        ]
+      ],
+      "grain": "One explicitly scoped fixture quality check, identified by check_id, with expected and actual results."
     }
   ],
   "findings": [
     {
       "id": "MT-F01",
-      "title": "Higher candidate threshold loses a known labelled positive",
+      "title": "Suppression removes a known positive from every candidate",
       "severity": "HIGH",
       "confidence": "HIGH",
       "claim_class": "Observed",
       "evidence_ids": [
-        "SYN-001"
+        "SYN-001",
+        "SYN-003"
       ],
-      "detail": "HIGH75 misses U03 and U05; BASE60 misses U05. Labelled recall falls from 2/3 to 1/3.",
-      "recommendation": "Do not support the higher candidate on workload savings alone; require explicit risk and independent validation review."
+      "detail": "G17 contains HOLDOUT U33 POSITIVE and U34 NEGATIVE. U33 is a raw hit under all four candidates, but the suppressed group reaches no queued case. The supplied record contains no valid suppression authorization.",
+      "recommendation": "Keep routing assurance blocked; obtain scope, reason, expiry, approver and covered-activity evidence, then replay all candidates."
     },
     {
       "id": "MT-F02",
-      "title": "Lower threshold increases coverage and exceeds illustrative capacity",
+      "title": "Lowest threshold increases raw known coverage and workload",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002",
+        "SYN-003"
+      ],
+      "detail": "LOW50 has 16/16 known positive raw hits and 27 workload hours against an illustrative 15-hour combined capacity. Retained known positive hits are 15/16 after suppression.",
+      "recommendation": "Further validate labels and segment behavior, repair routing and assess staffing; do not deploy from the synthetic result."
+    },
+    {
+      "id": "MT-F03",
+      "title": "Unknown and censored labels limit population performance claims",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-004"
+      ],
+      "detail": "Twenty-nine of thirty-six units have known labels. Four UNKNOWN and three CENSORED units remain outside confusion matrices, including both hit and nonhit records.",
+      "recommendation": "Preserve unavailable labels, obtain independent review and assess outcome maturity before any population recall inference."
+    },
+    {
+      "id": "MT-F04",
+      "title": "Segmented cutoffs lose correspondent known positives",
       "severity": "MEDIUM",
       "confidence": "HIGH",
       "claim_class": "Observed",
       "evidence_ids": [
-        "SYN-001"
+        "SYN-001",
+        "SYN-002"
       ],
-      "detail": "LOW50 detects all three labelled positives but creates six alerts across eight units against an illustrative capacity of five.",
-      "recommendation": "Investigate capacity and representative validation before any change decision."
-    },
-    {
-      "id": "MT-F03",
-      "title": "Two unlabelled units prevent complete population performance assessment",
-      "severity": "HIGH",
-      "confidence": "HIGH",
-      "claim_class": "Observed",
-      "evidence_ids": [
-        "SYN-001"
-      ],
-      "detail": "U07 and U08 are unlabelled; six synthetic labels cannot establish live detection coverage.",
-      "recommendation": "Obtain independent review of alerted and nonalerted samples and preserve unknown outcomes."
+      "detail": "SEGMENTED moves the correspondent cutoff to 65. TRAIN U11 score 63 and VALIDATION U23 score 61 are known positives caught by BASE60 and missed by SEGMENTED. RETAIL U03 score 56 is gained, so the combined result hides opposite segment effects.",
+      "recommendation": "Retain incremental unit IDs and require explicit segment challenge; aggregate workload cannot resolve the coverage tradeoff."
     }
   ],
   "evidence": [
     {
       "id": "SYN-001",
-      "title": "Fictional eight-unit monitoring population and candidate scores",
-      "locator": "10-worked-example.md, full population and candidate arithmetic",
+      "title": "Fictional 36-unit population, label and dependence register",
+      "locator": "10-worked-example.md, raw population and unit-by-unit trace",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Four predeclared fictional score candidates",
+      "locator": "10-worked-example.md, frozen candidate input table",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional G17 suppression and group-routing policy",
+      "locator": "10-worked-example.md, routing input and complete hit ledger",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional complete below-threshold frame and assigned ranks",
+      "locator": "10-worked-example.md, complete fifteen-row frame",
       "claim_class": "Observed"
     },
     {
       "id": "REF-001",
-      "title": "FFIEC Suspicious Activity Reporting",
-      "locator": "https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04",
+      "title": "FFIEC suspicious activity monitoring examination procedures",
+      "locator": "https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04_ep",
       "claim_class": "Reported"
     },
     {
       "id": "REF-002",
-      "title": "Federal Reserve SR 26-2 Revised Guidance on Model Risk Management",
-      "locator": "https://www.federalreserve.gov/supervisionreg/srletters/SR 2602.htm",
+      "title": "Federal Reserve SR 26-2, April 17, 2026",
+      "locator": "https://www.federalreserve.gov/supervisionreg/srletters/sr2602.htm",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-003",
+      "title": "Federal Reserve, Supervisory Guidance on Model Risk Management",
+      "locator": "https://www.federalreserve.gov/frrs/guidance/supervisory-guidance-on-model-risk-management.htm",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-004",
+      "title": "FinCEN and federal banking agencies, SAR FAQs, October 9, 2025",
+      "locator": "https://www.fincen.gov/system/files/2025-10/SAR-FAQs-October-2025.pdf",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-005",
+      "title": "FATF, Guidance for a Risk-Based Approach: The Banking Sector",
+      "locator": "https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Risk-Based-Approach-Banking-Sector.pdf.coredownload.pdf",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-006",
+      "title": "NIST, Confidence intervals for proportions",
+      "locator": "https://www.itl.nist.gov/div898/handbook/prc/section2/prc241.htm",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-007",
+      "title": "GAO, Standards for Internal Control in the Federal Government, 2025 revision",
+      "locator": "https://www.gao.gov/assets/890/882014.pdf",
       "claim_class": "Reported"
     }
   ],
   "metrics": [
     {
-      "label": "Known evaluation labels",
-      "value": "6 of 8 (75.0%)",
-      "method": "Units with POSITIVE or NEGATIVE fixture labels / complete supplied population."
+      "label": "Scored units",
+      "value": 36,
+      "method": "Complete frozen unit register; one customer-window per row."
     },
     {
-      "label": "BASE60 labelled recall",
-      "value": "2 of 3 (66.7%)",
-      "method": "TP / (TP+FN) on the six labelled units only."
+      "label": "Known labels",
+      "value": 29,
+      "method": "16 POSITIVE plus 13 NEGATIVE; excludes 4 UNKNOWN and 3 CENSORED."
     },
     {
-      "label": "LOW50 population alerts",
-      "value": "6 of 8 (75.0%)",
-      "method": "Score>=50 over all eight units, including two with unknown labels."
+      "label": "LOW50 raw known recall",
+      "value": 1.0,
+      "format": "0.0%",
+      "method": "16 raw positive hits / 16 known positive units; not population recall."
+    },
+    {
+      "label": "LOW50 workload hours",
+      "value": 27.0,
+      "format": "0.00",
+      "method": "Retained group lead hours plus 0.25 per additional hit after suppression."
     }
   ],
   "limitations": [
-    "Synthetic labels do not validate live detection performance.",
-    "Unlabelled units are excluded from confusion matrices and retained in workload counts.",
-    "Thresholds are illustrative score cutoffs, not legal or regulatory standards.",
-    "No production change, case closure, or filing decision is authorized."
+    "Every record is fictional; results test this supplied procedure and do not establish operational effectiveness.",
+    "Illustrative cutoffs, partitions, labels, capacities and severity choices are authored examples, not regulatory thresholds.",
+    "Human scope approval, deployment authority, case disposition and reporting decisions are not supplied.",
+    "Missing, censored and unresolved evidence remains visible; no favorable default is permitted."
   ],
-  "conclusion": "LOW50 captures all three known fixture positives but creates six alerts against an illustrative capacity of five. Two units remain unlabelled, so the results support further validation and capacity review rather than a production change.",
+  "conclusion": "LOW50 is a further-validation candidate only. Its known-label raw coverage improves, but G17 suppression removes a known positive, missing outcomes prevent population effectiveness claims, and illustrative workload exceeds capacity. No candidate is authorized for deployment.",
   "report_narrative": [
     [
-      "LOW50 captures all three known positives but generates six alerts against an illustrative capacity of five. The evidence supports further validation and capacity analysis, with no production change recommendation from the synthetic fixture."
+      "LOW50 is a further-validation candidate only. Its known-label raw coverage improves, but G17 suppression removes a known positive, missing outcomes prevent population effectiveness claims, and illustrative workload exceeds capacity. No candidate is authorized for deployment."
     ],
     [
-      "All candidates use the same eight scored units and the comparator score greater than or equal to threshold. Six units have known labels and two are UNKNOWN. Confusion matrices use six units; workload counts use all eight."
+      "The 36 fictional units form three disjoint partitions of twelve. Three segments each contain four units per partition. Group pairs never cross partitions. Scores and four candidates are predeclared; the ALL row is descriptive reconciliation rather than an independent evaluation set."
     ],
     [
-      "HIGH75 loses known positive U03 relative to BASE60 while removing negative U04. LOW50 adds positive U05 but exceeds the capacity assumption. Unknown U08 remains unalerted by every candidate and prevents a complete population recall claim."
+      "Raw predicate results, suppression, merged case counts and workload are separate stages. Group G17 suppresses HOLDOUT U33 and U34. A case merge does not automatically credit unhit siblings as detected. The raw and retained positive-unit numerators remain separate."
     ],
     [
-      "BASE60 has TP2, FP2, FN1, TN1 and five total alerts. HIGH75 has TP1, FP1, FN2, TN2 and three total alerts. LOW50 has TP3, FP2, FN0, TN1 and six total alerts. Labelled recall is 66.7%, 33.3%, and 100%, respectively."
+      "ALL BASE60 TP11 FP9 FN5 TN4; HIGH75 TP9 FP2 FN7 TN11; LOW50 TP16 FP9 FN0 TN4; SEGMENTED TP10 FP9 FN6 TN4. Each matrix has 29 known labels, with seven other units retained outside the matrix."
     ],
     [
-      "LabelledUnits contains U01 through U06 only. Labels are fictional review outcomes, not evidence of crime or real-world independent adjudication. Distinct group IDs simplify the fixture without proving the independence of an operational sample."
+      "The complete BASE60 below-threshold frame has fifteen units. Six assigned-rank selections contain three POSITIVE, one NEGATIVE, one UNKNOWN and one CENSORED outcome. Nine frame units remain unreviewed by this draw. The illustrative ranks do not support a random-sample confidence interval."
     ],
     [
-      "SYN-001 defines all eight scores and labels. The two unknown labels remain in total alert counts and outside the confusion matrices. Public FFIEC and SR 26-2 references support governance context, not a legal score cutoff or performance guarantee."
+      "The source ledger preserves 36 units, four candidates, one suppression group with incomplete authority, and fifteen below-threshold frame records. Public guidance provides governance context. It does not establish a legal cutoff, a live model classification or approval to suppress activity."
     ],
     [
-      "Propose independent labels, representative below-threshold review, a protected evaluation period, and a capacity plan before selecting a candidate for implementation review. Preserve U03 as an explicit loss under HIGH75 and assess LOW50\u2019s incremental workload."
+      "Proposed work is to establish suppression authority or revise routing, label unavailable outcomes without leakage, validate incremental segment losses, and test capacity on protected data. The human deployment disposition remains NOT_RECORDED."
     ],
     [
-      "QA must reproduce all three matrices and reject mixed denominators or unknown-to-negative conversion. Passing this fixture establishes predicate and arithmetic consistency only; deployment, case closure, and filing decisions remain human responsibilities."
+      "Reperform all candidate matrices and the conservation equations. Validate exact threshold boundaries, merge groups, null rates and missing labels. Passing the fictional checks establishes consistency of this example only; it cannot validate live detection effectiveness."
     ]
+  ],
+  "methods": [
+    "Freeze the scope, source versions, population grain, evidence cutoff and decision question before calculating.",
+    "Reconcile every received, eligible, excluded, duplicate and unresolved record against independent controls.",
+    "Apply the exact predicates, joins, state transitions and denominators in files 03 through 05.",
+    "Challenge missing data, counterexamples, boundary conditions and alternative explanations using file 09.",
+    "Reproduce file 10 before replacing fictional data; preserve approval gaps and incomplete coverage."
+  ],
+  "actions": [
+    {
+      "id": "MO-A01",
+      "finding_id": "MT-F01",
+      "proposal": "Keep routing assurance blocked; obtain scope, reason, expiry, approver and covered-activity evidence, then replay all candidates.",
+      "owner": "Proposed accountable role; assignment not recorded",
+      "due_date": null,
+      "status": "Proposed"
+    },
+    {
+      "id": "MO-A02",
+      "finding_id": "MT-F02",
+      "proposal": "Further validate labels and segment behavior, repair routing and assess staffing; do not deploy from the synthetic result.",
+      "owner": "Proposed accountable role; assignment not recorded",
+      "due_date": null,
+      "status": "Proposed"
+    },
+    {
+      "id": "MO-A03",
+      "finding_id": "MT-F03",
+      "proposal": "Preserve unavailable labels, obtain independent review and assess outcome maturity before any population recall inference.",
+      "owner": "Proposed accountable role; assignment not recorded",
+      "due_date": null,
+      "status": "Proposed"
+    },
+    {
+      "id": "MO-A04",
+      "finding_id": "MT-F04",
+      "proposal": "Retain incremental unit IDs and require explicit segment challenge; aggregate workload cannot resolve the coverage tradeoff.",
+      "owner": "Proposed accountable role; assignment not recorded",
+      "due_date": null,
+      "status": "Proposed"
+    }
+  ],
+  "qa": [
+    {
+      "id": "QA-01",
+      "check": "Exact fictional reconciliation",
+      "result": "REVIEW REQUIRED",
+      "evidence": "Reperform all ProcessQA rows and file 10 checkpoints in this session."
+    },
+    {
+      "id": "QA-02",
+      "check": "Evidence and counterevidence",
+      "result": "REVIEW REQUIRED",
+      "evidence": "Review every field, rule and exception in files 02 through 05."
+    },
+    {
+      "id": "QA-03",
+      "check": "Authorized human disposition",
+      "result": "NOT RECORDED",
+      "evidence": "No operational approval or filing decision is represented by these fictional records."
+    }
   ]
 }

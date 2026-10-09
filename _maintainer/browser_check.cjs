@@ -35,12 +35,24 @@ async function main(){
   const data=await page.locator('#report-data').textContent().then(JSON.parse);
   assert.equal(await page.evaluate(()=>formatted(1.2345,'0.0000')),'1.2345');
   assert.equal(await page.evaluate(()=>formatted(1.2,'0.0000')),'1.2000');
-  assert.equal(await page.locator('main section').count(),10);
+  assert.equal(await page.locator('main section').count(),8+data.domain_tables.length);
   assert.equal(await page.locator('#finding-table tbody tr').count(),data.findings.length);
-  for(const [i,suffix] of ['one','two'].entries()){
-   assert.equal(await page.locator('#domain-'+suffix+'-table tbody tr').count(),data.domain_tables[i].rows.length);
-   assert.deepEqual(await page.locator('#domain-'+suffix+'-table th').allTextContents(),data.domain_tables[i].columns);
+  for(const [i,t] of data.domain_tables.entries()){
+   const host='#domain-'+i+'-table';
+   assert.equal(await page.locator(host+' tbody tr').count(),t.rows.length);
+   assert.deepEqual(await page.locator(host+' th').allTextContents(),t.columns);
+   const expected=await page.evaluate(({rows,columns,formats})=>rows.map(row=>row.map((value,j)=>formatted(value,(formats||{})[columns[j]]))),t);
+   const rendered=await page.locator(host+' tbody tr').evaluateAll(rows=>rows.map(row=>[...row.cells].map(cell=>cell.textContent)));
+   assert.deepEqual(rendered,expected,slug+' / '+t.name+' values');
+   assert.equal(await page.locator('nav a[href="#domain-'+i+'"]').count(),1);
+   if(t.column_contracts){assert.equal(await page.locator('#domain-'+i+' dl dt').count(),t.columns.length);}
   }
+  for(const [i,paragraphs] of data.report_narrative.entries()){
+   assert.deepEqual(await page.locator('[data-narrative-section="'+i+'"] p').allTextContents(),paragraphs);
+  }
+  const [caseDownload]=await Promise.all([page.waitForEvent('download'),page.locator('#case-export').click()]);
+  const casePath=path.join(build,slug+'-complete-case.json');await caseDownload.saveAs(casePath);
+  assert.deepEqual(JSON.parse(fs.readFileSync(casePath,'utf8')),data);
   const high=data.findings.filter(f=>f.severity==='HIGH').length;
   await page.locator('#severity').selectOption('HIGH');
   assert.equal(await page.locator('#finding-table tbody tr').count(),high);
@@ -74,7 +86,41 @@ async function main(){
   if(slug==='control-testing')await page.screenshot({path:path.join(build,slug+'-mobile.png'),fullPage:true});
   await page.setViewportSize({width:1440,height:1100});
   assert.deepEqual(errors,[]);assert.deepEqual(external,[]);
-  results.push({suite:slug,sections:10,findings:data.findings.length,minimum_text_contrast:Number(Math.min(...ratios).toFixed(2)),desktop_and_mobile:true,filter_export_print:true,external_requests:0,page_errors:0});
+  results.push({suite:slug,sections:8+data.domain_tables.length,domain_tables:data.domain_tables.length,domain_rows:data.domain_tables.reduce((n,t)=>n+t.rows.length,0),complete_case_export:true,findings:data.findings.length,minimum_text_contrast:Number(Math.min(...ratios).toFixed(2)),desktop_and_mobile:true,filter_export_print:true,external_requests:0,page_errors:0});
+ }
+ const deep=results.find(result=>result.domain_tables>2);
+ let domainContractsTested=false;
+ if(deep){
+ await page.goto('file://'+path.join(build,deep.suite+'.html'));
+ const boundaryChecks=await page.evaluate(()=>{
+  const original=JSON.parse(document.getElementById('report-data').textContent);
+  const mutate=fn=>{const changed=structuredClone(original);fn(changed);return caseErrors(changed);};
+  const typed=original.domain_tables.findIndex(t=>t.column_contracts&&t.rows.length);
+  const table=original.domain_tables[typed];
+  const enumField=original.domain_tables.flatMap((t,i)=>Object.entries(t.column_contracts||{}).filter(([name,s])=>s.enum&&t.rows.length).map(([name])=>[i,name]))[0];
+  const checks={
+   wrongType:mutate(d=>{const t=d.domain_tables[typed];const c=t.columns[0];t.rows[0][0]=t.column_contracts[c].type==='text'?42:'invalid';}),
+   duplicateKey:mutate(d=>d.domain_tables[typed].rows.push(structuredClone(d.domain_tables[typed].rows[0]))),
+   invalidEnum:mutate(d=>{const [i,name]=enumField;d.domain_tables[i].rows[0][d.domain_tables[i].columns.indexOf(name)]='UNDECLARED_STATE';}),
+   invalidFindingEvidence:mutate(d=>d.findings[0].evidence_ids=['UNRESOLVED_KEY']),
+   invalidMetricFormat:mutate(d=>{d.metrics[0].value=9;d.metrics[0].format={};}),
+   excessivePrecision:mutate(d=>{const t=d.domain_tables[typed];t.formats={[t.columns[0]]:'0.'+'0'.repeat(101)};})
+  };
+  return checks;
+ });
+ for(const [name,problems] of Object.entries(boundaryChecks))assert(problems.length,name+' was not rejected');
+ const deepOriginal=fs.readFileSync(path.join(build,deep.suite+'.html'),'utf8');
+ for(const failure of ['duplicate-key','metric-format','format-precision']){
+ const blockedData=JSON.parse(deepOriginal.match(/<script id="report-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
+ if(failure==='duplicate-key')blockedData.domain_tables[0].rows.push(structuredClone(blockedData.domain_tables[0].rows[0]));
+ else if(failure==='metric-format'){blockedData.metrics[0].value=9;blockedData.metrics[0].format={};}
+ else{const t=blockedData.domain_tables[0];t.formats={[t.columns[0]]:'0.'+'0'.repeat(101)};}
+ const blockedJson=JSON.stringify(blockedData).replaceAll('<','\\u003c').replaceAll('>','\\u003e').replaceAll('&','\\u0026');
+ const blocked=deepOriginal.replace(/(<script id="report-data" type="application\/json">)[\s\S]*?(<\/script>)/,(_,a,b)=>a+blockedJson+b);
+ const blockedPath=path.join(build,'invalid-'+failure+'.html');fs.writeFileSync(blockedPath,blocked);await page.goto('file://'+blockedPath);
+ assert((await page.locator('#notice').textContent()).startsWith('Case data rejected:'));
+ assert.equal(await page.locator('main section').count(),0);assert(await page.locator('#case-export').isDisabled());assert.deepEqual(errors,[]);domainContractsTested=true;
+ }
  }
  const first=results[0].suite;const original=fs.readFileSync(path.join(build,first+'.html'),'utf8');
  const payload=JSON.parse(original.match(/<script id="report-data" type="application\/json">([\s\S]*?)<\/script>/)[1]);
@@ -85,7 +131,7 @@ async function main(){
  assert.equal(await page.evaluate(()=>window.pwned),undefined);
  assert((await page.locator('#evidence-table').textContent()).includes('</script>'));
  const [download]=await Promise.all([page.waitForEvent('download'),page.locator('#export').click()]);const csvPath=path.join(build,'injection.csv');await download.saveAs(csvPath);assert(fs.readFileSync(csvPath,'utf8').includes("'=1+1"));
- const result={browser:await browser.version(),suites:results,negative_controls:{script_injection_literal:true,csv_formula_escaped:true},limits:['Browser verification uses fictional data, not an enterprise tenant.','No native Office rendering is established by browser checks.']};
+ const result={browser:await browser.version(),suites:results,negative_controls:{script_injection_literal:true,csv_formula_escaped:true,domain_type_key_enum_rejections:domainContractsTested,invalid_case_blocks_exports:domainContractsTested},limits:['Browser verification uses fictional data, not an enterprise tenant.','No native Office rendering is established by browser checks.']};
  fs.writeFileSync(path.join(build,'results.json'),JSON.stringify(result,null,2)+'\n');
  console.log(JSON.stringify({browser:result.browser,suites:results.length,negative_controls:result.negative_controls}));
  await browser.close();

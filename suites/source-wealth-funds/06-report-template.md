@@ -1,6 +1,6 @@
 # Source of Wealth and Funds Review — fixed report template
 
-Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.2.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -17,7 +17,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 7. **Proposed corroboration actions**
 8. **Limitations quality review and human disposition**
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -47,6 +47,8 @@ The workbook retains every domain column in order; the report may present the sa
 
 ## Complete in-session renderer
 
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
+
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
 ```python
@@ -56,7 +58,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'source-wealth-funds', 'title': 'Source of Wealth and Funds Review', 'summary': 'Reconcile wealth accumulation and particular funding sources with dated asset, income, tax, FX, and transfer evidence.', 'audience': 'Analysts preparing generic source-of-wealth and source-of-funds review drafts', 'decision': 'What wealth accumulation and proposed funding can be explained from the supplied evidence, and which provenance or entitlement gaps remain?', 'palette': 'umber', 'report_sections': ['Wealth and funds conclusion', 'Scope valuation dates and reconciliation method', 'Material provenance findings', 'Wealth accumulation bridge', 'Proposed funding trace', 'Evidence chain and alternative explanations', 'Proposed corroboration actions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'WealthBridge', 'columns': ['event_id', 'event_date', 'event_type', 'original_amount', 'original_currency', 'fx_usd_per_unit', 'usd_wealth_change', 'cash_effect_usd', 'evidence_ids', 'notes'], 'rows': [['W01', '2025-01-01', 'OPENING_CASH', 400000, 'USD', 1, 400000, 400000, 'SYN-001', 'Opening stock; not period income'], ['W02', '2025-01-01', 'OPENING_SECURITIES', 600000, 'USD', 1, 600000, 0, 'SYN-001', 'Existing holdings; separate from inherited securities'], ['W03', '2025-01-01', 'OPENING_PROPERTY', 500000, 'USD', 1, 500000, 0, 'SYN-001', 'Gross property value before debt'], ['W04', '2025-01-01', 'OPENING_DEBT', -200000, 'USD', 1, -200000, 0, 'SYN-001', 'Liability deducted once; no period repayment'], ['W05', '2025-06-30', 'SALARY_NET', 300000, 'USD', 1, 210000, 210000, 'SYN-002', 'Gross salary 300000 less fictional tax paid 90000'], ['W06', '2025-07-01', 'INHERITED_SECURITIES', 400000, 'USD', 1, 400000, 0, 'SYN-003', 'Noncash inherited stock of assets; no sale receipt yet'], ['W07', '2025-08-01', 'PARTIAL_DISPOSAL', 250000, 'USD', 1, 20000, 220000, 'SYN-003', 'Carrying amount removed 200000; fee 10000; fictional tax paid 20000'], ['W08', '2025-08-15', 'DIVIDEND_NET', 100000, 'EUR', 1.2, 90000, 90000, 'SYN-004', 'Gross EUR100000 × 1.20 = USD120000; fictional tax paid USD30000'], ['W09', '2025-09-30', 'LIVING_EXPENSE', -120000, 'USD', 1, -120000, -120000, 'SYN-005', 'Period expense paid from cash'], ['W10', '2025-09-30', 'PROPERTY_REVALUATION', 100000, 'USD', 1, 100000, 0, 'SYN-005', 'Unrealized change; no funding cash'], ['W11', '2025-09-30', 'SECURITIES_REVALUATION', 60000, 'USD', 1, 60000, 0, 'SYN-005', 'Unrealized change on pre-existing holdings only']], 'formats': {'original_amount': '#,##0.00', 'fx_usd_per_unit': '0.0000', 'usd_wealth_change': '#,##0.00', 'cash_effect_usd': '#,##0.00'}}, {'name': 'FundingTrace', 'columns': ['trace_id', 'origin_type', 'economic_event_id', 'net_available_usd', 'allocated_usd', 'supported_usd', 'link_status', 'evidence_ids', 'notes'], 'rows': [['F01', 'SALARY', 'SALARY01', 210000, 180000, 180000, 'SUPPORTED_ALLOCATION', 'SYN-002;SYN-006', 'Remaining net salary cash 30000 is unallocated'], ['F02', 'DIVIDEND', 'DIV01', 90000, 90000, 90000, 'SUPPORTED_ALLOCATION', 'SYN-004;SYN-006', 'Net dividend only; gross not added'], ['F03', 'INHERITED_ASSET_SALE', 'SALE01', 220000, 220000, 220000, 'SUPPORTED_ALLOCATION', 'SYN-003;SYN-006', 'Same asset already included in wealth bridge'], ['F04', 'OPENING_CASH', 'CASH01', 400000, 50000, 50000, 'SUPPORTED_ALLOCATION', 'SYN-001;SYN-006', 'Opening stock used; not new wealth creation'], ['F05', 'UNRELATED_THIRD_PARTY', 'UNKNOWN01', 60000, 60000, 0, 'UNRESOLVED', 'SYN-006', 'Claimed contribution; sender origin and entitlement absent'], ['F06', 'DUPLICATE_SALE_ADVICE', 'SALE01', 220000, 0, 0, 'DUPLICATE_EXCLUDED', 'SYN-003', 'Second document for F03 event; not additional money']], 'formats': {'net_available_usd': '#,##0.00', 'allocated_usd': '#,##0.00', 'supported_usd': '#,##0.00'}}], 'findings': [{'id': 'WF-F01', 'title': 'Proposed third-party contribution remains unsupported', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-006'], 'detail': '$60,000.00 of the proposed $600,000.00 funding has no supplied origin or entitlement explanation.', 'recommendation': 'Obtain the sender relationship, economic origin, entitlement, and transfer rationale before relying on that allocation.'}, {'id': 'WF-F02', 'title': 'Inheritance and disposal are the same underlying assets', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003'], 'detail': 'The $400,000.00 inherited securities stock includes the $200,000.00 carrying amount sold for $220,000.00 net cash. Only $20,000.00 is incremental net wealth from disposal.', 'recommendation': 'Retain the asset bridge and reject adding all net sale cash as new wealth.'}, {'id': 'WF-F03', 'title': 'Unrealized gains are not funding cash', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-005'], 'detail': 'Property and existing securities revaluations add $160,000.00 to the wealth scenario and zero cash.', 'recommendation': 'Separate valuation support from liquidity and funding provenance.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional opening balance sheet', 'locator': '10-worked-example.md, opening asset and liability population', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional gross salary and tax schedule', 'locator': '10-worked-example.md, complete period-event population', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional inheritance and partial sale records', 'locator': '10-worked-example.md, securities quantity and disposal bridge', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional dividend FX and tax schedule', 'locator': '10-worked-example.md, complete period-event population', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional expenses and closing valuations', 'locator': '10-worked-example.md, closing reconciliation', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional proposed funding allocation', 'locator': '10-worked-example.md, full funding population', 'claim_class': 'Observed'}, {'id': 'REF-PEP', 'title': 'FATF 2013 PEP guidance, paragraphs 86–94', 'locator': 'https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-PEP-Rec12-22.pdf', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Closing net wealth scenario', 'value': '$2,060,000.00', 'method': 'Opening net wealth $1,300,000.00 plus net period wealth changes $760,000.00.', 'format': '#,##0'}, {'label': 'Supported proposed allocation', 'value': '$540,000.00 of $600,000.00 (90.0%)', 'method': 'Sum supported_usd across F01–F06 / sum allocated_usd; duplicate F06 contributes zero.', 'format': '#,##0'}, {'label': 'Unsupported proposed allocation', 'value': '$60,000.00 (10.0%)', 'method': 'Proposed $600,000.00 less supported $540,000.00; F05 is unresolved.', 'format': '#,##0'}, {'label': 'Closing cash before proposed transfer', 'value': '$800,000.00', 'method': 'Opening cash $400,000.00 + salary $210,000.00 + sale $220,000.00 + dividend $90,000.00 − expenses $120,000.00.', 'format': '#,##0'}], 'limitations': ['All balances, tax charges, valuations, exchange rates, and source records are fictional.', 'The wealth bridge is a scenario with assumed completeness, not verified net worth or a tax determination.', 'Supported allocation means document support within the fixture, not tracing particular currency units through a commingled account.', 'The proposed third-party contribution is excluded from owned wealth pending entitlement and origin evidence.', 'A funded amount or plausible wealth profile does not establish lawful origin or authorize a transaction.'], 'conclusion': 'The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained.', 'report_narrative': [['The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained.'], ['The wealth period is Jan 01–Sep 30, 2025. Opening net wealth is $1,300,000.00. The proposed funding is dated Oct 01, 2025 and has not occurred in this fixture. USD is the reporting currency; the dividend uses a fictional 1.20 USD-per-EUR conversion.'], ['The $60,000.00 third-party proposal has no supplied economic-origin or entitlement evidence. Inherited securities and their partial-sale proceeds cannot be counted as two independent sources of wealth. Unrealized appreciation raises a valuation scenario but provides no funding cash.'], ['The bridge adds net salary $210,000.00, inheritance $400,000.00, net disposal gain $20,000.00, net dividend $90,000.00, and revaluations $160,000.00, less living expenses $120,000.00. Closing assets total $2,260,000.00 less debt $200,000.00.', "SYN-003 supplies 4,000 inherited units at $100.00 per unit ($400,000.00). Of these, 2,000 units are sold at $125.00 ($250,000.00 gross); $10,000.00 fees and $20,000.00 paid fictional tax leave $220,000.00 cash. Remove the sold $200,000.00 carrying amount to obtain $20,000.00 incremental wealth. The remaining 2,000 units retain the fixture's $100.00 carrying value ($200,000.00) at Sep 30, 2025. These are exercise values, not tax-basis determinations."], ['The proposed allocation is salary $180,000.00, dividend $90,000.00, inherited-asset sale $220,000.00, opening cash $50,000.00, and unresolved third-party funds $60,000.00. Duplicate sale advice F06 adds zero. Supported allocations total $540,000.00.'], ['SYN-001 through SYN-006 supply all fictional balances, events, and proposed allocations. FATF 2013 paragraphs 86–94 inform the distinction between overall wealth origin and particular funds origin in a PEP context; this exercise does not determine PEP status or universal legal obligations.'], ['Request the third party’s economic origin, relationship, entitlement, and proposed transfer purpose in a permitted fictional or public form. Corroborate dates, inheritance rights, sale deductions, and valuations before relying on a real-world analogue. Keep tax and legal interpretation with qualified reviewers.'], ['QA must reconcile opening $1,300,000.00, net movement $760,000.00, closing $2,060,000.00, cash $800,000.00, and supported funding $540,000.00. The scenario does not verify tax compliance, lawful origin, actual liquidity, or human approval.']], 'as_of': '2025-09-30', 'scope': 'Fictional wealth bridge from Jan 01 through Sep 30, 2025; a separate proposed Oct 01, 2025 funding allocation is not a completed event at the wealth cutoff.', 'suite_id': 'source-wealth-funds', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'WF-F01', 'proposal': 'Obtain the sender relationship, economic origin, entitlement, and transfer rationale before relying on that allocation.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'WF-F02', 'proposal': 'Retain the asset bridge and reject adding all net sale cash as new wealth.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'WF-F03', 'proposal': 'Separate valuation support from liquidity and funding provenance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'source-wealth-funds', 'title': 'Source of Wealth and Funds Review', 'summary': 'Reconcile wealth accumulation and particular funding sources with dated asset, income, tax, FX, and transfer evidence.', 'audience': 'Analysts preparing generic source-of-wealth and source-of-funds review drafts', 'decision': 'What wealth accumulation and proposed funding can be explained from the supplied evidence, and which provenance or entitlement gaps remain?', 'palette': 'umber', 'report_sections': ['Wealth and funds conclusion', 'Scope valuation dates and reconciliation method', 'Material provenance findings', 'Wealth accumulation bridge', 'Proposed funding trace', 'Evidence chain and alternative explanations', 'Proposed corroboration actions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'WealthBridge', 'columns': ['event_id', 'event_date', 'event_type', 'original_amount', 'original_currency', 'fx_usd_per_unit', 'usd_wealth_change', 'cash_effect_usd', 'evidence_ids', 'notes'], 'rows': [['W01', '2025-01-01', 'OPENING_CASH', 400000, 'USD', 1, 400000, 400000, 'SYN-001', 'Opening stock; not period income'], ['W02', '2025-01-01', 'OPENING_SECURITIES', 600000, 'USD', 1, 600000, 0, 'SYN-001', 'Existing holdings; separate from inherited securities'], ['W03', '2025-01-01', 'OPENING_PROPERTY', 500000, 'USD', 1, 500000, 0, 'SYN-001', 'Gross property value before debt'], ['W04', '2025-01-01', 'OPENING_DEBT', -200000, 'USD', 1, -200000, 0, 'SYN-001', 'Liability deducted once; no period repayment'], ['W05', '2025-06-30', 'SALARY_NET', 300000, 'USD', 1, 210000, 210000, 'SYN-002', 'Gross salary 300000 less fictional tax paid 90000'], ['W06', '2025-07-01', 'INHERITED_SECURITIES', 400000, 'USD', 1, 400000, 0, 'SYN-003', 'Noncash inherited stock of assets; no sale receipt yet'], ['W07', '2025-08-01', 'PARTIAL_DISPOSAL', 250000, 'USD', 1, 20000, 220000, 'SYN-003', 'Carrying amount removed 200000; fee 10000; fictional tax paid 20000'], ['W08', '2025-08-15', 'DIVIDEND_NET', 100000, 'EUR', 1.2, 90000, 90000, 'SYN-004', 'Gross EUR100000 × 1.20 = USD120000; fictional tax paid USD30000'], ['W09', '2025-09-30', 'LIVING_EXPENSE', -120000, 'USD', 1, -120000, -120000, 'SYN-005', 'Period expense paid from cash'], ['W10', '2025-09-30', 'PROPERTY_REVALUATION', 100000, 'USD', 1, 100000, 0, 'SYN-005', 'Unrealized change; no funding cash'], ['W11', '2025-09-30', 'SECURITIES_REVALUATION', 60000, 'USD', 1, 60000, 0, 'SYN-005', 'Unrealized change on pre-existing holdings only']], 'formats': {'original_amount': '#,##0.00', 'fx_usd_per_unit': '0.0000', 'usd_wealth_change': '#,##0.00', 'cash_effect_usd': '#,##0.00'}}, {'name': 'FundingTrace', 'columns': ['trace_id', 'origin_type', 'economic_event_id', 'net_available_usd', 'allocated_usd', 'supported_usd', 'link_status', 'evidence_ids', 'notes'], 'rows': [['F01', 'SALARY', 'SALARY01', 210000, 180000, 180000, 'SUPPORTED_ALLOCATION', 'SYN-002;SYN-006', 'Remaining net salary cash 30000 is unallocated'], ['F02', 'DIVIDEND', 'DIV01', 90000, 90000, 90000, 'SUPPORTED_ALLOCATION', 'SYN-004;SYN-006', 'Net dividend only; gross not added'], ['F03', 'INHERITED_ASSET_SALE', 'SALE01', 220000, 220000, 220000, 'SUPPORTED_ALLOCATION', 'SYN-003;SYN-006', 'Same asset already included in wealth bridge'], ['F04', 'OPENING_CASH', 'CASH01', 400000, 50000, 50000, 'SUPPORTED_ALLOCATION', 'SYN-001;SYN-006', 'Opening stock used; not new wealth creation'], ['F05', 'UNRELATED_THIRD_PARTY', 'UNKNOWN01', 60000, 60000, 0, 'UNRESOLVED', 'SYN-006', 'Claimed contribution; sender origin and entitlement absent'], ['F06', 'DUPLICATE_SALE_ADVICE', 'SALE01', 220000, 0, 0, 'DUPLICATE_EXCLUDED', 'SYN-003', 'Second document for F03 event; not additional money']], 'formats': {'net_available_usd': '#,##0.00', 'allocated_usd': '#,##0.00', 'supported_usd': '#,##0.00'}}], 'findings': [{'id': 'WF-F01', 'title': 'Proposed third-party contribution remains unsupported', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-006'], 'detail': '$60,000.00 of the proposed $600,000.00 funding has no supplied origin or entitlement explanation.', 'recommendation': 'Obtain the sender relationship, economic origin, entitlement, and transfer rationale before relying on that allocation.'}, {'id': 'WF-F02', 'title': 'Inheritance and disposal are the same underlying assets', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-003'], 'detail': 'The $400,000.00 inherited securities stock includes the $200,000.00 carrying amount sold for $220,000.00 net cash. Only $20,000.00 is incremental net wealth from disposal.', 'recommendation': 'Retain the asset bridge and reject adding all net sale cash as new wealth.'}, {'id': 'WF-F03', 'title': 'Unrealized gains are not funding cash', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-005'], 'detail': 'Property and existing securities revaluations add $160,000.00 to the wealth scenario and zero cash.', 'recommendation': 'Separate valuation support from liquidity and funding provenance.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional opening balance sheet', 'locator': '10-worked-example.md, opening asset and liability population', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional gross salary and tax schedule', 'locator': '10-worked-example.md, complete period-event population', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional inheritance and partial sale records', 'locator': '10-worked-example.md, securities quantity and disposal bridge', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional dividend FX and tax schedule', 'locator': '10-worked-example.md, complete period-event population', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional expenses and closing valuations', 'locator': '10-worked-example.md, closing reconciliation', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional proposed funding allocation', 'locator': '10-worked-example.md, full funding population', 'claim_class': 'Observed'}, {'id': 'REF-PEP', 'title': 'FATF 2013 PEP guidance, paragraphs 86–94', 'locator': 'https://www.fatf-gafi.org/content/dam/fatf-gafi/guidance/Guidance-PEP-Rec12-22.pdf', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Closing net wealth scenario', 'value': '$2,060,000.00', 'method': 'Opening net wealth $1,300,000.00 plus net period wealth changes $760,000.00.', 'format': '#,##0'}, {'label': 'Supported proposed allocation', 'value': '$540,000.00 of $600,000.00 (90.0%)', 'method': 'Sum supported_usd across F01–F06 / sum allocated_usd; duplicate F06 contributes zero.', 'format': '#,##0'}, {'label': 'Unsupported proposed allocation', 'value': '$60,000.00 (10.0%)', 'method': 'Proposed $600,000.00 less supported $540,000.00; F05 is unresolved.', 'format': '#,##0'}, {'label': 'Closing cash before proposed transfer', 'value': '$800,000.00', 'method': 'Opening cash $400,000.00 + salary $210,000.00 + sale $220,000.00 + dividend $90,000.00 − expenses $120,000.00.', 'format': '#,##0'}], 'limitations': ['All balances, tax charges, valuations, exchange rates, and source records are fictional.', 'The wealth bridge is a scenario with assumed completeness, not verified net worth or a tax determination.', 'Supported allocation means document support within the fixture, not tracing particular currency units through a commingled account.', 'The proposed third-party contribution is excluded from owned wealth pending entitlement and origin evidence.', 'A funded amount or plausible wealth profile does not establish lawful origin or authorize a transaction.'], 'conclusion': 'The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained.', 'report_narrative': [['The fictional wealth bridge reconciles to $2,060,000.00 net wealth and $800,000.00 cash at cutoff. Of a separate proposed $600,000.00 funding allocation, $540,000.00 is supported within the fixture and $60,000.00 from an unrelated third party remains unexplained.'], ['The wealth period is Jan 01–Sep 30, 2025. Opening net wealth is $1,300,000.00. The proposed funding is dated Oct 01, 2025 and has not occurred in this fixture. USD is the reporting currency; the dividend uses a fictional 1.20 USD-per-EUR conversion.'], ['The $60,000.00 third-party proposal has no supplied economic-origin or entitlement evidence. Inherited securities and their partial-sale proceeds cannot be counted as two independent sources of wealth. Unrealized appreciation raises a valuation scenario but provides no funding cash.'], ['The bridge adds net salary $210,000.00, inheritance $400,000.00, net disposal gain $20,000.00, net dividend $90,000.00, and revaluations $160,000.00, less living expenses $120,000.00. Closing assets total $2,260,000.00 less debt $200,000.00.', "SYN-003 supplies 4,000 inherited units at $100.00 per unit ($400,000.00). Of these, 2,000 units are sold at $125.00 ($250,000.00 gross); $10,000.00 fees and $20,000.00 paid fictional tax leave $220,000.00 cash. Remove the sold $200,000.00 carrying amount to obtain $20,000.00 incremental wealth. The remaining 2,000 units retain the fixture's $100.00 carrying value ($200,000.00) at Sep 30, 2025. These are exercise values, not tax-basis determinations."], ['The proposed allocation is salary $180,000.00, dividend $90,000.00, inherited-asset sale $220,000.00, opening cash $50,000.00, and unresolved third-party funds $60,000.00. Duplicate sale advice F06 adds zero. Supported allocations total $540,000.00.'], ['SYN-001 through SYN-006 supply all fictional balances, events, and proposed allocations. FATF 2013 paragraphs 86–94 inform the distinction between overall wealth origin and particular funds origin in a PEP context; this exercise does not determine PEP status or universal legal obligations.'], ['Request the third party’s economic origin, relationship, entitlement, and proposed transfer purpose in a permitted fictional or public form. Corroborate dates, inheritance rights, sale deductions, and valuations before relying on a real-world analogue. Keep tax and legal interpretation with qualified reviewers.'], ['QA must reconcile opening $1,300,000.00, net movement $760,000.00, closing $2,060,000.00, cash $800,000.00, and supported funding $540,000.00. The scenario does not verify tax compliance, lawful origin, actual liquidity, or human approval.']], 'as_of': '2025-09-30', 'scope': 'Fictional wealth bridge from Jan 01 through Sep 30, 2025; a separate proposed Oct 01, 2025 funding allocation is not a completed event at the wealth cutoff.', 'suite_id': 'source-wealth-funds', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'WF-F01', 'proposal': 'Obtain the sender relationship, economic origin, entitlement, and transfer rationale before relying on that allocation.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'WF-F02', 'proposal': 'Retain the asset bridge and reject adding all net sale cash as new wealth.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'WF-F03', 'proposal': 'Separate valuation support from liquidity and funding provenance.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -69,6 +71,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -95,8 +104,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -120,8 +129,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -137,6 +198,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -152,7 +240,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -173,6 +261,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -220,10 +309,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -249,7 +338,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -286,13 +376,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -301,7 +397,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

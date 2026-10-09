@@ -1,6 +1,6 @@
 # Customer Risk Review — fixed report template
 
-Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.2.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -17,7 +17,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 7. **Proposed review actions**
 8. **Limitations quality review and human disposition**
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -47,6 +47,8 @@ The workbook retains every domain column in order; the report may present the sa
 
 ## Complete in-session renderer
 
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
+
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
 ```python
@@ -56,7 +58,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'customer-risk-review', 'title': 'Customer Risk Review', 'summary': 'Review a customer profile with transparent factor weighting, evidence gaps, material exceptions, and human rating decisions.', 'audience': 'Analysts preparing generic customer risk review drafts', 'decision': 'What review priority and additional evidence are supported, and which rating decisions remain for an authorized human?', 'palette': 'umber', 'report_sections': ['Customer review conclusion', 'Population scope and scoring method', 'Material profile findings', 'Customer factor assessment', 'Evidence completeness and review priorities', 'Evidence provenance and alternatives', 'Proposed review actions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'CustomerFactors', 'columns': ['factor_id', 'customer_id', 'dimension', 'weight', 'factor_value', 'contribution', 'evidence_ids', 'notes'], 'rows': [['C01-1', 'C01', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-2', 'C01', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-3', 'C01', 'geography', 0.2, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-4', 'C01', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-5', 'C01', 'ownership', 0.1, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-1', 'C02', 'business', 0.3, 2, 20.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-2', 'C02', 'product', 0.25, 2, 16.666666666666664, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-3', 'C02', 'geography', 0.2, 1, 6.666666666666667, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-4', 'C02', 'channel', 0.15, 2, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-5', 'C02', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-1', 'C03', 'business', 0.3, 3, 30.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-2', 'C03', 'product', 0.25, 2, 16.666666666666664, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-3', 'C03', 'geography', 0.2, 2, 13.333333333333334, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-4', 'C03', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-5', 'C03', 'ownership', 0.1, 3, 10.000000000000002, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-1', 'C04', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-2', 'C04', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-3', 'C04', 'geography', 0.2, None, None, 'SYN-001', 'NOT SUPPLIED'], ['C04-4', 'C04', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-5', 'C04', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-1', 'C05', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-2', 'C05', 'product', 0.25, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-3', 'C05', 'geography', 0.2, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-4', 'C05', 'channel', 0.15, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-5', 'C05', 'ownership', 0.1, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-1', 'C06', 'business', 0.3, 2, 20.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-2', 'C06', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-3', 'C06', 'geography', 0.2, 2, 13.333333333333334, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-4', 'C06', 'channel', 0.15, 2, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-5', 'C06', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated']], 'formats': {'weight': '0.0%', 'factor_value': '0.0', 'contribution': '0.0'}}, {'name': 'ReviewOutcomes', 'columns': ['customer_id', 'illustrative_score', 'illustrative_band', 'complete_items', 'required_items', 'completeness', 'material_gap', 'review_priority', 'evidence_ids', 'rationale'], 'rows': [['C01', 23.333333333333332, 'LOW', 4, 4, 1.0, 'NONE', 'STANDARD', 'SYN-001', 'All four evidence items supplied'], ['C02', 56.666666666666664, 'MODERATE', 4, 4, 1.0, 'NONE', 'HEIGHTENED', 'SYN-001', 'Complexity warrants contextual review'], ['C03', 75.0, 'HIGH', 3, 4, 0.75, 'Ownership rights unresolved', 'SPECIALIST', 'SYN-001', 'High illustrative band and material ownership gap'], ['C04', None, 'INCOMPLETE', 2, 4, 0.5, 'Geography input, ownership evidence and funds explanation missing', 'INCOMPLETE', 'SYN-001', 'No complete score; prioritize missing information'], ['C05', 10.0, 'LOW', 3, 4, 0.75, 'Third-party source of funds unsupported', 'TARGETED', 'SYN-001', 'Low illustrative score cannot close a material funds gap'], ['C06', 54.99999999999999, 'MODERATE', 4, 4, 1.0, 'Control operating exceptions in separate sample', 'HEIGHTENED', 'SYN-001;SYN-002', 'No arithmetic control discount; examine exception relevance']], 'formats': {'illustrative_score': '0.0', 'completeness': '0.0%'}}], 'findings': [{'id': 'CR-F01', 'title': 'One incomplete score remains outside band counts', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'C04 lacks its geography factor. The possible score spans 26.7 to 46.7 and crosses LOW/MODERATE boundaries.', 'recommendation': 'Obtain the missing factor evidence; preserve an incomplete result.'}, {'id': 'CR-F02', 'title': 'Low illustrative score does not settle funds provenance', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'C05 scores 10.0 but lacks support for a planned third-party source of funds.', 'recommendation': 'Request a targeted funds explanation and preserve the unresolved disposition.'}, {'id': 'CR-F03', 'title': 'Control claims cannot be converted to a score discount', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-002'], 'detail': 'C06 has two exceptions among eight fictional control checks; the sample has no demonstrated population representativeness.', 'recommendation': 'Investigate the exceptions and their coverage before relying on the control.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-customer profiles and factor rubric', 'locator': '10-worked-example.md, complete customer population', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional eight-check control sample for C06', 'locator': '10-worked-example.md, complete control sample', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FFIEC Customer Due Diligence overview', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/02', 'claim_class': 'Observed'}, {'id': 'REF-RISK', 'title': 'FFIEC BSA/AML Risk Assessment overview', 'locator': 'https://bsaaml.ffiec.gov/manual/BSAAMLRiskAssessment/01', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Computable illustrative scores', 'value': '5 of 6 (83.3%)', 'method': 'Customers with all five factor values / six supplied customers; C04 remains incomplete.', 'format': '#,##0'}, {'label': 'Evidence completeness', 'value': '20 of 24 (83.3%)', 'method': 'Sum of supplied decision-evidence items / four expected items per customer × six customers.', 'format': '#,##0'}, {'label': 'C06 sample exceptions', 'value': '2 of 8 (25.0%)', 'method': 'Exception checks K03 and K07 / all eight supplied checks; descriptive sample rate only.', 'format': '#,##0'}], 'limitations': ['Scores and bands are illustrative ordering conventions, not calibrated AML probabilities.', 'An incomplete score and a material evidence gap cannot be treated as approval.', 'The C06 sample does not establish live control effectiveness or population exception rates.', 'No customer rating, onboarding, restriction, exit, or filing decision is authorized.'], 'conclusion': 'Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount.', 'report_narrative': [['Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount.'], ['The six customer profiles use five fixed factors weighted 30%, 25%, 20%, 15%, and 10%. Values range from zero to three; contributions equal value × weight / 3 × 100. Evidence completeness uses a separate four-item checklist per customer.'], ['C04 has no geography value and cannot receive a complete band. C05 has an unsupported planned third-party receipt that the score does not resolve. C06 has two control exceptions among eight checks, with no demonstrated representativeness.'], ['Complete scores are C01 23.3, C02 56.7, C03 75.0, C05 10.0, and C06 55.0. C04 has an illustrative possible range from 26.7 to 46.7; no midpoint or reweighted score is assigned.'], ['Twenty of twenty-four expected evidence items are supplied. C03 remains subject to ownership review, C04 is incomplete, C05 receives targeted funds review, and C06 remains subject to control exception review. The low-band count is two among five complete scores, not two approved customers.', 'SYN-002 preserves all eight targeted C06 checks: K01 NO EXCEPTION (review field present); K02 NO EXCEPTION (review field present); K03 EXCEPTION (review timestamp absent); K04 NO EXCEPTION (review field present); K05 NO EXCEPTION (review field present); K06 NO EXCEPTION (review field present); K07 EXCEPTION (escalation rationale absent); K08 NO EXCEPTION (review field present). Thus 2/8 = 25.0% have recorded exceptions. Selection is targeted; the larger operating population is unknown.'], ['SYN-001 supplies all profiles, rubric assignments, and evidence checklist statuses. SYN-002 supplies the complete eight-check sample. FFIEC references provide public U.S. bank context; they do not prescribe these weights, bands, or customer dispositions.'], ['Propose evidence requests for C03 ownership, C04 geography, ownership and funds explanation, and C05 funds provenance. Examine C06 exceptions and control scope. Retain all numeric and narrative differences for the human rating reviewer.'], ['QA must reproduce the five scores, the C04 range, the twenty-of-twenty-four evidence count, and two-of-eight exceptions. These are fictional consistency tests; independent review and actual customer decisions remain unrecorded.']], 'as_of': '2026-09-30', 'scope': 'Six fictional customer relationships at Sep 30, 2026, with five factor assignments and four evidence expectations each; a separate eight-check C06 sample is descriptive only.', 'suite_id': 'customer-risk-review', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'CR-F01', 'proposal': 'Obtain the missing factor evidence; preserve an incomplete result.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'CR-F02', 'proposal': 'Request a targeted funds explanation and preserve the unresolved disposition.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'CR-F03', 'proposal': 'Investigate the exceptions and their coverage before relying on the control.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'customer-risk-review', 'title': 'Customer Risk Review', 'summary': 'Review a customer profile with transparent factor weighting, evidence gaps, material exceptions, and human rating decisions.', 'audience': 'Analysts preparing generic customer risk review drafts', 'decision': 'What review priority and additional evidence are supported, and which rating decisions remain for an authorized human?', 'palette': 'umber', 'report_sections': ['Customer review conclusion', 'Population scope and scoring method', 'Material profile findings', 'Customer factor assessment', 'Evidence completeness and review priorities', 'Evidence provenance and alternatives', 'Proposed review actions', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'CustomerFactors', 'columns': ['factor_id', 'customer_id', 'dimension', 'weight', 'factor_value', 'contribution', 'evidence_ids', 'notes'], 'rows': [['C01-1', 'C01', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-2', 'C01', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-3', 'C01', 'geography', 0.2, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-4', 'C01', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C01-5', 'C01', 'ownership', 0.1, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-1', 'C02', 'business', 0.3, 2, 20.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-2', 'C02', 'product', 0.25, 2, 16.666666666666664, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-3', 'C02', 'geography', 0.2, 1, 6.666666666666667, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-4', 'C02', 'channel', 0.15, 2, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C02-5', 'C02', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-1', 'C03', 'business', 0.3, 3, 30.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-2', 'C03', 'product', 0.25, 2, 16.666666666666664, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-3', 'C03', 'geography', 0.2, 2, 13.333333333333334, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-4', 'C03', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C03-5', 'C03', 'ownership', 0.1, 3, 10.000000000000002, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-1', 'C04', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-2', 'C04', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-3', 'C04', 'geography', 0.2, None, None, 'SYN-001', 'NOT SUPPLIED'], ['C04-4', 'C04', 'channel', 0.15, 1, 5.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C04-5', 'C04', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-1', 'C05', 'business', 0.3, 1, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-2', 'C05', 'product', 0.25, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-3', 'C05', 'geography', 0.2, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-4', 'C05', 'channel', 0.15, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C05-5', 'C05', 'ownership', 0.1, 0, 0.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-1', 'C06', 'business', 0.3, 2, 20.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-2', 'C06', 'product', 0.25, 1, 8.333333333333332, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-3', 'C06', 'geography', 0.2, 2, 13.333333333333334, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-4', 'C06', 'channel', 0.15, 2, 10.0, 'SYN-001', 'Fictional rubric assignment; not calibrated'], ['C06-5', 'C06', 'ownership', 0.1, 1, 3.3333333333333335, 'SYN-001', 'Fictional rubric assignment; not calibrated']], 'formats': {'weight': '0.0%', 'factor_value': '0.0', 'contribution': '0.0'}}, {'name': 'ReviewOutcomes', 'columns': ['customer_id', 'illustrative_score', 'illustrative_band', 'complete_items', 'required_items', 'completeness', 'material_gap', 'review_priority', 'evidence_ids', 'rationale'], 'rows': [['C01', 23.333333333333332, 'LOW', 4, 4, 1.0, 'NONE', 'STANDARD', 'SYN-001', 'All four evidence items supplied'], ['C02', 56.666666666666664, 'MODERATE', 4, 4, 1.0, 'NONE', 'HEIGHTENED', 'SYN-001', 'Complexity warrants contextual review'], ['C03', 75.0, 'HIGH', 3, 4, 0.75, 'Ownership rights unresolved', 'SPECIALIST', 'SYN-001', 'High illustrative band and material ownership gap'], ['C04', None, 'INCOMPLETE', 2, 4, 0.5, 'Geography input, ownership evidence and funds explanation missing', 'INCOMPLETE', 'SYN-001', 'No complete score; prioritize missing information'], ['C05', 10.0, 'LOW', 3, 4, 0.75, 'Third-party source of funds unsupported', 'TARGETED', 'SYN-001', 'Low illustrative score cannot close a material funds gap'], ['C06', 54.99999999999999, 'MODERATE', 4, 4, 1.0, 'Control operating exceptions in separate sample', 'HEIGHTENED', 'SYN-001;SYN-002', 'No arithmetic control discount; examine exception relevance']], 'formats': {'illustrative_score': '0.0', 'completeness': '0.0%'}}], 'findings': [{'id': 'CR-F01', 'title': 'One incomplete score remains outside band counts', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'C04 lacks its geography factor. The possible score spans 26.7 to 46.7 and crosses LOW/MODERATE boundaries.', 'recommendation': 'Obtain the missing factor evidence; preserve an incomplete result.'}, {'id': 'CR-F02', 'title': 'Low illustrative score does not settle funds provenance', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'C05 scores 10.0 but lacks support for a planned third-party source of funds.', 'recommendation': 'Request a targeted funds explanation and preserve the unresolved disposition.'}, {'id': 'CR-F03', 'title': 'Control claims cannot be converted to a score discount', 'severity': 'MEDIUM', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001', 'SYN-002'], 'detail': 'C06 has two exceptions among eight fictional control checks; the sample has no demonstrated population representativeness.', 'recommendation': 'Investigate the exceptions and their coverage before relying on the control.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-customer profiles and factor rubric', 'locator': '10-worked-example.md, complete customer population', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional eight-check control sample for C06', 'locator': '10-worked-example.md, complete control sample', 'claim_class': 'Observed'}, {'id': 'REF-CDD', 'title': 'FFIEC Customer Due Diligence overview', 'locator': 'https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/02', 'claim_class': 'Observed'}, {'id': 'REF-RISK', 'title': 'FFIEC BSA/AML Risk Assessment overview', 'locator': 'https://bsaaml.ffiec.gov/manual/BSAAMLRiskAssessment/01', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Computable illustrative scores', 'value': '5 of 6 (83.3%)', 'method': 'Customers with all five factor values / six supplied customers; C04 remains incomplete.', 'format': '#,##0'}, {'label': 'Evidence completeness', 'value': '20 of 24 (83.3%)', 'method': 'Sum of supplied decision-evidence items / four expected items per customer × six customers.', 'format': '#,##0'}, {'label': 'C06 sample exceptions', 'value': '2 of 8 (25.0%)', 'method': 'Exception checks K03 and K07 / all eight supplied checks; descriptive sample rate only.', 'format': '#,##0'}], 'limitations': ['Scores and bands are illustrative ordering conventions, not calibrated AML probabilities.', 'An incomplete score and a material evidence gap cannot be treated as approval.', 'The C06 sample does not establish live control effectiveness or population exception rates.', 'No customer rating, onboarding, restriction, exit, or filing decision is authorized.'], 'conclusion': 'Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount.', 'report_narrative': [['Five of six fictional profiles have computable illustrative scores; C04 remains incomplete. C05 requires targeted funds review despite its low score, and C06 control exceptions require investigation without a numeric discount.'], ['The six customer profiles use five fixed factors weighted 30%, 25%, 20%, 15%, and 10%. Values range from zero to three; contributions equal value × weight / 3 × 100. Evidence completeness uses a separate four-item checklist per customer.'], ['C04 has no geography value and cannot receive a complete band. C05 has an unsupported planned third-party receipt that the score does not resolve. C06 has two control exceptions among eight checks, with no demonstrated representativeness.'], ['Complete scores are C01 23.3, C02 56.7, C03 75.0, C05 10.0, and C06 55.0. C04 has an illustrative possible range from 26.7 to 46.7; no midpoint or reweighted score is assigned.'], ['Twenty of twenty-four expected evidence items are supplied. C03 remains subject to ownership review, C04 is incomplete, C05 receives targeted funds review, and C06 remains subject to control exception review. The low-band count is two among five complete scores, not two approved customers.', 'SYN-002 preserves all eight targeted C06 checks: K01 NO EXCEPTION (review field present); K02 NO EXCEPTION (review field present); K03 EXCEPTION (review timestamp absent); K04 NO EXCEPTION (review field present); K05 NO EXCEPTION (review field present); K06 NO EXCEPTION (review field present); K07 EXCEPTION (escalation rationale absent); K08 NO EXCEPTION (review field present). Thus 2/8 = 25.0% have recorded exceptions. Selection is targeted; the larger operating population is unknown.'], ['SYN-001 supplies all profiles, rubric assignments, and evidence checklist statuses. SYN-002 supplies the complete eight-check sample. FFIEC references provide public U.S. bank context; they do not prescribe these weights, bands, or customer dispositions.'], ['Propose evidence requests for C03 ownership, C04 geography, ownership and funds explanation, and C05 funds provenance. Examine C06 exceptions and control scope. Retain all numeric and narrative differences for the human rating reviewer.'], ['QA must reproduce the five scores, the C04 range, the twenty-of-twenty-four evidence count, and two-of-eight exceptions. These are fictional consistency tests; independent review and actual customer decisions remain unrecorded.']], 'as_of': '2026-09-30', 'scope': 'Six fictional customer relationships at Sep 30, 2026, with five factor assignments and four evidence expectations each; a separate eight-check C06 sample is descriptive only.', 'suite_id': 'customer-risk-review', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'CR-F01', 'proposal': 'Obtain the missing factor evidence; preserve an incomplete result.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'CR-F02', 'proposal': 'Request a targeted funds explanation and preserve the unresolved disposition.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'CR-F03', 'proposal': 'Investigate the exceptions and their coverage before relying on the control.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -69,6 +71,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -95,8 +104,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -120,8 +129,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -137,6 +198,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -152,7 +240,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -173,6 +261,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -220,10 +309,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -249,7 +338,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -286,13 +376,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -301,7 +397,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

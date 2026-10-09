@@ -1,50 +1,108 @@
-# Transaction monitoring: inputs and evidence
+# Transaction Monitoring Review: complete input and evidence contract
 
-## Input dictionary and grain
+## Acquisition manifest and source reconciliation
 
-One canonical transaction is one posted economic leg in one account. Preserve a raw-row identifier in addition to transaction ID: the same transaction can appear in multiple extracts, and a transfer can have two legitimate account legs. Do not deduplicate solely because amount, date, or customer are the same.
+For each supplied input, record the source owner or origin if known, source identifier, extraction parameters, query version if supplied, extraction time, file identity, expected row count, actual row count, covered accounts, products and dates, currency and status populations, pagination limits, known filters and stated omissions. These are evidence fields, not assumed facts. If no independent control total exists, label the result as a reconciliation of the accessible extract and retain the missing control as a limitation.
 
-| Input | Required fields and types | Meaning and validation |
+Preserve raw source text before normalization. A source row and an economic transaction are different grains. Two rows may be exact extraction copies of one leg, while two equal payments with separate identifiers may be two legitimate events. A transfer can generate two account legs without either being a duplicate. Maintain separate immutable raw IDs and canonical IDs; a deletion from the analytical sums must remain explainable through an exclusion or lineage record. Retain the original order only as source evidence; do not use row order as a surrogate for time or sequencing metadata.
+
+Counts and amounts are independent control dimensions. Every raw row must receive exactly one terminal source disposition, including unparsed, inaccessible or deferred records. Then classify canonical rows for the particular scenario separately. A source-level duplicate is not also counted as an own-transfer exclusion in the same conservation equation. A count equation can pass while monetary completeness is unknown. Sum only numeric amounts in each currency and disclose how many amounts, identities or timestamps remain unresolved.
+
+## Required semantic commitments
+
+| Commitment | Minimum evidence | Prohibited shortcut |
 | --- | --- | --- |
-| Transactions | raw_row_id text, transaction_id text, account_id text, event_time timestamp, direction enum CREDIT/DEBIT, amount decimal, currency ISO text, status enum, counterparty_id text/null | Amount is nonnegative; direction carries the sign. Keep the original timestamp and normalized time. |
-| Linkage | transfer_group_id text/null, reversal_of text/null, own_transfer boolean/null | Own-account status requires evidence; matching names alone are insufficient. A reversal is an event linked to an original, not permission to delete history. |
-| Accounts | account_id, customer_id, product, opening_date, stated_activity, profile_as_of | Use the profile effective during the review period. A later profile cannot retroactively explain earlier activity without a dated basis. |
-| Expectations | metric, expected_value or range, period, source_id, approved_by, effective_date | Separate a customer statement from an approved monitoring parameter and from an empirical historical baseline. |
-| Scenario specification | scenario_id, version, eligible_population, exclusions, aggregation_key, window, operator, threshold, currency_basis | Every operator must be explicit: greater than differs from greater than or equal. |
-| Review evidence | evidence_id, source, exact_locator, obtained_at, claim_class, availability | An invoice supports a stated purpose only to the degree it is independently matched to payment and counterparties. |
+| Economic identity | Account leg, source transaction key and applicable version semantics | Deduplicating by equal amounts or names |
+| Historical scope | Event-time interval plus historical profile and ownership dates | Applying today's profile to old transactions without a dated basis |
+| Run visibility | Ingestion cutoff and source availability evidence | Using a later correction as if the first run knew it |
+| Direction | Source mapping or explicit signed-amount convention | Flipping sign twice or interpreting negative as reversal automatically |
+| Monetary precision | Original amount string, currency scale and rounding policy | Binary display rounding before threshold comparison |
+| Ownership | Reliable identity bridge effective during the period | Treating a similar counterparty name as confirmed own transfer |
+| Reversal | Original identifier, amount, currency and scope relationship | Netting unrelated equal and opposite payments |
+| Exclusion | Specific criterion, affected record IDs and supporting evidence | Removing inconvenient records from the denominator |
+| Review explanation | Documents matched to the actual transaction and parties | Accepting an attractive generic business story |
+| Disposition | Named authorized decision and its evidence | Inferring approval from a file being downloaded |
 
-Optional fields include channel, originator and beneficiary institution, geography, device reference, merchant category, balance snapshots, settlement date, and relationship history. Their absence is not itself suspicious. Describe which hypotheses can no longer be tested. Do not infer cash from a vague “deposit” description or infer a foreign payment from a nonlocal name.
+## Time, dates and event ordering
 
-## Scope manifest and reconciliation
+Declare the economic review period as start inclusive and end exclusive. The rolling scenario may use a different endpoint convention, which must be explicitly named rather than inherited accidentally. Normalize timezone-aware instants for duration calculations while preserving their original source representation. A local date without a timezone supports a date-level analysis only. A date field cannot establish a two-hour interval. A timestamp without an offset during a daylight-saving overlap can represent two different instants; retain the ambiguity until resolved.
 
-Declare the period as a half-open interval: start inclusive, end exclusive. State whether event time, posting time, or settlement time controls inclusion. Preserve records straddling the boundary in an exception ledger; a batch crossing midnight can otherwise create artificial pass-through patterns. Specify whether the extract is complete for all accounts or only already-alerted accounts. An alert-only extract cannot estimate the proportion of activity missed by monitoring.
+Distinguish event time, posting time, settlement time and ingestion time. The illustrative examples use event instants for economic scope and ingestion instants only where a run cutoff is specified. A late-arriving row belongs to its economic period but was unavailable to an earlier run. A correction posted today may amend an event last week; both chronology and information availability matter. Record whether a rerun recomputes the historical period, carries a correction forward or uses another documented design. Do not choose the most favorable interpretation after seeing the result.
 
-Assign each raw row exactly one terminal bucket: processed, duplicate, excluded_by_scope, unparsed, inaccessible, or deferred. Reconcile `received = sum(terminal buckets)`. Then separately classify processed rows as scenario eligible, scenario excluded, or scenario not assessable. These are two different levels; never add scenario exclusions to raw-row exclusions twice.
+When two events share an instant and no authoritative sequence exists, classify them as contemporaneous. Deterministic sorting by ID makes output reproducible; it does not prove economic order. A strict subsequent-debit predicate requires a greater instant or an explicitly approved sequence convention. If a transaction's timestamp is uncertain by several minutes, preserve that range and calculate a boundary sensitivity where it can change a result. Do not manufacture seconds to make a test pass.
 
-Reconcile counts by source, account, date, currency, direction, and posting status. Reconcile known amounts by currency. Unknown amounts remain unknown: a count reconciliation can pass while monetary completeness fails. Compare extract controls with source totals when provided. If no source total exists, label the coverage “accessible extract only” and do not call the customer relationship fully reviewed.
+## Amount, currency and balance evidence
 
-Use transaction ID plus account leg and source version to identify a duplicate. When two versions disagree, choose neither silently: obtain the authoritative version or maintain a conflict bucket. Retain duplicate provenance even after excluding it from sums. Document refunds, chargebacks, cancellations, pending items, and reversals separately because their economic meanings differ.
+Retain amounts as nonnegative magnitude with direction in a separate field for these specimens. Preserve original strings and use decimal arithmetic for threshold calculations. If an actual source uses signed amounts, document exactly one mapping to the canonical convention and test both signs, zero and invalid combinations. A negative magnitude under a nonnegative schema is a validation failure; taking its absolute value can hide a source error. A legitimate zero-value verification event can remain in event counts while adding zero to movement, if its posting and product semantics are explicitly supported.
 
-## Evidence quality
+Never add currencies or asset units directly. Conversion requires original amount, source currency, destination currency, rate, rate direction, source, rate time and rounding rule. A USD-per-EUR rate is not interchangeable with EUR-per-USD. Transaction-time conversion and valuation-time conversion answer different questions. Reconcile original-currency totals before converted totals, and preserve both. None of these fictional specimens needs an exchange rate; the lineage EUR row remains separate and outside the USD-only screen.
 
-An observed posting proves the system recorded that entry, not who ultimately controlled the counterparty. A stated business purpose is Reported until corroborated. A ratio is an Observed calculation from the accessible records; a claim that the ratio indicates possible pass-through activity is Inferred. A modeled missing amount would be Estimated and must never be inserted as a known posting.
+Gross movement adds credits and debits; signed movement subtracts debits from credits. Neither equals ending balance without a verified opening balance and complete adjustments. Gross movement counts the two sides of a round trip. It is not unique funds, customer income, customer loss, suspicious value or criminal proceeds. Ratios can exceed one when preexisting funds finance outflows. Do not cap a ratio to obtain a more intuitive display. A zero denominator yields null and the specified rule branch, not infinity or an invented zero ratio.
 
-Record evidence IDs at transaction, account, scenario, and finding level. Negative results need evidence too: an absent red flag requires sufficient field coverage. A customer response received after analysis must be dated and retained alongside the earlier hypothesis. Do not discard contradictory records simply because a plausible explanation has been found.
+## Context and evidence requests
 
-## Currency and time conventions
+A transaction posting establishes that the source recorded an entry. It does not alone establish beneficial control, ultimate destination, commercial purpose or legality. A stated business description is Reported. A matched invoice can corroborate one payment to the extent parties, amount, date and reference agree. It does not explain unrelated activity. A later customer response must retain its received date and cannot be silently backdated into an earlier review. Contradictory evidence stays in the record even when one explanation appears plausible.
 
-Do not add USD, EUR, token units, or asset quantities directly. If an approved conversion is necessary, retain original amount, original currency, rate, rate timestamp, rate source, converted amount, and rounding rule. Use the transaction-time rate only if that is the stated design; valuation-time rates answer a different question. Convert before aggregation and reconcile the converted ledger.
+Request the smallest specific evidence that can resolve a material branch: the authoritative transaction version for a conflict; the corrected amount and extraction controls for a parse defect; the ownership bridge for an own-transfer exclusion; the invoice and payment reference for a purpose claim; the complete boundary interval for a rolling-window calculation; or the run receipt for a late arrival. Name the affected IDs and the decision that remains blocked. Avoid blanket requests for every conceivable document when a narrow record would answer the actual question.
 
-Use timezone-aware timestamps for elapsed intervals. Daylight-saving changes can produce repeated local times; compare normalized instants. If only dates exist, report whole-day bounds and do not manufacture an hour-level measure. A missing timestamp blocks a timing rule even when total volume is known.
+## Data-quality effects are hypothesis-specific
 
+Classify a defect by affected propositions. An unreadable counterparty narrative may not block amount arithmetic but can block purpose analysis. An unknown amount blocks relevant sums and amount predicates. An unresolved timezone can leave gross movement known while blocking timing. A duplicate can inflate counts and sums without changing source account coverage. Missing whole accounts can invalidate relationship-wide conclusions even if every provided row parses perfectly. Explain these differences rather than assigning one global completeness percentage and assuming all decisions share it.
 
-## Public-source register
+Build a repair dependency chain from raw row to canonical leg, account/currency subtotal, window membership, raw rule state, review result and report metric. A correction triggers every dependent recalculation, including windows that previously did not match. Retain old and new values and the change reason. A repair is not complete merely because the source owner sent a replacement file; the replacement must reconcile, preserve unaffected controls and pass the affected acceptance cases.
 
-Sources below were retrieved for package preparation on **2026-10-09**. This records access, not a legal-currency certification. Recheck applicability, amendments, jurisdiction, and institution type for a live task. The methods and illustrative thresholds in this suite are authored analytical conventions, not quotations from or mandates attributed to these sources.
+## Case-specific required populations and acquisition questions
 
-| ID | Source and locator | Publication/version | Applicability and boundary |
+Before accepting this population, confirm its scope, identity key, time basis and relation to the upstream source. Compare the first and last record and every exceptional row to their locators. A derived register is not an independent source control; retain the raw input and the transformation that generated it. If an input needed for this register is unavailable, name the affected field and downstream claim rather than leaving a header-only table or inventing a default.
+
+### RawTransactions source obligation
+
+Acquire enough evidence to populate one immutable raw receipt row, including extraction duplicates and unparsed amounts. The exact fields are `raw_row_id`, `transaction_id`, `account_id`, `event_utc`, `direction`, `amount_text`, `currency`, `counterparty_id`, `posting_state`, `ownership_state`, `terminal_bucket`, `evidence_ids`. The specimen contains 10 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### CanonicalLedger source obligation
+
+Acquire enough evidence to populate one readable unique posted economic account leg. The exact fields are `leg_id`, `raw_row_id`, `transaction_id`, `account_id`, `event_utc`, `direction`, `amount`, `currency`, `counterparty_id`, `ownership_state`, `scenario_eligible`, `evidence_ids`. The specimen contains 8 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### Eligibility source obligation
+
+Acquire enough evidence to populate one raw-row decision for the declared daily scenario. The exact fields are `eligibility_id`, `raw_row_id`, `leg_id`, `account_id`, `scenario_id`, `eligibility_state`, `reason`, `evidence_ids`. The specimen contains 10 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### AccountFlows source obligation
+
+Acquire enough evidence to populate one account and currency within the fixed daily event period. The exact fields are `account_id`, `currency`, `processed_tx_count`, `credit_total`, `debit_total`, `eligible_credit_total`, `eligible_debit_total`, `out_in_ratio`, `population_status`. The specimen contains 4 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### WindowDiagnostics source obligation
+
+Acquire enough evidence to populate one eligible credit anchor and its observed closed 24-hour interval. The exact fields are `window_id`, `account_id`, `anchor_leg_id`, `start_utc`, `end_utc`, `observed_leg_ids`, `known_credit_total`, `known_debit_total`, `known_ratio`, `first_debit_hours`, `coverage_state`, `evidence_ids`. The specimen contains 3 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### ScenarioResults source obligation
+
+Acquire enough evidence to populate one account, daily window and scenario specification. The exact fields are `scenario_result_id`, `account_id`, `scenario_id`, `eligible`, `rule_result`, `first_credit_to_debit_hours`, `review_outcome`, `evidence_ids`. The specimen contains 4 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### ReviewLedger source obligation
+
+Acquire enough evidence to populate one contextual review of a retained daily scenario result. The exact fields are `review_id`, `scenario_result_id`, `finding_id`, `account_id`, `raw_result`, `explanation_state`, `counterevidence`, `next_evidence`, `human_disposition`, `evidence_ids`. The specimen contains 4 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### ControlTotals source obligation
+
+Acquire enough evidence to populate one explicitly named count or monetary reconciliation proposition. The exact fields are `control_id`, `measure`, `expected_value`, `actual_value`, `unit`, `result`, `calculation`, `evidence_ids`. The specimen contains 7 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### EvidenceProvenance source obligation
+
+Acquire enough evidence to populate one fictional evidence source with its access state and evidential limit. The exact fields are `evidence_id`, `source_kind`, `source_date`, `availability`, `locator`, `supports`, `limitation`. The specimen contains 6 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+### ProcessQA source obligation
+
+Acquire enough evidence to populate one performed or explicitly unrecorded quality proposition. The exact fields are `check_id`, `check`, `expected`, `actual`, `status`, `reviewer`, `evidence_ids`. The specimen contains 5 complete records at this grain, including the explicit missing-value states printed in file 10.
+
+## Primary public-source register and bounded use
+
+The following primary pages were accessed on Oct 09, 2026 for this authored package. Access records are not a legal currency certification. Read the applicable current source in a permitted environment before relying on it for an actual institution. The numerical parameters, specimen data, workflow gates and formulas below are authored analytical conventions; these publishers do not prescribe or approve them.
+
+| Source ID | Primary reference | Exact contextual use | Boundary |
 | --- | --- | --- | --- |
-| AUTH-TM-01 | [FFIEC: Suspicious Activity Reporting](https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04) | Online manual; publication date not stated on accessed section | US bank examination context; contextual basis for documented monitoring and human review. |
-| AUTH-TM-02 | [FFIEC: Suspicious Activity Reporting examination procedures](https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04_ep) | Online manual; publication date not stated on accessed section | Control-review context; prompts inspection of monitoring design and transaction testing. |
+| AUTH-01 | [FFIEC Suspicious Activity Reporting](https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04), sections on transaction and surveillance monitoring | Context for documented filtering, testing and contextual review | US bank examination material; does not establish a universal threshold or approve this rule |
+| AUTH-02 | [FFIEC examination procedures](https://bsaaml.ffiec.gov/manual/AssessingComplianceWithBSARegulatoryRequirements/04_ep), transaction and surveillance monitoring and transaction testing | Context for inspecting scope, source information and actual results | Examination procedure context, not evidence about the fictional subjects |
+| AUTH-03 | [Wolfsberg Monitoring for Suspicious Activity, Part I](https://wolfsberg-group.org/resources/general/168/) | Industry perspective on considering customer attributes and behavior alongside transactions | Industry guidance, not law; not a source of specimen parameters |
 
-Record future retrievals separately using source ID, direct URL, publisher, publication date if stated, retrieval timestamp, page or section, exact proposition supported, and status. Guidance cannot establish the facts of a particular case. An accessible page does not establish the correctness of an attached customer assertion.
+Keep a future retrieval record with publisher, title, direct URL, retrieved time, page or section, source date if shown, proposition supported and unresolved applicability. A source-register entry cannot be used as evidence that a particular customer document is genuine. A search result excerpt cannot substitute for an unread source. If a link is unavailable, use NOT RETRIEVED and narrow the authority claim; preserve the original authored method as an explicitly illustrative method rather than inventing the missing guidance.

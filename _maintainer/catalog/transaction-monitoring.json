@@ -17,6 +17,654 @@
   ],
   "domain_tables": [
     {
+      "name": "RawTransactions",
+      "title": "Raw source rows and terminal reconciliation",
+      "columns": [
+        "raw_row_id",
+        "transaction_id",
+        "account_id",
+        "event_utc",
+        "direction",
+        "amount_text",
+        "currency",
+        "counterparty_id",
+        "posting_state",
+        "ownership_state",
+        "terminal_bucket",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "R01",
+          "T01",
+          "A",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          "6000.00",
+          "USD",
+          "P01",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R02",
+          "T02",
+          "A",
+          "2026-09-01T14:00:00Z",
+          "CREDIT",
+          "4000.00",
+          "USD",
+          "P02",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R03",
+          "T03",
+          "A",
+          "2026-09-01T15:00:00Z",
+          "DEBIT",
+          "9500.00",
+          "USD",
+          "P03",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R04",
+          "T04",
+          "B",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          "5000.00",
+          "USD",
+          "P04",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R05",
+          "T05",
+          "B",
+          "2026-09-01T16:00:00Z",
+          "DEBIT",
+          "4800.00",
+          "USD",
+          "P05",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R06",
+          "T06",
+          "C",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          "3000.00",
+          "USD",
+          "C-OWN-1",
+          "POSTED",
+          "CONFIRMED_OWN",
+          "PROCESSED",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "R07",
+          "T07",
+          "C",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          "3000.00",
+          "USD",
+          "C-OWN-2",
+          "POSTED",
+          "CONFIRMED_OWN",
+          "PROCESSED",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "R08",
+          "T08",
+          "D",
+          "2026-09-01T17:00:00Z",
+          "DEBIT",
+          "1000.00",
+          "USD",
+          "P06",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "PROCESSED",
+          "SYN-001"
+        ],
+        [
+          "R09",
+          "T01",
+          "A",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          "6000.00",
+          "USD",
+          "P01",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "DUPLICATE",
+          "SYN-001"
+        ],
+        [
+          "R10",
+          "T09",
+          "D",
+          "2026-09-01T18:00:00Z",
+          "DEBIT",
+          "unreadable",
+          "USD",
+          "P07",
+          "POSTED",
+          "CONFIRMED_EXTERNAL",
+          "UNPARSED",
+          "SYN-001;SYN-005"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "raw_row_id"
+      ],
+      "column_contracts": {
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "transaction_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Source economic transaction identifier. Its uniqueness is assessed with account leg and source version; matching amount or narrative alone is insufficient."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "event_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Timezone-aware economic event instant serialized in UTC. The source-local representation belongs in evidence; elapsed comparisons use this instant."
+        },
+        "direction": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical CREDIT or DEBIT from the account perspective. Amount remains nonnegative; do not infer direction from a signed display string."
+        },
+        "amount_text": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact source amount string before parsing. It can contain unreadable text; preserve it as evidence and never sum it directly."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "counterparty_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Supplied counterparty reference for this economic leg. Similar names or repeated identifiers do not independently establish common ownership."
+        },
+        "posting_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical posting status that determines whether a leg enters the declared posted population. A pending item remains visible outside that population."
+        },
+        "ownership_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evidence-backed own/external classification for the specific leg and historical period. Unknown ownership is not automatically external or own."
+        },
+        "terminal_bucket": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exactly one initial raw-row reconciliation outcome. It explains whether the row is processed, duplicate or unreadable; scenario exclusions are a separate layer."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one immutable raw receipt row, including extraction duplicates and unparsed amounts",
+      "report_section": 4
+    },
+    {
+      "name": "CanonicalLedger",
+      "title": "Canonical known posted account legs",
+      "columns": [
+        "leg_id",
+        "raw_row_id",
+        "transaction_id",
+        "account_id",
+        "event_utc",
+        "direction",
+        "amount",
+        "currency",
+        "counterparty_id",
+        "ownership_state",
+        "scenario_eligible",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "L-T01",
+          "R01",
+          "T01",
+          "A",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          6000.0,
+          "USD",
+          "P01",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ],
+        [
+          "L-T02",
+          "R02",
+          "T02",
+          "A",
+          "2026-09-01T14:00:00Z",
+          "CREDIT",
+          4000.0,
+          "USD",
+          "P02",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ],
+        [
+          "L-T03",
+          "R03",
+          "T03",
+          "A",
+          "2026-09-01T15:00:00Z",
+          "DEBIT",
+          9500.0,
+          "USD",
+          "P03",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ],
+        [
+          "L-T04",
+          "R04",
+          "T04",
+          "B",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000.0,
+          "USD",
+          "P04",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ],
+        [
+          "L-T05",
+          "R05",
+          "T05",
+          "B",
+          "2026-09-01T16:00:00Z",
+          "DEBIT",
+          4800.0,
+          "USD",
+          "P05",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ],
+        [
+          "L-T06",
+          "R06",
+          "T06",
+          "C",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          3000.0,
+          "USD",
+          "C-OWN-1",
+          "CONFIRMED_OWN",
+          false,
+          "SYN-001;SYN-004"
+        ],
+        [
+          "L-T07",
+          "R07",
+          "T07",
+          "C",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          3000.0,
+          "USD",
+          "C-OWN-2",
+          "CONFIRMED_OWN",
+          false,
+          "SYN-001;SYN-004"
+        ],
+        [
+          "L-T08",
+          "R08",
+          "T08",
+          "D",
+          "2026-09-01T17:00:00Z",
+          "DEBIT",
+          1000.0,
+          "USD",
+          "P06",
+          "CONFIRMED_EXTERNAL",
+          true,
+          "SYN-001"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      },
+      "primary_key": [
+        "leg_id"
+      ],
+      "column_contracts": {
+        "leg_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Unique identifier of one readable canonical posted account leg. It joins to the raw source and is never substituted for a customer identifier."
+        },
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "transaction_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Source economic transaction identifier. Its uniqueness is assessed with account leg and source version; matching amount or narrative alone is insufficient."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "event_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Timezone-aware economic event instant serialized in UTC. The source-local representation belongs in evidence; elapsed comparisons use this instant."
+        },
+        "direction": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical CREDIT or DEBIT from the account perspective. Amount remains nonnegative; do not infer direction from a signed display string."
+        },
+        "amount": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row currency",
+          "description": "Known nonnegative monetary amount in the row currency. Null means unrecovered source value and blocks the relevant completeness proposition."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "counterparty_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Supplied counterparty reference for this economic leg. Similar names or repeated identifiers do not independently establish common ownership."
+        },
+        "ownership_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Evidence-backed own/external classification for the specific leg and historical period. Unknown ownership is not automatically external or own."
+        },
+        "scenario_eligible": {
+          "type": "boolean",
+          "nullable": false,
+          "unit": "boolean",
+          "description": "Boolean record-level inclusion flag. True means a known eligible leg, not proof the entire account or window is complete."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "raw_row_id"
+          ],
+          "table": "RawTransactions",
+          "references": [
+            "raw_row_id"
+          ]
+        }
+      ],
+      "grain": "one readable unique posted economic account leg",
+      "report_section": 4
+    },
+    {
+      "name": "Eligibility",
+      "title": "Raw-row scenario eligibility decisions",
+      "columns": [
+        "eligibility_id",
+        "raw_row_id",
+        "leg_id",
+        "account_id",
+        "scenario_id",
+        "eligibility_state",
+        "reason",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "EL-R01",
+          "R01",
+          "L-T01",
+          "A",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R02",
+          "R02",
+          "L-T02",
+          "A",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R03",
+          "R03",
+          "L-T03",
+          "A",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R04",
+          "R04",
+          "L-T04",
+          "B",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R05",
+          "R05",
+          "L-T05",
+          "B",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R06",
+          "R06",
+          "L-T06",
+          "C",
+          "TM-01",
+          "EXCLUDED_OWN",
+          "SYN-004 confirms common customer ownership during period",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "EL-R07",
+          "R07",
+          "L-T07",
+          "C",
+          "TM-01",
+          "EXCLUDED_OWN",
+          "SYN-004 confirms common customer ownership during period",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "EL-R08",
+          "R08",
+          "L-T08",
+          "D",
+          "TM-01",
+          "ELIGIBLE_KNOWN",
+          "Known external posted leg; account-level completeness checked separately",
+          "SYN-001"
+        ],
+        [
+          "EL-R09",
+          "R09",
+          "L-T01",
+          "A",
+          "TM-01",
+          "DUPLICATE",
+          "Exact second extraction of R01; not another account leg",
+          "SYN-001"
+        ],
+        [
+          "EL-R10",
+          "R10",
+          null,
+          "D",
+          "TM-01",
+          "BLOCKED",
+          "Posted in-scope amount unreadable; blocks D completeness",
+          "SYN-001;SYN-005"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "eligibility_id"
+      ],
+      "column_contracts": {
+        "eligibility_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique identifier for a raw-row/scenario decision. It preserves reasons for retained, excluded and blocked records without removing source population members."
+        },
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "leg_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Unique identifier of one readable canonical posted account leg. It joins to the raw source and is never substituted for a customer identifier."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "scenario_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact illustrative scenario identifier. Criteria are versioned outside the identifier in the case manifest and cannot drift between outputs."
+        },
+        "eligibility_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Record-level eligibility conclusion. ELIGIBLE_KNOWN, EXCLUDED_OWN, DUPLICATE and BLOCKED are mutually exclusive in the specimen."
+        },
+        "reason": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific evidence-backed reason for a state or transition. It identifies the relevant row, rule or missing fact rather than a generic compliance label."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "raw_row_id"
+          ],
+          "table": "RawTransactions",
+          "references": [
+            "raw_row_id"
+          ]
+        }
+      ],
+      "grain": "one raw-row decision for the declared daily scenario",
+      "report_section": 4
+    },
+    {
       "name": "AccountFlows",
       "columns": [
         "account_id",
@@ -81,7 +729,228 @@
         "eligible_credit_total": "#,##0.00",
         "eligible_debit_total": "#,##0.00",
         "out_in_ratio": "0.0%"
-      }
+      },
+      "primary_key": [
+        "account_id",
+        "currency"
+      ],
+      "column_contracts": {
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "processed_tx_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Count of readable canonical economic legs at account/currency grain. It excludes extraction duplicates and unknown-amount rows but retains own transfers."
+        },
+        "credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known eligible or gross credit subtotal as specified by the table grain. It is not necessarily a complete total when coverage_state or population_status is defective."
+        },
+        "debit_total": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row currency",
+          "description": "Known eligible debit subtotal at the table grain. Null is required for a window total dependent on an unknown debit; known subtotals elsewhere remain explicitly partial."
+        },
+        "eligible_credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of known credit amounts after stated scenario exclusions. It cannot include confirmed own legs or a copied extraction duplicate."
+        },
+        "eligible_debit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of known debit amounts after stated scenario exclusions. It is not an attributed or suspicious amount and may exceed eligible credits."
+        },
+        "out_in_ratio": {
+          "type": "number",
+          "nullable": true,
+          "unit": "ratio",
+          "description": "Eligible debit total divided by positive eligible credit total. Stored as a dimensionless ratio and displayed as a percentage without changing decision precision."
+        },
+        "population_status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Account-level completeness or exclusion state. COMPLETE, OWN_TRANSFER_EXCLUDED and UNPARSED_AMOUNT have different analytical consequences."
+        }
+      },
+      "title": "AccountFlows",
+      "grain": "one account and currency within the fixed daily event period",
+      "report_section": 5
+    },
+    {
+      "name": "WindowDiagnostics",
+      "title": "Observed credit-anchored membership; coverage remains incomplete",
+      "columns": [
+        "window_id",
+        "account_id",
+        "anchor_leg_id",
+        "start_utc",
+        "end_utc",
+        "observed_leg_ids",
+        "known_credit_total",
+        "known_debit_total",
+        "known_ratio",
+        "first_debit_hours",
+        "coverage_state",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "W-A-T01",
+          "A",
+          "L-T01",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "L-T01;L-T02;L-T03",
+          10000,
+          9500,
+          0.95,
+          2,
+          "BOUNDARY_INCOMPLETE",
+          "SYN-001;SYN-006"
+        ],
+        [
+          "W-A-T02",
+          "A",
+          "L-T02",
+          "2026-09-01T14:00:00Z",
+          "2026-09-02T14:00:00Z",
+          "L-T02;L-T03",
+          4000,
+          9500,
+          2.375,
+          1,
+          "BOUNDARY_INCOMPLETE",
+          "SYN-001;SYN-006"
+        ],
+        [
+          "W-B-T04",
+          "B",
+          "L-T04",
+          "2026-09-01T13:00:00Z",
+          "2026-09-02T13:00:00Z",
+          "L-T04;L-T05",
+          5000,
+          4800,
+          0.96,
+          3,
+          "BOUNDARY_INCOMPLETE",
+          "SYN-001;SYN-006"
+        ]
+      ],
+      "formats": {
+        "known_credit_total": "#,##0.00",
+        "known_debit_total": "#,##0.00",
+        "known_ratio": "0.0%",
+        "first_debit_hours": "0.0"
+      },
+      "primary_key": [
+        "window_id"
+      ],
+      "column_contracts": {
+        "window_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable account/anchor/specification window key. It distinguishes overlapping observations so a membership count cannot be mistaken for unique transactions."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "anchor_leg_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Canonical eligible credit that starts a diagnostic window. Only credit anchors are used; a debit cannot silently become an anchor."
+        },
+        "start_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Inclusive UTC instant at the anchor. The applicable window convention determines endpoint inclusion, not the date formatting of the rendered table."
+        },
+        "end_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "UTC endpoint exactly 24 elapsed hours after the anchor. The scenario-design closed interval includes this instant; the TM diagnostic convention matches it."
+        },
+        "observed_leg_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited canonical legs observed inside the diagnostic interval. This list is partial when the extract does not cover the entire interval."
+        },
+        "known_credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable credits only at the declared stage, account or observed diagnostic window. The word known is substantive where an unresolved amount exists."
+        },
+        "known_debit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable debits only at the declared stage, account or observed diagnostic window. An unknown debit is not imputed as a measured zero."
+        },
+        "known_ratio": {
+          "type": "number",
+          "nullable": true,
+          "unit": "ratio",
+          "description": "Ratio of known observed debits to known observed credits when the denominator is positive. Boundary-incomplete diagnostics do not establish a complete rule result."
+        },
+        "first_debit_hours": {
+          "type": "number",
+          "nullable": true,
+          "unit": "hours",
+          "description": "Elapsed hours from anchor to first strictly subsequent eligible debit. Null means no qualifying ordered pair; a contemporaneous debit cannot satisfy the predicate."
+        },
+        "coverage_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Completeness state for the exact account/window inputs. COMPLETE, BOUNDARY_INCOMPLETE and AMOUNT_UNKNOWN cannot be collapsed into a binary risk score."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "anchor_leg_id"
+          ],
+          "table": "CanonicalLedger",
+          "references": [
+            "leg_id"
+          ]
+        }
+      ],
+      "grain": "one eligible credit anchor and its observed closed 24-hour interval",
+      "report_section": 5
     },
     {
       "name": "ScenarioResults",
@@ -139,7 +1008,579 @@
       ],
       "formats": {
         "first_credit_to_debit_hours": "0.0"
-      }
+      },
+      "primary_key": [
+        "scenario_result_id"
+      ],
+      "column_contracts": {
+        "scenario_result_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable daily account/scenario/window result key. It links to the review register without being replaced after a contextual explanation."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "scenario_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact illustrative scenario identifier. Criteria are versioned outside the identifier in the case manifest and cannot drift between outputs."
+        },
+        "eligible": {
+          "type": "boolean",
+          "nullable": false,
+          "unit": "boolean",
+          "description": "Account-result eligibility flag after completeness and exclusion gates. False is distinguished by rule_result as either excluded or not assessable."
+        },
+        "rule_result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Deterministic raw result under the named specification: MATCH, NO_MATCH, EXCLUDED or NOT_ASSESSABLE. Contextual evidence does not rewrite it."
+        },
+        "first_credit_to_debit_hours": {
+          "type": "number",
+          "nullable": true,
+          "unit": "hours",
+          "description": "Elapsed hours from the first eligible daily credit to its first strictly subsequent eligible debit. It screens timing and does not attribute funding."
+        },
+        "review_outcome": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Proposed contextual assessment distinct from raw rule_result. No value in this field constitutes an authorized filing or relationship decision."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "title": "ScenarioResults",
+      "grain": "one account, daily window and scenario specification",
+      "report_section": 5
+    },
+    {
+      "name": "ReviewLedger",
+      "title": "Contextual review and unrecorded human disposition",
+      "columns": [
+        "review_id",
+        "scenario_result_id",
+        "finding_id",
+        "account_id",
+        "raw_result",
+        "explanation_state",
+        "counterevidence",
+        "next_evidence",
+        "human_disposition",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "RV-A",
+          "SR-001",
+          "TM-F01",
+          "A",
+          "MATCH",
+          "UNSUPPORTED",
+          "No opening balance or onward P03 records; timing does not trace funds",
+          "Invoice or contract matching T03 plus counterparty role",
+          "NOT_RECORDED",
+          "SYN-001;SYN-002"
+        ],
+        [
+          "RV-B",
+          "SR-002",
+          "TM-F02",
+          "B",
+          "MATCH",
+          "SUPPORTED_FOR_T05",
+          "One invoice does not establish relationship-wide legitimacy",
+          "Reviewer assessment of invoice linkage and remaining scope",
+          "NOT_RECORDED",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "RV-C",
+          "SR-003",
+          null,
+          "C",
+          "EXCLUDED",
+          "OWNERSHIP_CONFIRMED",
+          "Exclusion applies only to external-flow TM-01",
+          "Retain SYN-004 and check any other applicable scenario separately",
+          "NOT_RECORDED",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "RV-D",
+          "SR-004",
+          "TM-F03",
+          "D",
+          "NOT_ASSESSABLE",
+          "SOURCE_DEFECT",
+          "Known debit does not bound unreadable T09 value",
+          "Corrected T09 amount and source control total",
+          "NOT_RECORDED",
+          "SYN-001;SYN-005"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "review_id"
+      ],
+      "column_contracts": {
+        "review_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique contextual review record. It joins the exact raw scenario result and retains the relevant finding or an explained null when no finding is raised."
+        },
+        "scenario_result_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable daily account/scenario/window result key. It links to the review register without being replaced after a contextual explanation."
+        },
+        "finding_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Stable key to the Findings register. Nullable only where a documented review outcome raises no separate finding; absence is not a missing case record."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "raw_result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Preserved deterministic rule result before human review or delivery grouping. Explanations and grouping decisions must not delete or change it."
+        },
+        "explanation_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Scope-limited state of the explanation evidence. Supported documentation for one payment does not become an assurance about the whole account."
+        },
+        "counterevidence": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Strongest supplied limitation or competing interpretation that tempers the proposed concern. It may identify missing evidence without treating missingness as guilt."
+        },
+        "next_evidence": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific discriminating document or control record needed for the next decision. It is a request proposal, not evidence that retrieval occurred."
+        },
+        "human_disposition": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded authorized human decision. NOT_RECORDED is required in this specimen because no real person has approved or closed anything."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "scenario_result_id"
+          ],
+          "table": "ScenarioResults",
+          "references": [
+            "scenario_result_id"
+          ]
+        }
+      ],
+      "grain": "one contextual review of a retained daily scenario result",
+      "report_section": 5
+    },
+    {
+      "name": "ControlTotals",
+      "title": "Count and monetary reconciliation with known limits",
+      "columns": [
+        "control_id",
+        "measure",
+        "expected_value",
+        "actual_value",
+        "unit",
+        "result",
+        "calculation",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "CT-01",
+          "Received rows",
+          10,
+          10,
+          "rows",
+          "PASS",
+          "8 processed + 1 duplicate + 1 unparsed",
+          "SYN-001"
+        ],
+        [
+          "CT-02",
+          "Canonical known legs",
+          8,
+          8,
+          "legs",
+          "PASS",
+          "L-T01 through L-T08",
+          "SYN-001"
+        ],
+        [
+          "CT-03",
+          "Known credits",
+          18000,
+          18000,
+          "USD",
+          "PASS",
+          "6000 + 4000 + 5000 + 3000",
+          "SYN-001"
+        ],
+        [
+          "CT-04",
+          "Known debits",
+          18300,
+          18300,
+          "USD",
+          "PASS",
+          "9500 + 4800 + 3000 + 1000",
+          "SYN-001"
+        ],
+        [
+          "CT-05",
+          "Complete monetary population",
+          null,
+          null,
+          "USD",
+          "NOT_ASSESSABLE",
+          "T09 amount unknown; known gross is 36300, not complete gross",
+          "SYN-001;SYN-005"
+        ],
+        [
+          "CT-06",
+          "Daily rule matches",
+          2,
+          2,
+          "account windows",
+          "PASS",
+          "SR-001 and SR-002",
+          "SYN-001"
+        ],
+        [
+          "CT-07",
+          "Distinct observed rolling legs",
+          5,
+          5,
+          "legs",
+          "PASS",
+          "Union T01,T02,T03,T04,T05; membership count 7",
+          "SYN-001;SYN-006"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "control_id"
+      ],
+      "column_contracts": {
+        "control_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique reconciliation-control key. Controls can test different grains; counts and monetary comparisons are never combined into one unexplained balance."
+        },
+        "measure": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Precisely named control measure including known versus complete scope. A passing count measure cannot substitute for unknown monetary completeness."
+        },
+        "expected_value": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row unit",
+          "description": "Independent expected numerical control value when known. Null records a proposition whose true value is unavailable rather than a failed zero comparison."
+        },
+        "actual_value": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row unit",
+          "description": "Reproduced value from the supplied rows. Null remains null when the corresponding measure is unavailable; never enter an attractive expected value by copying."
+        },
+        "unit": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Physical or analytical unit of the control, such as USD, rows, legs or account windows. The label determines what can validly be added or divided."
+        },
+        "result": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Control result or acceptance state. PASS applies to an executed synthetic check; it is not regulatory assurance or an operational approval."
+        },
+        "calculation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit arithmetic or set-membership expression supporting the control. It retains unknown components instead of replacing them with a rounded display."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one explicitly named count or monetary reconciliation proposition",
+      "report_section": 5
+    },
+    {
+      "name": "EvidenceProvenance",
+      "title": "Source identity, period, availability and evidential limits",
+      "columns": [
+        "evidence_id",
+        "source_kind",
+        "source_date",
+        "availability",
+        "locator",
+        "supports",
+        "limitation"
+      ],
+      "rows": [
+        [
+          "SYN-001",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, raw population R01\u2013R10",
+          "Fictional transaction extract",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SYN-002",
+          "Authored fictional context record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, context register A",
+          "Fictional account A profile",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SYN-003",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, context register B",
+          "Fictional invoice and matching confirmation",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SYN-004",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, context register C",
+          "Fictional ownership confirmation",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SYN-005",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, raw row R10",
+          "Fictional extract defect",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "SYN-006",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, Window diagnostic convention; coverage stops Sep 02, 2026 12:00 AM ET",
+          "Fictional diagnostic window specification",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "evidence_id"
+      ],
+      "column_contracts": {
+        "evidence_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact unique Evidence key at one source-provenance row. It joins the common Evidence register without combining unrelated sources."
+        },
+        "source_kind": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicitly fictional record type and origin. Authored cases and guidance references must not be mislabeled as actual institutional evidence."
+        },
+        "source_date": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "ISO calendar date of the authored source package, distinct from transaction event dates and evidence retrieval dates."
+        },
+        "availability": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "State of access to the source text. FULL_TEXT_IN_FILE_10 means the complete fictional content is supplied in this suite, not externally verified."
+        },
+        "locator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact file and section or row reference supporting retrieval of the fictional source. A title alone is insufficient."
+        },
+        "supports": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Bounded proposition the source can establish in the synthetic exercise. It does not certify any broader customer or control conclusion."
+        },
+        "limitation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific scope restriction or evidential weakness that must accompany use of the source."
+        }
+      },
+      "grain": "one fictional evidence source with its access state and evidential limit",
+      "report_section": 5
+    },
+    {
+      "name": "ProcessQA",
+      "title": "Explicit expected and actual control evidence",
+      "columns": [
+        "check_id",
+        "check",
+        "expected",
+        "actual",
+        "status",
+        "reviewer",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "TQ01",
+          "All source rows have one terminal bucket",
+          "10 = 8 + 1 + 1",
+          "10 = 8 + 1 + 1",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SYN-001"
+        ],
+        [
+          "TQ02",
+          "Daily rule hits remain after B explanation",
+          "A and B MATCH",
+          "A and B MATCH",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "TQ03",
+          "Rolling coverage",
+          "Three windows BOUNDARY_INCOMPLETE",
+          "Three windows BOUNDARY_INCOMPLETE",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SYN-001;SYN-006"
+        ],
+        [
+          "TQ04",
+          "Complete monetary population",
+          "No complete total established",
+          "T09 amount unknown",
+          "REVIEW REQUIRED",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SYN-005"
+        ],
+        [
+          "TQ05",
+          "Independent human disposition",
+          "Not supplied",
+          "Not supplied",
+          "NOT RECORDED",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "SYN-001"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "check_id"
+      ],
+      "column_contracts": {
+        "check_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique process-quality check key retained across output formats. A later rerun creates a dated actual result without changing the original expectation."
+        },
+        "check": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Falsifiable control proposition with defined expected evidence. It must be precise enough for another reviewer to reproduce."
+        },
+        "expected": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact target result for the named check. This is fixed before execution and may state not supplied when the check concerns authorization."
+        },
+        "actual": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded output of the check. In future sessions, use NOT TESTED until performed; do not copy the specimen result as evidence of a new execution."
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded PASS, FAIL, REVIEW REQUIRED, NOT RECORDED or NOT TESTED status for this check, separate from analytical finding severity."
+        },
+        "reviewer": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Identity or role of the actual check performer. The specimen labels authored arithmetic and explicitly records absent independent operational review."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one performed or explicitly unrecorded quality proposition",
+      "report_section": 5
     }
   ],
   "findings": [
@@ -187,7 +1628,7 @@
     {
       "id": "SYN-001",
       "title": "Fictional transaction extract",
-      "locator": "10-worked-example.md, raw population R01–R10",
+      "locator": "10-worked-example.md, raw population R01\u2013R10",
       "claim_class": "Observed"
     },
     {
@@ -213,13 +1654,19 @@
       "title": "Fictional extract defect",
       "locator": "10-worked-example.md, raw row R10",
       "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional diagnostic window specification",
+      "locator": "10-worked-example.md, Window diagnostic convention; coverage stops Sep 02, 2026 12:00 AM ET",
+      "claim_class": "Observed"
     }
   ],
   "metrics": [
     {
       "label": "Raw rows",
       "value": 10,
-      "method": "Count R01–R10 before deduplication"
+      "method": "Count R01\u2013R10 before deduplication"
     },
     {
       "label": "Processed transactions",
@@ -240,7 +1687,8 @@
   "limitations": [
     "Synthetic rules are illustrative and are not regulatory thresholds.",
     "Account D has an unknown amount; total monetary completeness is not established.",
-    "No opening balances or complete external flow paths are supplied."
+    "No opening balances or complete external flow paths are supplied.",
+    "The three rolling-window diagnostics extend beyond the extract end; known observed sums are reproducible but a complete rolling-rule result is not available."
   ],
   "conclusion": "Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.",
   "report_narrative": [
@@ -256,10 +1704,12 @@
       "TM-F03: One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit."
     ],
     [
-      "Known gross movement is $36,300.00 within the captured records. Account totals retain the relationship between incoming and outgoing activity; gross movement is not net loss, customer income or suspicious value."
+      "Known gross movement is $36,300.00 within the captured records. Account totals retain the relationship between incoming and outgoing activity; gross movement is not net loss, customer income or suspicious value.",
+      "RawTransactions retains all ten rows; CanonicalLedger contains the eight readable unique posted legs. Eligibility retains ten separate reasons. Credit-anchored diagnostics contain seven memberships over five distinct legs; their known membership gross of $42,800.00 is overlapping and is not unique movement. All three diagnostic windows extend beyond the supplied observation boundary and cannot be represented as complete rolling-window assessments."
     ],
     [
-      "Two accounts meet the raw illustrative rapid-movement criterion. One has a supported invoice explanation, while the other remains a review lead. An additional account is not assessable because an amount is unreadable; it cannot be scored as a negative."
+      "Two accounts meet the raw illustrative rapid-movement criterion. One has a supported invoice explanation, while the other remains a review lead. An additional account is not assessable because an amount is unreadable; it cannot be scored as a negative.",
+      "Daily TM-01 and diagnostic rolling windows are separate measures. ReviewLedger retains four account review records with no human disposition recorded; the supported B invoice does not remove SR-002. ControlTotals preserves the failed monetary-completeness proposition even though row reconciliation passes."
     ],
     [
       "The synthetic source rows and criterion definitions in file 10 support the arithmetic and matches. The public typology references do not supply a regulatory threshold or evidence of wrongdoing for these fictional accounts."
@@ -273,5 +1723,7 @@
       "No opening balances or complete external flow paths are supplied.",
       "QA remains pending and no authorized human disposition is recorded."
     ]
-  ]
+  ],
+  "as_of": "2026-09-02T04:00:00Z",
+  "scope": "Fictional USD account legs with event instants from 2026-09-01T04:00:00Z inclusive to 2026-09-02T04:00:00Z exclusive. Extraction completeness is asserted only for the ten supplied rows; R10 has an unreadable amount."
 }

@@ -12,8 +12,9 @@ The assistant's response is a draft for you to check.
 2. **Download its files.** Each release ZIP contains twelve Markdown files in one
    folder. Unzip it using normal file controls. Read `README.md`; keep
    `11-build-record.md` for provenance and content size.
-3. **Attach files 01–10.** These ten files contain everything needed for that suite's
-   method and templates. Add only the data approved for the current environment.
+3. **Choose an attachment stage.** The ten files 01–10 contain the complete method
+   and templates. For the deeper process suites, start with the Example check stage
+   below and load one rendering stage at a time. Add only approved data.
    File 10 is fictional training data; explicitly choose example mode or your own
    authorized case so the assistant does not mix the two.
 4. **Paste the launch prompt in file 01.** State your decision question, scope,
@@ -85,7 +86,8 @@ Ten files is a packaging choice, not a context guarantee. The per-suite build re
 estimates the text size; code inside Markdown counts too. Leave space for source
 materials, prior messages and the final answer. Never load all suites together.
 
-Use three deliberate stages when necessary:
+Use these three stages by default for the expanded process suites. The full ten-file
+route remains available only when the session can accommodate the measured content:
 
 | Stage | Attachments | Deliverable before moving on |
 | --- | --- | --- |
@@ -98,6 +100,12 @@ behavior. The analysis stage still requires the full method. The render stage mu
 not invent new findings or change dispositions. If a missing method becomes relevant,
 reattach it before continuing. A new chat needs the checkpoint and the applicable
 instructions again; no background memory is assumed.
+
+Read the [process map](PROCESS-MAP.md) for boundaries between related monitoring tasks
+and the [measured process-depth report](PROCESS-DEPTH.md) for actual file sizes. Each
+deep suite's file 10 includes a standalone fixture calculation block. Execute it only
+when the current session already supports Python; otherwise reproduce the same arithmetic
+from the printed rows and label unexecuted code honestly.
 
 ## Checkpoint to save between stages
 
@@ -127,14 +135,19 @@ segment before synthesis. Do not silently sample or discard records to fit a cha
 domain registers, actions and review limitations. The Word recipe uses a restrained
 portrait report; large domain tables become readable vertical records.
 
-**Workbook.** Eight sheets: Summary, Dashboard, Findings, Evidence, Actions, QA and
-two task-specific registers. The suite fixes the field names and their meanings.
+**Workbook.** Six common sheets—Summary, Dashboard, Findings, Evidence, Actions and
+QA—plus every domain register declared in file 05. The deep process suites include
+additional raw, intermediate, decision, provenance and QA ledgers. Their exact fields,
+types, null rules and keys are fixed in the attachment.
 The workbook is a generated snapshot; regenerate after changing its row population.
 
-**Dashboard.** One complete HTML file with ten sections, restrained light/dark themes,
-search, severity filter, findings export and print support. The file makes no network
-requests. Filtering changes the findings view; labeled coverage measures remain based
-on the full supplied dataset.
+**Dashboard.** One complete HTML file with eight common sections and one section per
+domain register, restrained light/dark themes, search, severity filter, findings export,
+complete-case JSON export and print support. All report narrative and domain records
+remain present. The file makes no network requests. Filtering changes the findings
+view; labeled coverage measures remain based on the full supplied dataset. The complete
+case export retains unfiltered records and metadata for an explicit handoff; its presence
+does not demonstrate that the case was approved.
 
 **Copy-ready fallback.** The same content can be delivered as Markdown when the chat
 cannot generate files. State exactly which exports were not created. Do not present a

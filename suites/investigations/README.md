@@ -1,54 +1,36 @@
 # Investigation Case Review
 
-Build an evidence-led chronology, reconcile funds movements, test competing explanations, and prepare a bounded case assessment for a human decision-maker.
+Reconstruct a full case chronology, reconcile account and entity flows, test competing claims, preserve contradictions and produce a bounded human decision package.
 
-## In plain English
+**Decision:** Which propositions survive a complete chronology, reconciliation and contrary-evidence review, and what evidence or human decision is still required?
 
-- Give the assistant the ten numbered attachments and an authorized, bounded input set.
-- It checks what the inputs cover, works through the method, and shows how each conclusion follows from evidence.
-- You receive a consistent report, workbook, and optional dashboard, with visible gaps and a review checklist.
-- A person makes the final decision. These files do not connect to systems, monitor accounts, or carry out actions.
+Use this suite for investigators, case reviewers and quality-assurance analysts. It contains exactly twelve Markdown files. Attach 01 through 10 for the working session; README and 11 are navigation and build evidence. All required methods, schemas, complete fictional inputs, populated outputs, controlled counterexamples and executable fixture arithmetic live inside these attachments. End users need no repository, terminal, connector or automation.
 
-**Audience:** Investigators, case reviewers, and quality-assurance analysts
+Start with 01, establish actual scope and supplied policy, then follow 02–05. Files 06–08 contain fixed report, workbook and offline dashboard templates. File 09 supplies acceptance tests. File 10 contains the complete worked case and an optional standalone Python arithmetic check that can run inside an already available approved chat capability. If that capability is unavailable, the printed raw records and expected calculations remain complete.
 
-**Decision supported:** Which case propositions are supported, contradicted, or unresolved, and what specific evidence or human decision is needed next?
+The specimen is fictional and the criteria are explicitly illustrative. Replace every example source, amount, finding and conclusion when adapting. Public authorities provide methodological context; they are not evidence about the fictional subjects. Actual human decisions, external communications and operational actions remain separate from this review package.
 
-## What to attach
+## Included domain registers
 
-Attach **01 through 10: ten Markdown files**. This README and 11-build-record.md are browse-only. The folder contains twelve Markdown files in total. Input evidence is additional to the ten instructions and must fit the approved session's limits. Attachment support and file creation differ by environment; the session guide tests capabilities before promising deliverables.
-
-| File | Purpose |
-| --- | --- |
-| [01-session-guide.md](01-session-guide.md) | Start, scope, restart, and fallback instructions |
-| [02-inputs-evidence.md](02-inputs-evidence.md) | Data dictionary, source register, and reconciliation |
-| [03-analysis-method.md](03-analysis-method.md) | Ordered analytical method and calculations |
-| [04-decision-rules.md](04-decision-rules.md) | Explicit criteria, exceptions, and human gates |
-| [05-output-contract.md](05-output-contract.md) | Exact output tables and narrative requirements |
-| [06-report-template.md](06-report-template.md) | Fixed report structure and document styling |
-| [07-workbook-template.md](07-workbook-template.md) | Exact workbook sheets and rendering instructions |
-| [08-dashboard-template.md](08-dashboard-template.md) | Offline HTML and restrained light/dark themes |
-| [09-quality-review.md](09-quality-review.md) | Falsifiable checks and release decision |
-| [10-worked-example.md](10-worked-example.md) | Complete fictional population and expected results |
-| [11-build-record.md](11-build-record.md) | Build stages, checks, and content-token estimate |
-
-## Small-context sessions
-
-For smaller contexts, use the explicit Example check, Analyze and Render stages in [01-session-guide.md](01-session-guide.md). Each stage includes its required method and quality controls; preserve the complete checkpoint and example-check record between stages.
-
-Use one suite per session. A neighboring suite can be consulted later with a separate checkpoint; do not silently combine incompatible rules or sum findings from different populations. In-session Python is optional. If unavailable, ask for the fixed Markdown report and tables, with uncomputed fields marked clearly. No terminal, repository checkout, installation, scheduler, or connector is required by the end user.
-
-## What the package proves
-
-The worked example tests the arithmetic and reasoning on deliberately small fictional inputs. It does not establish production accuracy, regulatory compliance, model reliability, or suitability for every jurisdiction. The public-source register supplies contextual guidance, not institution policy. Operational thresholds require an approved local basis.
-
-The build record distinguishes estimated tokens in the finished files from actual generation-token usage. Actual build usage and monetary cost are unknown without telemetry. The record also shows the authoring, reference review, template, and verification stages; it does not invent elapsed time or expenditure.
+| register | grain | fixture_rows |
+| --- | --- | --- |
+| CaseTimeline | One canonical transfer touching A; same-entity mirror legs are represented once. | 24 |
+| AccountBalances | One account-period balance equation. | 2 |
+| ClaimTests | One proposition, including favorable and contrary alternatives. | 6 |
+| Contradictions | One material contradiction or qualification and its exact decision effect. | 4 |
+| EvidenceRequests | One decision-sensitive request or satisfied request outcome. | 5 |
+| EvidenceProvenance | One source origin or explicitly unavailable supplied item. | 12 |
+| DecisionRecord | One distinct gate; completion is not equivalent to case closure. | 4 |
+| ProcessQA | One performed fixture check or explicit unrecorded approval gate. | 12 |
 
 <!-- BUILD:START -->
 ## Build and attachment budget
 
-The ten instructional files contain **15,659 words** and approximately **35,005 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **140,020–350,050 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
+The ten instructional files contain **42,912 words** and approximately **92,742 attachment tokens** (characters ÷ 4, rounded up; code included). This is content size, not build consumption. An illustrative reproduction budget is **370,968–927,420 tokens** (4–10× content; heuristic, not observed usage). Actual generation tokens and monetary cost were not captured per suite.
 
-Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.1.0/docs/VERIFICATION.md) records what was actually tested.
+The seven authored method files (01–05, 09 and 10) contain **20,450 prose/table words**, excluding fenced code and the compiled field dictionary. This separates method depth from repeated renderer code and embedded fixture payloads. Their complete file size is **160,977 UTF-8 bytes**. Counts measure content, not analytical validity.
 
-[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.1.0/investigations.zip). Unzip and attach files 01–10. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
+Creation sequence: scope mapping → domain methods → fixed output contracts → complete fictional example → review checks → packaged release. [Build details and hashes](11-build-record.md) show the method; [verification](https://github.com/maxmoran23/markdown-analyst-toolkit/blob/v1.2.0/docs/VERIFICATION.md) records what was actually tested.
+
+[Download this 12-file Markdown suite](https://github.com/maxmoran23/markdown-analyst-toolkit/releases/download/v1.2.0/investigations.zip). Unzip and attach the files for the current stage in file 01; files 01–10 contain the complete instructions. The README and build record are for browsing. If ZIP downloads are restricted, open a file on GitHub, choose Raw, and save its Markdown text using approved controls; do not bypass an organizational restriction.
 <!-- BUILD:END -->

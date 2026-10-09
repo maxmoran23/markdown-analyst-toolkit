@@ -1,0 +1,1688 @@
+{
+  "slug": "tm-data-lineage",
+  "title": "Transaction Monitoring Data Lineage",
+  "summary": "Reconcile source-to-monitoring transformations, population counts, currency totals, exceptions and late-change effects with a complete row-level lineage specimen.",
+  "audience": "Monitoring analysts, scenario owners, data owners and independent control reviewers",
+  "decision": "Can a reviewer reproduce which source records reached monitoring, which did not, and exactly how a correction changes the downstream assessment?",
+  "palette": "slate",
+  "as_of": "2026-09-02T12:00:00Z",
+  "report_sections": [
+    "Lineage conclusion and unresolved coverage",
+    "Source scope, cutoffs and transformation contract",
+    "Defects, exclusions and downstream consequences",
+    "Source-to-canonical row lineage",
+    "Stage controls and rerun impact",
+    "Evidence and transformation provenance",
+    "Proposed repair and reprocessing actions",
+    "Limitations, quality gates and acceptance"
+  ],
+  "domain_tables": [
+    {
+      "name": "SourceRows",
+      "title": "Immutable delivered source records",
+      "columns": [
+        "raw_row_id",
+        "transaction_id",
+        "account_id",
+        "event_utc",
+        "ingest_utc",
+        "source_direction",
+        "amount_text",
+        "currency",
+        "source_status",
+        "source_version",
+        "reversal_of",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "X01",
+          "TX01",
+          "LA",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "6000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X02",
+          "TX02",
+          "LA",
+          "2026-09-01T14:00:00Z",
+          "2026-09-01T14:05:00Z",
+          "D",
+          "5400.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X03",
+          "TX01",
+          "LA",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T15:00:00Z",
+          "C",
+          "6000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X04",
+          "TX03",
+          "LB",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "5000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X05",
+          "TX04",
+          "LB",
+          "2026-09-01T14:00:00Z",
+          "2026-09-01T14:05:00Z",
+          "D",
+          "4500.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X06",
+          "TX05",
+          "LC",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "2000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X07",
+          "TX05",
+          "LC",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:06:00Z",
+          "C",
+          "2200.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01;LN-E02"
+        ],
+        [
+          "X08",
+          "TX06",
+          "LC",
+          "2026-09-01T14:00:00Z",
+          "2026-09-01T14:05:00Z",
+          "D",
+          "1000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X09",
+          "TX07",
+          "LD",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "7000.00",
+          "USD",
+          "N",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X10",
+          "TX08",
+          "LE",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "3000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X11",
+          "TX09",
+          "LE",
+          "2026-09-01T14:00:00Z",
+          "2026-09-01T14:05:00Z",
+          "D",
+          "3000.00",
+          "USD",
+          "R",
+          "1",
+          "TX08",
+          "LN-E01;LN-E03"
+        ],
+        [
+          "X12",
+          "TX10",
+          "LF",
+          "2026-09-01T23:30:00Z",
+          "2026-09-02T10:00:00Z",
+          "C",
+          "4000.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01;LN-E04"
+        ],
+        [
+          "X13",
+          "TX11",
+          "LF",
+          "2026-09-02T00:00:00Z",
+          "2026-09-02T00:05:00Z",
+          "D",
+          "3600.00",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ],
+        [
+          "X14",
+          "TX12",
+          "LG",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "unreadable",
+          "USD",
+          "P",
+          "1",
+          null,
+          "LN-E01;LN-E05"
+        ],
+        [
+          "X15",
+          "TX13",
+          "LH",
+          "2026-09-01T13:00:00Z",
+          "2026-09-01T13:05:00Z",
+          "C",
+          "1000.00",
+          "EUR",
+          "P",
+          "1",
+          null,
+          "LN-E01"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "raw_row_id"
+      ],
+      "column_contracts": {
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "transaction_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Source economic transaction identifier. Its uniqueness is assessed with account leg and source version; matching amount or narrative alone is insufficient."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "event_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Timezone-aware economic event instant serialized in UTC. The source-local representation belongs in evidence; elapsed comparisons use this instant."
+        },
+        "ingest_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "UTC instant at which the source record became available to the monitoring feed. It controls run visibility separately from economic event-period inclusion."
+        },
+        "source_direction": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Unmodified source C or D code. The explicit mapping defines direction; unmapped codes require an exception and cannot be guessed."
+        },
+        "amount_text": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact source amount string before parsing. It can contain unreadable text; preserve it as evidence and never sum it directly."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "source_status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Original status code before mapping. P is posted, N pending and R a posted reversal under this particular source contract."
+        },
+        "source_version": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Source-declared record version as text. Later ingestion alone is not evidence of a later authoritative version when this value is unchanged."
+        },
+        "reversal_of": {
+          "type": "text",
+          "nullable": true,
+          "unit": "text",
+          "description": "Original source transaction key for a posted reversal. Null means no link supplied; do not fabricate a relation from equal and opposite amounts."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one immutable raw delivered feed record, including later-unavailable and exceptional records",
+      "report_section": 4
+    },
+    {
+      "name": "FieldMappings",
+      "title": "Source-to-canonical transformations and rejection behavior",
+      "columns": [
+        "mapping_id",
+        "source_field",
+        "target_field",
+        "transformation",
+        "failure_state",
+        "test_locator",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "MAP01",
+          "transaction_id + account_id + source_version",
+          "canonical identity",
+          "Exact text tuple; currency and amount are compared payload, not identity",
+          "CONFLICT if same tuple differs",
+          "X06 and X07",
+          "LN-E06"
+        ],
+        [
+          "MAP02",
+          "event_utc",
+          "event instant",
+          "Parse timezone-aware ISO timestamp; normalize UTC without changing instant",
+          "UNPARSED_TIME",
+          "X12 and X13 are previous ET business date",
+          "LN-E06"
+        ],
+        [
+          "MAP03",
+          "source_direction",
+          "direction",
+          "C -> CREDIT; D -> DEBIT; no other mapping",
+          "UNMAPPED_DIRECTION",
+          "X01 C; X02 D",
+          "LN-E06"
+        ],
+        [
+          "MAP04",
+          "amount_text",
+          "amount",
+          "Decimal nonnegative; retain original string; no thousands separator guessing",
+          "UNPARSED_AMOUNT",
+          "X14 unreadable",
+          "LN-E06"
+        ],
+        [
+          "MAP05",
+          "source_status",
+          "posting_state",
+          "P -> POSTED; N -> PENDING; R -> REVERSAL_POSTED",
+          "UNMAPPED_STATUS",
+          "X09 pending; X11 linked reversal",
+          "LN-E06"
+        ],
+        [
+          "MAP06",
+          "currency",
+          "currency",
+          "Preserve uppercase ISO code; no conversion in this case",
+          "UNKNOWN_CURRENCY",
+          "X15 EUR stays EUR",
+          "LN-E06"
+        ],
+        [
+          "MAP07",
+          "reversal_of",
+          "reversal link",
+          "Resolve original same-account transaction and exact amount/currency before paired exclusion",
+          "UNRESOLVED_REVERSAL",
+          "X11 refers TX08 at LE, USD 3000",
+          "LN-E03;LN-E06"
+        ],
+        [
+          "MAP08",
+          "ingest_utc",
+          "cutoff eligibility",
+          "Include if ingest instant <= run cutoff; apply event scope separately",
+          "LATE_DEFERRED",
+          "X12 appears only in rerun",
+          "LN-E04;LN-E06"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "mapping_id"
+      ],
+      "column_contracts": {
+        "mapping_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique source-to-canonical transformation identifier. It separates the mapping definition from actual row-level transformation outcomes."
+        },
+        "source_field": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Source column or explicit compound key consumed by a mapping. The original source text remains retrievable after transformation."
+        },
+        "target_field": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Named canonical concept produced by the mapping. A transformed concept may require several source columns and has its own validation gate."
+        },
+        "transformation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Complete authored transformation rule for the supplied source. It specifies value mapping, precision and failure behavior without assuming vendor implementation."
+        },
+        "failure_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Required exception category when the mapping cannot be applied. It must propagate to downstream affected windows rather than silently dropping records."
+        },
+        "test_locator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact fictional source examples that exercise the mapping. These are sufficient to reproduce this specimen, not a complete production validation dataset."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one explicit source-to-canonical transformation with its failure branch",
+      "report_section": 4
+    },
+    {
+      "name": "LineageLedger",
+      "title": "Every source row to one initial terminal state",
+      "columns": [
+        "lineage_id",
+        "raw_row_id",
+        "canonical_id",
+        "terminal_state",
+        "reason",
+        "run_id",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "LIN-X01",
+          "X01",
+          "CL01",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X02",
+          "X02",
+          "CL02",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X03",
+          "X03",
+          "CL01",
+          "DUPLICATE",
+          "Same economic tuple and payload as X01; later extraction metadata only",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X04",
+          "X04",
+          "CL03",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X05",
+          "X05",
+          "CL04",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X06",
+          "X06",
+          null,
+          "CONFLICT",
+          "Same TX05 identity; conflicting amount; neither selected",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X07",
+          "X07",
+          null,
+          "CONFLICT",
+          "Same TX05 identity; conflicting amount; neither selected",
+          "RUN0",
+          "LN-E01;LN-E02;LN-E06"
+        ],
+        [
+          "LIN-X08",
+          "X08",
+          "CL05",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X09",
+          "X09",
+          null,
+          "PENDING",
+          "Not posted at supplied status; retain outside posted ledger",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X10",
+          "X10",
+          null,
+          "REVERSAL_PAIR",
+          "Exact linked original and reversal preserved but netted out of external-flow scenario",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X11",
+          "X11",
+          null,
+          "REVERSAL_PAIR",
+          "Exact linked original and reversal preserved but netted out of external-flow scenario",
+          "RUN0",
+          "LN-E01;LN-E03;LN-E06"
+        ],
+        [
+          "LIN-X12",
+          "X12",
+          null,
+          "LATE_DEFERRED",
+          "Event in period, ingestion after initial cutoff; add only in rerun",
+          "RUN0",
+          "LN-E01;LN-E04;LN-E06"
+        ],
+        [
+          "LIN-X13",
+          "X13",
+          "CL06",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LIN-X14",
+          "X14",
+          null,
+          "UNPARSED_AMOUNT",
+          "Posted amount cannot be recovered; LG blocked",
+          "RUN0",
+          "LN-E01;LN-E05;LN-E06"
+        ],
+        [
+          "LIN-X15",
+          "X15",
+          "CL07",
+          "CANONICAL",
+          "Unique readable posted leg available by initial cutoff",
+          "RUN0",
+          "LN-E01;LN-E06"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "lineage_id"
+      ],
+      "column_contracts": {
+        "lineage_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique link between a raw source row and its initial disposition. Each raw row appears once even when it maps to an already retained canonical leg."
+        },
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "canonical_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Unique canonical output identifier or explicit null for a noncanonical row. A duplicate may point to an existing canonical identifier without adding a row."
+        },
+        "terminal_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exactly one initial row disposition for conservation. CANONICAL, DUPLICATE, CONFLICT, PENDING, REVERSAL_PAIR, LATE_DEFERRED and UNPARSED_AMOUNT partition the source."
+        },
+        "reason": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific evidence-backed reason for a state or transition. It identifies the relevant row, rule or missing fact rather than a generic compliance label."
+        },
+        "run_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Snapshot identity with a fixed ingestion cutoff. RUN0 and RUN1 differ in available source information; neither is silently overwritten."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "raw_row_id"
+          ],
+          "table": "SourceRows",
+          "references": [
+            "raw_row_id"
+          ]
+        }
+      ],
+      "grain": "one raw source row and its initial RUN0 terminal disposition",
+      "report_section": 4
+    },
+    {
+      "name": "CanonicalOutput",
+      "title": "Known unique posted legs at initial cutoff",
+      "columns": [
+        "canonical_id",
+        "raw_row_id",
+        "transaction_id",
+        "account_id",
+        "event_utc",
+        "direction",
+        "amount",
+        "currency",
+        "run_id",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "CL01",
+          "X01",
+          "TX01",
+          "LA",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          6000.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL02",
+          "X02",
+          "TX02",
+          "LA",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          5400.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL03",
+          "X04",
+          "TX03",
+          "LB",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          5000.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL04",
+          "X05",
+          "TX04",
+          "LB",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          4500.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL05",
+          "X08",
+          "TX06",
+          "LC",
+          "2026-09-01T14:00:00Z",
+          "DEBIT",
+          1000.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL06",
+          "X13",
+          "TX11",
+          "LF",
+          "2026-09-02T00:00:00Z",
+          "DEBIT",
+          3600.0,
+          "USD",
+          "RUN0",
+          "LN-E01"
+        ],
+        [
+          "CL07",
+          "X15",
+          "TX13",
+          "LH",
+          "2026-09-01T13:00:00Z",
+          "CREDIT",
+          1000.0,
+          "EUR",
+          "RUN0",
+          "LN-E01"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      },
+      "primary_key": [
+        "canonical_id"
+      ],
+      "column_contracts": {
+        "canonical_id": {
+          "type": "text",
+          "nullable": true,
+          "unit": "identifier",
+          "description": "Unique canonical output identifier or explicit null for a noncanonical row. A duplicate may point to an existing canonical identifier without adding a row."
+        },
+        "raw_row_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Immutable identifier of one delivered source row. Repeated economic transactions retain distinct raw-row identifiers so extraction duplicates remain countable."
+        },
+        "transaction_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Source economic transaction identifier. Its uniqueness is assessed with account leg and source version; matching amount or narrative alone is insufficient."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "event_utc": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Timezone-aware economic event instant serialized in UTC. The source-local representation belongs in evidence; elapsed comparisons use this instant."
+        },
+        "direction": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Canonical CREDIT or DEBIT from the account perspective. Amount remains nonnegative; do not infer direction from a signed display string."
+        },
+        "amount": {
+          "type": "number",
+          "nullable": true,
+          "unit": "row currency",
+          "description": "Known nonnegative monetary amount in the row currency. Null means unrecovered source value and blocks the relevant completeness proposition."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "run_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Snapshot identity with a fixed ingestion cutoff. RUN0 and RUN1 differ in available source information; neither is silently overwritten."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "foreign_keys": [
+        {
+          "columns": [
+            "raw_row_id"
+          ],
+          "table": "SourceRows",
+          "references": [
+            "raw_row_id"
+          ]
+        }
+      ],
+      "grain": "one known unique posted account leg available at RUN0 and surviving declared exclusions",
+      "report_section": 5
+    },
+    {
+      "name": "StageControls",
+      "title": "Counts and known amounts by stage and currency",
+      "columns": [
+        "control_id",
+        "stage",
+        "currency",
+        "row_count",
+        "known_credit_total",
+        "known_debit_total",
+        "unknown_amount_count",
+        "interpretation",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "LC01",
+          "Delivered raw",
+          "USD",
+          14,
+          35200,
+          17500,
+          1,
+          "Raw contains duplicate, conflicting alternatives, pending and reversal; not economic total",
+          "LN-E01"
+        ],
+        [
+          "LC02",
+          "Delivered raw",
+          "EUR",
+          1,
+          1000,
+          0,
+          0,
+          "Separate currency; not added to USD",
+          "LN-E01"
+        ],
+        [
+          "LC03",
+          "RUN0 canonical",
+          "USD",
+          6,
+          11000,
+          14500,
+          0,
+          "Known partial posted population; LC conflict, LF late, LG unknown remain blocked",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LC04",
+          "RUN0 canonical",
+          "EUR",
+          1,
+          1000,
+          0,
+          0,
+          "Preserved EUR leg; USD scenario exclusion separately disclosed",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LC05",
+          "RUN1 canonical",
+          "USD",
+          7,
+          15000,
+          14500,
+          0,
+          "Adds X12 USD 4000 credit; unresolved conflict and parse defect remain",
+          "LN-E04;LN-E06"
+        ],
+        [
+          "LC06",
+          "RUN1 canonical",
+          "EUR",
+          1,
+          1000,
+          0,
+          0,
+          "EUR unchanged",
+          "LN-E01;LN-E06"
+        ]
+      ],
+      "formats": {
+        "known_credit_total": "#,##0.00",
+        "known_debit_total": "#,##0.00"
+      },
+      "primary_key": [
+        "control_id"
+      ],
+      "column_contracts": {
+        "control_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique reconciliation-control key. Controls can test different grains; counts and monetary comparisons are never combined into one unexplained balance."
+        },
+        "stage": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Named source or canonical pipeline layer and run. Its grain must be checked before interpreting totals because raw rows include non-economic duplicates."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "row_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Number of records in the named stage and currency. This is counted independently of known amounts and can include unreadable monetary rows."
+        },
+        "known_credit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable credits only at the declared stage, account or observed diagnostic window. The word known is substantive where an unresolved amount exists."
+        },
+        "known_debit_total": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Sum of readable debits only at the declared stage, account or observed diagnostic window. An unknown debit is not imputed as a measured zero."
+        },
+        "unknown_amount_count": {
+          "type": "integer",
+          "nullable": false,
+          "unit": "count",
+          "description": "Count of stage records whose amount is not numeric. It does not measure uncertain amount ranges or conflicted values unless explicitly stated."
+        },
+        "interpretation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific limitation on the control total, including duplicate/conflict effects or incomplete economic coverage. It travels with the number in every output."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one pipeline layer, run and currency control population",
+      "report_section": 5
+    },
+    {
+      "name": "RunImpact",
+      "title": "Account assessment changes after known late arrival",
+      "columns": [
+        "impact_id",
+        "account_id",
+        "currency",
+        "run0_credit",
+        "run0_debit",
+        "run0_state",
+        "run1_credit",
+        "run1_debit",
+        "run1_state",
+        "change_reason",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "IMP-A",
+          "LA",
+          "USD",
+          6000,
+          5400,
+          "MATCH",
+          6000,
+          5400,
+          "MATCH",
+          "No source change",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "IMP-B",
+          "LB",
+          "USD",
+          5000,
+          4500,
+          "MATCH",
+          5000,
+          4500,
+          "MATCH",
+          "No source change",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "IMP-C",
+          "LC",
+          "USD",
+          0,
+          1000,
+          "NOT_ASSESSABLE",
+          0,
+          1000,
+          "NOT_ASSESSABLE",
+          "TX05 conflict unresolved; credit zero means known subtotal only",
+          "LN-E02;LN-E06"
+        ],
+        [
+          "IMP-D",
+          "LD",
+          "USD",
+          0,
+          0,
+          "NO_POSTED_ACTIVITY",
+          0,
+          0,
+          "NO_POSTED_ACTIVITY",
+          "Pending source retained; no posted leg",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "IMP-E",
+          "LE",
+          "USD",
+          0,
+          0,
+          "REVERSAL_PAIR_EXCLUDED",
+          0,
+          0,
+          "REVERSAL_PAIR_EXCLUDED",
+          "Original and reversal retained outside illustrative flow totals",
+          "LN-E03;LN-E06"
+        ],
+        [
+          "IMP-F",
+          "LF",
+          "USD",
+          0,
+          3600,
+          "NOT_ASSESSABLE",
+          4000,
+          3600,
+          "NO_MATCH",
+          "Late credit repaired; ratio .90 but 4000 below illustrative 5000 minimum",
+          "LN-E04;LN-E06"
+        ],
+        [
+          "IMP-G",
+          "LG",
+          "USD",
+          0,
+          0,
+          "NOT_ASSESSABLE",
+          0,
+          0,
+          "NOT_ASSESSABLE",
+          "Unknown posted credit remains; zeros are known subtotals",
+          "LN-E05;LN-E06"
+        ],
+        [
+          "IMP-H",
+          "LH",
+          "EUR",
+          1000,
+          0,
+          "CURRENCY_EXCLUDED",
+          1000,
+          0,
+          "CURRENCY_EXCLUDED",
+          "USD-only rule; EUR preserved in lineage",
+          "LN-E01;LN-E06"
+        ]
+      ],
+      "formats": {
+        "run0_credit": "#,##0.00",
+        "run0_debit": "#,##0.00",
+        "run1_credit": "#,##0.00",
+        "run1_debit": "#,##0.00"
+      },
+      "primary_key": [
+        "impact_id"
+      ],
+      "column_contracts": {
+        "impact_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Stable account/currency change-comparison key. It connects prior and rerun states without presenting the new state as the original conclusion."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "currency": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicit row currency. USD and EUR remain separate; the specimen contains no foreign-exchange conversion or implicit base-currency amount."
+        },
+        "run0_credit": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known initial-run credit subtotal in row currency. A zero on a blocked account is a known subtotal only and cannot prove no credits exist."
+        },
+        "run0_debit": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known initial-run debit subtotal in row currency. Reversal exclusions and missing records are documented separately."
+        },
+        "run0_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Initial downstream assessment after all source defects known to the case are propagated. A known unavailable event makes the account incomplete."
+        },
+        "run1_credit": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known rerun credit subtotal after the declared late event becomes available. Unrelated unresolved defects are not repaired by this increase."
+        },
+        "run1_debit": {
+          "type": "number",
+          "nullable": false,
+          "unit": "row currency",
+          "description": "Known rerun debit subtotal under the same scope and transformation rules. Its equality to RUN0 is a checked result rather than an assumption."
+        },
+        "run1_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Downstream assessment at the later cutoff with the same illustrative predicates. State changes require an explicit source or criteria delta."
+        },
+        "change_reason": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact source delta explaining a before/after result. It distinguishes improved completeness from changed risk or changed threshold."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one account and currency compared across RUN0 and RUN1",
+      "report_section": 5
+    },
+    {
+      "name": "ExceptionRegister",
+      "title": "Specific defects and required repair evidence",
+      "columns": [
+        "exception_id",
+        "account_id",
+        "source_rows",
+        "exception_type",
+        "affected_claim",
+        "required_evidence",
+        "repair_state",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "EX01",
+          "LC",
+          "X06;X07",
+          "CONFLICT",
+          "Credit amount and LC rule outcome",
+          "Authoritative TX05 version history and amount; do not choose maximum",
+          "OPEN",
+          "LN-E02"
+        ],
+        [
+          "EX02",
+          "LF",
+          "X12",
+          "LATE_ARRIVAL",
+          "Initial completeness and LF timing",
+          "RUN1 ingest receipt and complete lag population",
+          "RERUN_REPRODUCED",
+          "LN-E04"
+        ],
+        [
+          "EX03",
+          "LG",
+          "X14",
+          "UNPARSED_AMOUNT",
+          "Credit total and LG rule outcome",
+          "Corrected signed source extract and source amount control",
+          "OPEN",
+          "LN-E05"
+        ],
+        [
+          "EX04",
+          "LE",
+          "X10;X11",
+          "REVERSAL_TREATMENT",
+          "Difference between posting gross and illustrative external flow",
+          "Exact reversal link, currency and amount, plus stated exclusion convention",
+          "DOCUMENTED_ONLY",
+          "LN-E03;LN-E06"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "exception_id"
+      ],
+      "column_contracts": {
+        "exception_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique source-defect or controlled-treatment record. Exceptions retain their evidence and cannot be closed merely because a rerun finished."
+        },
+        "account_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Fictional account key at the declared grain. Account and customer are different units; no aggregation across accounts occurs without an explicit bridge."
+        },
+        "source_rows": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited raw-row keys contributing to the exception. Each referenced row remains in the immutable source and lineage registers."
+        },
+        "exception_type": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific conflict, late-arrival, unreadable-amount or reversal-treatment category. Categories drive different repair and retest requirements."
+        },
+        "affected_claim": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Analytical statement that cannot be supported, or changes meaning, because of the exception. This connects technical defects to monitoring consequences."
+        },
+        "required_evidence": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Concrete source-owner evidence needed to resolve or verify the exception. A verbal assurance does not substitute for the named record."
+        },
+        "repair_state": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Actual evidence state of repair in the specimen. OPEN remains unresolved, RERUN_REPRODUCED verifies the illustrated rerun, DOCUMENTED_ONLY is not operational acceptance."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one specific defect or documented controlled treatment and its repair evidence",
+      "report_section": 5
+    },
+    {
+      "name": "EvidenceProvenance",
+      "title": "Source identity, period, availability and evidential limits",
+      "columns": [
+        "evidence_id",
+        "source_kind",
+        "source_date",
+        "availability",
+        "locator",
+        "supports",
+        "limitation"
+      ],
+      "rows": [
+        [
+          "LN-E01",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, SourceRows X01-X15; source manifest",
+          "Fictional delivered feed",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "LN-E02",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, TX05 conflict declaration",
+          "Fictional conflict notice",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "LN-E03",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, TX08/TX09 reversal declaration",
+          "Fictional exact reversal link",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "LN-E04",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, X12 cutoff declaration and RUN1 receipt",
+          "Fictional late-arrival notice",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "LN-E05",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, X14 parse-defect declaration",
+          "Fictional unreadable amount",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ],
+        [
+          "LN-E06",
+          "Authored fictional case record",
+          "2026-09-02",
+          "FULL_TEXT_IN_FILE_10",
+          "10-worked-example.md, FieldMappings, run cutoffs and illustrative TM-01 predicates",
+          "Authored transformation and downstream rule",
+          "Supports only the stated fictional proposition; no external subject fact or institutional approval"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "evidence_id"
+      ],
+      "column_contracts": {
+        "evidence_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Exact unique Evidence key at one source-provenance row. It joins the common Evidence register without combining unrelated sources."
+        },
+        "source_kind": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Explicitly fictional record type and origin. Authored cases and guidance references must not be mislabeled as actual institutional evidence."
+        },
+        "source_date": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "ISO calendar date of the authored source package, distinct from transaction event dates and evidence retrieval dates."
+        },
+        "availability": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "State of access to the source text. FULL_TEXT_IN_FILE_10 means the complete fictional content is supplied in this suite, not externally verified."
+        },
+        "locator": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact file and section or row reference supporting retrieval of the fictional source. A title alone is insufficient."
+        },
+        "supports": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Bounded proposition the source can establish in the synthetic exercise. It does not certify any broader customer or control conclusion."
+        },
+        "limitation": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Specific scope restriction or evidential weakness that must accompany use of the source."
+        }
+      },
+      "grain": "one fictional evidence source with its access state and evidential limit",
+      "report_section": 5
+    },
+    {
+      "name": "ProcessQA",
+      "title": "Explicit expected and actual control evidence",
+      "columns": [
+        "check_id",
+        "check",
+        "expected",
+        "actual",
+        "status",
+        "reviewer",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "LQ01",
+          "Initial terminal conservation",
+          "15 = 7 + 1 + 2 + 1 + 2 + 1 + 1",
+          "15 = 7 + 1 + 2 + 1 + 2 + 1 + 1",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "LN-E01;LN-E06"
+        ],
+        [
+          "LQ02",
+          "RUN1 known USD gross",
+          "29500.00",
+          "29500.00",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "LN-E01;LN-E04"
+        ],
+        [
+          "LQ03",
+          "Distinct currencies",
+          "USD and EUR separate",
+          "USD and EUR separate",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "LN-E01"
+        ],
+        [
+          "LQ04",
+          "Conflict not selected",
+          "X06 and X07 both quarantined",
+          "X06 and X07 both quarantined",
+          "PASS",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "LN-E02"
+        ],
+        [
+          "LQ05",
+          "Independent acceptance",
+          "Not supplied",
+          "Not supplied",
+          "NOT RECORDED",
+          "Authored specimen arithmetic; independent operational reviewer not supplied",
+          "LN-E06"
+        ]
+      ],
+      "formats": {},
+      "primary_key": [
+        "check_id"
+      ],
+      "column_contracts": {
+        "check_id": {
+          "type": "text",
+          "nullable": false,
+          "unit": "identifier",
+          "description": "Unique process-quality check key retained across output formats. A later rerun creates a dated actual result without changing the original expectation."
+        },
+        "check": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Falsifiable control proposition with defined expected evidence. It must be precise enough for another reviewer to reproduce."
+        },
+        "expected": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Exact target result for the named check. This is fixed before execution and may state not supplied when the check concerns authorization."
+        },
+        "actual": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded output of the check. In future sessions, use NOT TESTED until performed; do not copy the specimen result as evidence of a new execution."
+        },
+        "status": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Recorded PASS, FAIL, REVIEW REQUIRED, NOT RECORDED or NOT TESTED status for this check, separate from analytical finding severity."
+        },
+        "reviewer": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Identity or role of the actual check performer. The specimen labels authored arithmetic and explicitly records absent independent operational review."
+        },
+        "evidence_ids": {
+          "type": "text",
+          "nullable": false,
+          "unit": "text",
+          "description": "Semicolon-delimited exact Evidence keys. Every key must resolve, support the row proposition and retain its claim class and scope limitation."
+        }
+      },
+      "grain": "one performed or explicitly unrecorded quality proposition",
+      "report_section": 5
+    }
+  ],
+  "findings": [
+    {
+      "id": "LN-F01",
+      "title": "Conflicting versions block LC",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "LN-E01",
+        "LN-E02"
+      ],
+      "detail": "X06 and X07 share the TX05 identity but disagree between USD 2000 and USD 2200; neither is selected. LC remains not assessable.",
+      "recommendation": "Obtain an authoritative version history, resolve TX05 and rerun every affected window."
+    },
+    {
+      "id": "LN-F02",
+      "title": "Known late credit changes LF assessment",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "LN-E01",
+        "LN-E04",
+        "LN-E06"
+      ],
+      "detail": "RUN1 adds X12 USD 4000 credit. LF changes from not assessable to no match because .90 satisfies the ratio but USD 4000 fails the credit minimum.",
+      "recommendation": "Preserve RUN0 and RUN1 and verify the wider lag population before accepting complete coverage."
+    },
+    {
+      "id": "LN-F03",
+      "title": "Unreadable posted credit remains unresolved",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "LN-E01",
+        "LN-E05"
+      ],
+      "detail": "X14 amount is unknown; LG contributes no known amount but cannot be treated as a zero-activity negative.",
+      "recommendation": "Request corrected source evidence and reconcile the replacement to source totals."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "LN-E01",
+      "title": "Fictional delivered feed",
+      "locator": "10-worked-example.md, SourceRows X01-X15; source manifest",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "LN-E02",
+      "title": "Fictional conflict notice",
+      "locator": "10-worked-example.md, TX05 conflict declaration",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "LN-E03",
+      "title": "Fictional exact reversal link",
+      "locator": "10-worked-example.md, TX08/TX09 reversal declaration",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "LN-E04",
+      "title": "Fictional late-arrival notice",
+      "locator": "10-worked-example.md, X12 cutoff declaration and RUN1 receipt",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "LN-E05",
+      "title": "Fictional unreadable amount",
+      "locator": "10-worked-example.md, X14 parse-defect declaration",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "LN-E06",
+      "title": "Authored transformation and downstream rule",
+      "locator": "10-worked-example.md, FieldMappings, run cutoffs and illustrative TM-01 predicates",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Delivered rows",
+      "value": 15,
+      "method": "Count X01-X15 including post-cutoff record"
+    },
+    {
+      "label": "Initial canonical rows",
+      "value": 7,
+      "method": "Six USD plus one EUR known unique posted leg"
+    },
+    {
+      "label": "Rerun canonical rows",
+      "value": 8,
+      "method": "RUN0 seven plus late X12; unresolved defects unchanged"
+    },
+    {
+      "label": "RUN1 known USD gross",
+      "value": 29500,
+      "method": "USD 15000 credits plus USD 14500 debits; excludes unknown/conflicting amounts"
+    }
+  ],
+  "limitations": [
+    "Source-row reconciliation does not establish a complete economic monetary total.",
+    "The posting reversal pair is excluded only by this authored illustrative flow convention; actual monitoring designs may retain reversal activity.",
+    "RUN1 repairs one known late event, not an independently proven complete late-arrival population.",
+    "EUR remains separate and is outside the illustrative USD rule."
+  ],
+  "report_narrative": [
+    [
+      "Every one of fifteen delivered rows has an explicit initial lineage state. Seven known rows reach RUN0; eight reach RUN1 after a late credit. Two accounts remain blocked by unresolved source defects."
+    ],
+    [
+      "The event review period is Sep 01, 2026 12:00 AM ET to Sep 02, 2026 12:00 AM ET exclusive. RUN0 ingestion cutoff is Sep 02, 2026 12:00 AM ET. RUN1 cutoff is Sep 02, 2026 8:00 AM ET. The delivered set intentionally includes a row unavailable at RUN0."
+    ],
+    [
+      "TX05 conflicts between two same-version amounts, X14 is unreadable, and X12 arrives after the first cutoff. Reversal and pending records are controlled exclusions, not discarded evidence."
+    ],
+    [
+      "SourceRows contains fifteen rows; FieldMappings defines eight transformations; LineageLedger gives every raw row one initial terminal state; CanonicalOutput retains seven RUN0 rows. One exact duplicate points to CL01 without increasing totals."
+    ],
+    [
+      "Initial USD canonical movement is $25,500.00; RUN1 is $29,500.00, a $4,000.00 credit increase. EUR $1,000.00 remains separate. LF becomes a complete no-match under the illustrative credit minimum while LC and LG remain blocked. RunImpact preserves eight account/currency records."
+    ],
+    [
+      "All row facts and controls are fictional. Public monitoring examination guidance supplies context for checking data and filtering; it does not establish a required transformation or threshold here."
+    ],
+    [
+      "Resolve TX05; recover X14; review all known late arrivals; retain before/after counts, amounts and affected windows. No operational reprocessing or rule change is performed by this package."
+    ],
+    [
+      "Count reconciliation succeeds while economic monetary completeness remains unresolved. The demonstrated pipeline is a synthetic review design, not production data assurance or monitoring validation."
+    ]
+  ],
+  "conclusion": "Every one of fifteen delivered rows has an explicit initial lineage state. Seven known rows reach RUN0; eight reach RUN1 after a late credit. Two accounts remain blocked by unresolved source defects."
+}

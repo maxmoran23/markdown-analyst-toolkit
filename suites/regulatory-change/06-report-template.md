@@ -1,6 +1,6 @@
 # Regulatory Change and Obligation Mapping — fixed report template
 
-Version 1.1.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+Version 1.2.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
 
 ## Delivery path
 
@@ -17,7 +17,7 @@ Use the available approved file-creation capability in the current chat. If Pyth
 7. **Implementation and verification proposals**
 8. **Limitations quality review and human disposition**
 
-Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve every domain register in file 05, with one named subsection per table and every row retained. Table metadata fixes placement in section 4 or 5. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
 
 The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
 
@@ -47,6 +47,8 @@ The workbook retains every domain column in order; the report may present the sa
 
 ## Complete in-session renderer
 
+For portable case data, write integer fields and report placement as whole-number JSON literals such as `1` and `4`, without a decimal suffix. Python enforces integer types; JavaScript parses `1` and `1.0` as the same number. HTML rejects integers outside JavaScript's safe range, and Excel applies its stricter 15-digit boundary. Preserve exact large identifiers or quantities as text under the declared field contract. These runtime constraints are not identical validators or a guarantee of exact floating-point arithmetic.
+
 The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
 
 ```python
@@ -56,7 +58,7 @@ from docx.shared import Inches, Pt, RGBColor
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 
-DATA = {'slug': 'regulatory-change', 'title': 'Regulatory Change and Obligation Mapping', 'summary': 'Translate a supplied public-source change set into provision-level applicability, readiness, and evidence questions without turning proposals into current obligations.', 'audience': 'Regulatory analysts, control owners, and legal reviewers', 'decision': 'Which changes require verified applicability and implementation action, and which remain watch or research items?', 'palette': 'umber', 'report_sections': ['Change priorities and restricted conclusion', 'Scope status and applicability method', 'Material readiness findings', 'Instrument register and date status', 'Obligation mapping and readiness', 'Source evidence and unresolved authority', 'Implementation and verification proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'ChangeRegister', 'columns': ['change_id', 'instrument_status', 'applicability', 'effective_date', 'compliance_date', 'owner_role', 'priority', 'evidence_ids'], 'rows': [['CH01', 'PROPOSED', 'Conditional', None, None, 'Regulatory analysis', 'MEDIUM', 'SYN-001'], ['CH02', 'FINAL_NOT_EFFECTIVE', 'In scope', '2026-11-01', '2026-12-01', 'Records owner', 'MEDIUM', 'SYN-001'], ['CH03', 'EFFECTIVE', 'In scope', '2026-09-01', '2026-10-01', 'Review owner', 'HIGH', 'SYN-001'], ['CH04', 'GUIDANCE', 'Reference only', None, None, 'Governance owner', 'LOW', 'SYN-001'], ['CH05', 'WITHDRAWN', 'Not current', None, None, 'Regulatory analysis', 'LOW', 'SYN-001'], ['CH06', 'STATUS_UNVERIFIED', 'Unresolved', None, None, 'Legal review', 'HIGH', 'SYN-001']]}, {'name': 'ObligationMap', 'columns': ['obligation_id', 'change_id', 'requirement_summary', 'control_id', 'readiness', 'compliance_date', 'evidence_ids'], 'rows': [['OB01', 'CH02', 'Retain a review log under fictional provision2', 'CTRL-LOG', 'BUILD', '2026-12-01', 'SYN-001'], ['OB02', 'CH03', 'Evidence escalation review under fictional provision3a', 'CTRL-REV', 'EVIDENCE GAP', '2026-10-01', 'SYN-001'], ['OB03', 'CH03', 'Complete role training under fictional provision3b', 'CTRL-TRN', 'VERIFIED FOR FIXTURE', '2026-10-01', 'SYN-001'], ['OB04', 'CH01', 'Potential reporting field under proposed provision1', 'CTRL-PROP', 'SCENARIO ONLY', None, 'SYN-001'], ['OB05', 'CH04', 'Consider governance review practice', 'CTRL-GOV', 'REFERENCE ONLY', None, 'SYN-001']]}], 'findings': [{'id': 'RC-F01', 'title': 'Evidence for an effective fictional requirement remains missing', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'OB02 has no retained review evidence as of 2026-10-09; the fictional compliance date is 2026-10-01. A legal breach is not established by missing evidence alone.', 'recommendation': 'Obtain execution evidence and route the applicability and consequence assessment to an authorized reviewer.'}, {'id': 'RC-F02', 'title': 'A near-term claimed change lacks primary-source status confirmation', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'CH06 is supported only by a fictional secondary summary. Its claimed date is not copied into confirmed deadline fields.', 'recommendation': 'Retrieve primary material or keep status unverified and document interim review needs.'}, {'id': 'RC-F03', 'title': 'Future final requirement needs implementation evidence', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'OB01 remains in build status ahead of the fictional 2026-12-01 compliance date. Readiness has not been evidenced.', 'recommendation': 'Define accountable milestones and acceptance tests for human approval.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-instrument change set and implementation evidence', 'locator': '10-worked-example.md, source cards and obligation mapping', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'National Archives Federal Register Tutorial', 'locator': 'https://www.archives.gov/federal-register/tutorial/text', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'Administrative Procedure Act,5 U.S.C. 553', 'locator': 'https://www.archives.gov/federal-register/laws/administrative-procedure/553.html', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'National Archives Office of the Federal Register FAQs', 'locator': 'https://www.archives.gov/federal-register/faqs', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Tracked instruments', 'value': '6', 'method': 'Distinct CH01–CH06 source cards, preserving proposed, withdrawn, and unverified states.', 'format': '#,##0'}, {'label': 'Confirmed final in-scope instruments', 'value': '2', 'method': 'CH02 final-not-effective plus CH03 effective; excludes guidance and proposals.', 'format': '#,##0'}, {'label': 'Effective mapped evidence coverage', 'value': '1 of 2 (50.0%)', 'method': 'OB03 verified / OB02 and OB03 effective mapped requirements; not a compliance score.', 'format': '#,##0'}], 'limitations': ['All six change instruments and organization facts are fictional.', 'A proposal, guidance item, or secondary report is not a verified current legal obligation.', 'Missing execution evidence does not alone prove legal noncompliance.', 'Readiness counts do not measure the completeness of all applicable legal obligations.'], 'conclusion': 'Prioritize the missing evidence for OB02 and primary-source confirmation for CH06 while planning the future CH02 requirement. One of two effective mapped fixture requirements has verified evidence; this is evidence coverage, not a compliance score.', 'report_narrative': [['Prioritize OB02’s evidence gap and CH06’s missing primary-source confirmation, while planning CH02’s future requirement. One of two effective mapped fixture requirements has verified evidence; this is not a compliance score.'], ['The review is as of Oct 09, 2026 and covers six invented instruments for a fictional Type A entity carrying Activity Q. Status, applicability, dates, and readiness are assessed separately using the complete source cards in SYN-001.'], ['OB02 lacks execution evidence after its explicit fictional compliance date. CH06 has only a secondary claim and no confirmed deadline. OB01 remains in build status ahead of its future compliance date; that supports a readiness concern, not a prediction of missed implementation.'], ['ChangeRegister preserves one proposed, one final-not-effective, one effective, one guidance, one withdrawn, and one unverified item. Only CH02 and CH03 have confirmed effective and compliance dates in the fixture.'], ['ObligationMap has five rows: one future requirement, two effective requirements, one proposal scenario, and one reference item. The effective evidence denominator is OB02 and OB03; only OB03 is verified for the fixture, giving 1/2 = 50.0%.'], ['SYN-001 contains fictional source cards and implementation evidence. CH06’s claimed Oct 15 date remains in the evidence narrative rather than confirmed deadline fields. The National Archives references support research method, not the invented legal requirements.'], ['Propose retrieval of OB02 evidence, primary verification for CH06, and accountable acceptance milestones for OB01. Keep CH01 as scenario planning, CH04 as reference context, and CH05 as historical withdrawal.'], ['QA rejects proposal-to-obligation conversion, comment-date substitution, and breach conclusions from missing evidence alone. Human reviewers retain legal interpretation, applicability, commitments, and final readiness decisions.']], 'suite_id': 'regulatory-change', 'version': '1.1.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'RC-F01', 'proposal': 'Obtain execution evidence and route the applicability and consequence assessment to an authorized reviewer.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'RC-F02', 'proposal': 'Retrieve primary material or keep status unverified and document interim review needs.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'RC-F03', 'proposal': 'Define accountable milestones and acceptance tests for human approval.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+DATA = {'slug': 'regulatory-change', 'title': 'Regulatory Change and Obligation Mapping', 'summary': 'Translate a supplied public-source change set into provision-level applicability, readiness, and evidence questions without turning proposals into current obligations.', 'audience': 'Regulatory analysts, control owners, and legal reviewers', 'decision': 'Which changes require verified applicability and implementation action, and which remain watch or research items?', 'palette': 'umber', 'report_sections': ['Change priorities and restricted conclusion', 'Scope status and applicability method', 'Material readiness findings', 'Instrument register and date status', 'Obligation mapping and readiness', 'Source evidence and unresolved authority', 'Implementation and verification proposals', 'Limitations quality review and human disposition'], 'domain_tables': [{'name': 'ChangeRegister', 'columns': ['change_id', 'instrument_status', 'applicability', 'effective_date', 'compliance_date', 'owner_role', 'priority', 'evidence_ids'], 'rows': [['CH01', 'PROPOSED', 'Conditional', None, None, 'Regulatory analysis', 'MEDIUM', 'SYN-001'], ['CH02', 'FINAL_NOT_EFFECTIVE', 'In scope', '2026-11-01', '2026-12-01', 'Records owner', 'MEDIUM', 'SYN-001'], ['CH03', 'EFFECTIVE', 'In scope', '2026-09-01', '2026-10-01', 'Review owner', 'HIGH', 'SYN-001'], ['CH04', 'GUIDANCE', 'Reference only', None, None, 'Governance owner', 'LOW', 'SYN-001'], ['CH05', 'WITHDRAWN', 'Not current', None, None, 'Regulatory analysis', 'LOW', 'SYN-001'], ['CH06', 'STATUS_UNVERIFIED', 'Unresolved', None, None, 'Legal review', 'HIGH', 'SYN-001']]}, {'name': 'ObligationMap', 'columns': ['obligation_id', 'change_id', 'requirement_summary', 'control_id', 'readiness', 'compliance_date', 'evidence_ids'], 'rows': [['OB01', 'CH02', 'Retain a review log under fictional provision2', 'CTRL-LOG', 'BUILD', '2026-12-01', 'SYN-001'], ['OB02', 'CH03', 'Evidence escalation review under fictional provision3a', 'CTRL-REV', 'EVIDENCE GAP', '2026-10-01', 'SYN-001'], ['OB03', 'CH03', 'Complete role training under fictional provision3b', 'CTRL-TRN', 'VERIFIED FOR FIXTURE', '2026-10-01', 'SYN-001'], ['OB04', 'CH01', 'Potential reporting field under proposed provision1', 'CTRL-PROP', 'SCENARIO ONLY', None, 'SYN-001'], ['OB05', 'CH04', 'Consider governance review practice', 'CTRL-GOV', 'REFERENCE ONLY', None, 'SYN-001']]}], 'findings': [{'id': 'RC-F01', 'title': 'Evidence for an effective fictional requirement remains missing', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'OB02 has no retained review evidence as of 2026-10-09; the fictional compliance date is 2026-10-01. A legal breach is not established by missing evidence alone.', 'recommendation': 'Obtain execution evidence and route the applicability and consequence assessment to an authorized reviewer.'}, {'id': 'RC-F02', 'title': 'A near-term claimed change lacks primary-source status confirmation', 'severity': 'HIGH', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-001'], 'detail': 'CH06 is supported only by a fictional secondary summary. Its claimed date is not copied into confirmed deadline fields.', 'recommendation': 'Retrieve primary material or keep status unverified and document interim review needs.'}, {'id': 'RC-F03', 'title': 'Future final requirement needs implementation evidence', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001'], 'detail': 'OB01 remains in build status ahead of the fictional 2026-12-01 compliance date. Readiness has not been evidenced.', 'recommendation': 'Define accountable milestones and acceptance tests for human approval.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional six-instrument change set and implementation evidence', 'locator': '10-worked-example.md, source cards and obligation mapping', 'claim_class': 'Observed'}, {'id': 'REF-001', 'title': 'National Archives Federal Register Tutorial', 'locator': 'https://www.archives.gov/federal-register/tutorial/text', 'claim_class': 'Reported'}, {'id': 'REF-002', 'title': 'Administrative Procedure Act,5 U.S.C. 553', 'locator': 'https://www.archives.gov/federal-register/laws/administrative-procedure/553.html', 'claim_class': 'Reported'}, {'id': 'REF-003', 'title': 'National Archives Office of the Federal Register FAQs', 'locator': 'https://www.archives.gov/federal-register/faqs', 'claim_class': 'Reported'}], 'metrics': [{'label': 'Tracked instruments', 'value': '6', 'method': 'Distinct CH01–CH06 source cards, preserving proposed, withdrawn, and unverified states.', 'format': '#,##0'}, {'label': 'Confirmed final in-scope instruments', 'value': '2', 'method': 'CH02 final-not-effective plus CH03 effective; excludes guidance and proposals.', 'format': '#,##0'}, {'label': 'Effective mapped evidence coverage', 'value': '1 of 2 (50.0%)', 'method': 'OB03 verified / OB02 and OB03 effective mapped requirements; not a compliance score.', 'format': '#,##0'}], 'limitations': ['All six change instruments and organization facts are fictional.', 'A proposal, guidance item, or secondary report is not a verified current legal obligation.', 'Missing execution evidence does not alone prove legal noncompliance.', 'Readiness counts do not measure the completeness of all applicable legal obligations.'], 'conclusion': 'Prioritize the missing evidence for OB02 and primary-source confirmation for CH06 while planning the future CH02 requirement. One of two effective mapped fixture requirements has verified evidence; this is evidence coverage, not a compliance score.', 'report_narrative': [['Prioritize OB02’s evidence gap and CH06’s missing primary-source confirmation, while planning CH02’s future requirement. One of two effective mapped fixture requirements has verified evidence; this is not a compliance score.'], ['The review is as of Oct 09, 2026 and covers six invented instruments for a fictional Type A entity carrying Activity Q. Status, applicability, dates, and readiness are assessed separately using the complete source cards in SYN-001.'], ['OB02 lacks execution evidence after its explicit fictional compliance date. CH06 has only a secondary claim and no confirmed deadline. OB01 remains in build status ahead of its future compliance date; that supports a readiness concern, not a prediction of missed implementation.'], ['ChangeRegister preserves one proposed, one final-not-effective, one effective, one guidance, one withdrawn, and one unverified item. Only CH02 and CH03 have confirmed effective and compliance dates in the fixture.'], ['ObligationMap has five rows: one future requirement, two effective requirements, one proposal scenario, and one reference item. The effective evidence denominator is OB02 and OB03; only OB03 is verified for the fixture, giving 1/2 = 50.0%.'], ['SYN-001 contains fictional source cards and implementation evidence. CH06’s claimed Oct 15 date remains in the evidence narrative rather than confirmed deadline fields. The National Archives references support research method, not the invented legal requirements.'], ['Propose retrieval of OB02 evidence, primary verification for CH06, and accountable acceptance milestones for OB01. Keep CH01 as scenario planning, CH04 as reference context, and CH05 as historical withdrawal.'], ['QA rejects proposal-to-obligation conversion, comment-date substitution, and breach conclusions from missing evidence alone. Human reviewers retain legal interpretation, applicability, commitments, and final readiness decisions.']], 'suite_id': 'regulatory-change', 'version': '1.2.0', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'as_of': '2026-10-09', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'RC-F01', 'proposal': 'Obtain execution evidence and route the applicability and consequence assessment to an authorized reviewer.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'RC-F02', 'proposal': 'Retrieve primary material or keep status unverified and document interim review needs.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'RC-F03', 'proposal': 'Define accountable milestones and acceptance tests for human approval.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
 """Validate the data boundary shared by catalogs and standalone Python renderers."""
 import math
 import re
@@ -69,6 +71,13 @@ def case_errors(data, complete=False):
         return ['case data must be an object']
     def string(value):
         return isinstance(value, str) and bool(value.strip())
+    def valid_format(value):
+        return string(value) and all(len(m)<=15 for m in re.findall(r'\.([0#]+)',value))
+    def scalar_matches(value,expected):
+        return isinstance(value,str) if expected=='text' else type(value) is bool if expected=='boolean' else type(value) is int if expected=='integer' else type(value) in (int,float)
+    def key_value(value):
+        # Python aliases True with 1; record joins must retain scalar identity.
+        return ('number',value) if type(value) in (int,float) else (type(value).__name__,value)
     if complete:
         for key in ['suite_id','version','as_of','notice','scope','conclusion']:
             if not string(data.get(key)):errors.append(key+' must be nonempty text in a complete case')
@@ -95,8 +104,8 @@ def case_errors(data, complete=False):
         errors.append('eight populated case-specific narrative sections required')
     if not all(string(x) for x in data['limitations']):
         errors.append('limitations must contain text')
-    if len(data['domain_tables']) != 2:
-        errors.append('exactly two domain tables required')
+    if not 2 <= len(data['domain_tables']) <= 12:
+        errors.append('between two and twelve domain tables required')
     names = {x.casefold() for x in SCHEMA_COMMON}
     for index, table in enumerate(data['domain_tables']):
         label = f'domain table {index + 1}'
@@ -120,8 +129,60 @@ def case_errors(data, complete=False):
             elif any(isinstance(value,(dict,list)) for value in row):
                 errors.append(f'nested domain cell in {name}, row {row_number}')
         formats = table.get('formats',{})
-        if not isinstance(formats,dict) or any(k not in columns or not string(v) for k,v in formats.items()):
-            errors.append(label+' formats must name existing columns')
+        if not isinstance(formats,dict) or any(k not in columns or not valid_format(v) for k,v in formats.items()):
+            errors.append(label+' formats must name existing columns and use at most 15 decimal places')
+        placement=table.get('report_section',4 if index==0 else 5)
+        if type(placement) is not int or placement not in (4,5):
+            errors.append(label+' report_section must be 4 or 5')
+        if 'grain' in table and not string(table['grain']):errors.append(label+' grain must be nonempty text')
+        contracts=table.get('column_contracts')
+        if 'column_contracts' in table and contracts is None:errors.append(label+' column_contracts must be an object')
+        if contracts is not None:
+            if not isinstance(contracts,dict) or set(contracts)!=set(columns):
+                errors.append(label+' column_contracts must define every column exactly');continue
+            for column,spec in contracts.items():
+                field=f'{name}.{column}'
+                if not isinstance(spec,dict) or spec.get('type') not in ('text','integer','number','boolean') or type(spec.get('nullable')) is not bool or not string(spec.get('unit')) or not string(spec.get('description')):
+                    errors.append('invalid field contract '+field);continue
+                enum=spec.get('enum')
+                if 'enum' in spec and (not isinstance(enum,list) or not enum or any(isinstance(v,(dict,list)) or v is None for v in enum)):
+                    errors.append('invalid field enum '+field);continue
+                if enum is not None and (any(not scalar_matches(v,spec['type']) for v in enum) or len(set(enum))!=len(enum)):
+                    errors.append('enum must contain distinct values of the declared type in '+field)
+                for bound in ('minimum','maximum'):
+                    if bound in spec and (spec['type'] not in ('number','integer') or type(spec[bound]) not in (int,float) or type(spec[bound]) is float and not math.isfinite(spec[bound])):
+                        errors.append('invalid numeric bound '+field)
+                if type(spec.get('minimum')) in (int,float) and type(spec.get('maximum')) in (int,float) and spec['minimum']>spec['maximum']:
+                    errors.append('minimum exceeds maximum in '+field)
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns):continue
+                    value=row[columns.index(column)]
+                    if value is None:
+                        if not spec['nullable']:errors.append(f'null prohibited in {field}, row {row_number}')
+                        continue
+                    expected=spec['type']
+                    valid=scalar_matches(value,expected)
+                    if not valid:
+                        errors.append(f'wrong {expected} type in {field}, row {row_number}');continue
+                    if enum is not None and value not in enum:
+                        errors.append(f'value outside enum in {field}, row {row_number}')
+                    if type(value) in (int,float):
+                        for bound,operator in [('minimum',lambda a,b:a<b),('maximum',lambda a,b:a>b)]:
+                            if type(spec.get(bound)) in (int,float) and operator(value,spec[bound]):errors.append(f'value outside {bound} in {field}, row {row_number}')
+        key=table.get('primary_key')
+        if contracts is not None and key is None:errors.append(label+' typed table requires primary_key')
+        if key is not None:
+            if not isinstance(key,list) or not key or any(not isinstance(c,str) or c not in columns for c in key) or len(set(key))!=len(key):
+                errors.append(label+' invalid primary_key')
+            else:
+                seen=set()
+                for row_number,row in enumerate(rows,1):
+                    if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                    values=tuple(row[columns.index(c)] for c in key)
+                    if any(v is None or isinstance(v,str) and not v.strip() for v in values):errors.append(f'empty primary key in {name}, row {row_number}')
+                    identity=tuple(key_value(v) for v in values)
+                    if identity in seen:errors.append(f'duplicate primary key in {name}, row {row_number}')
+                    seen.add(identity)
     def records(key,fields):
         valid=[]
         for index,row in enumerate(data[key]):
@@ -137,6 +198,33 @@ def case_errors(data, complete=False):
     if len(finding_ids)!=len(findings):errors.append('invalid finding ID')
     if len(set(evidence_ids))!=len(evidence_ids):errors.append('duplicate evidence ID')
     if len(set(finding_ids))!=len(finding_ids):errors.append('duplicate finding ID')
+    tables={t['name']:t for t in data['domain_tables'] if isinstance(t,dict) and isinstance(t.get('name'),str)}
+    for source in tables.values():
+        columns,rows=source.get('columns'),source.get('rows')
+        if not isinstance(columns,list) or not isinstance(rows,list):continue
+        for row_number,row in enumerate(rows,1):
+            if not isinstance(row,list) or len(row)!=len(columns):continue
+            for column,value in zip(columns,row):
+                if not isinstance(column,str) or value is None:continue
+                if column=='evidence_ids' or column.endswith('_evidence_ids') or column=='evidence_id' or column.endswith('_evidence_id'):
+                    refs=[v.strip() for v in value.split(';')] if isinstance(value,str) else []
+                    if not refs or any(ref not in evidence_ids for ref in refs):errors.append(f'unresolved domain evidence key in {source["name"]}, row {row_number}')
+        joins=source.get('foreign_keys',[])
+        if not isinstance(joins,list):errors.append('foreign_keys must be a list in '+source['name']);continue
+        for join in joins:
+            if not isinstance(join,dict):errors.append('invalid foreign key in '+source['name']);continue
+            left,right=join.get('columns'),join.get('references')
+            target=tables.get(join.get('table')) if isinstance(join.get('table'),str) else None
+            if not isinstance(left,list) or not left or not isinstance(right,list) or len(left)!=len(right) or any(not isinstance(c,str) or c not in columns for c in left) or target is None or not isinstance(target.get('columns'),list) or any(not isinstance(c,str) or c not in target['columns'] for c in right):
+                errors.append('invalid foreign key in '+source['name']);continue
+            target_rows=target.get('rows',[])
+            keys=[tuple(key_value(row[target['columns'].index(c)]) for c in right) for row in target_rows if isinstance(row,list) and len(row)==len(target['columns']) and all(not isinstance(v,(dict,list)) for v in row)] if isinstance(target_rows,list) else []
+            if len(keys)!=len(set(keys)):errors.append('foreign key target is not unique in '+source['name']);continue
+            for row_number,row in enumerate(rows,1):
+                if not isinstance(row,list) or len(row)!=len(columns) or any(isinstance(v,(dict,list)) for v in row):continue
+                values=tuple(row[columns.index(c)] for c in left)
+                if all(v is None for v in values):continue
+                if any(v is None for v in values) or tuple(key_value(v) for v in values) not in keys:errors.append(f'unresolved domain foreign key in {source["name"]}, row {row_number}')
     classes=('Observed','Reported','Inferred','Estimated')
     for row in evidence_rows:
         if any(not string(row[k]) for k in ['title','locator']) or row['claim_class'] not in classes:
@@ -152,7 +240,7 @@ def case_errors(data, complete=False):
     for row in records('metrics',['label','value','method']):
         if not string(row['label']) or not string(row['method']) or isinstance(row['value'],(dict,list)):
             errors.append('invalid metric label, method or scalar value')
-        if 'format' in row and not string(row['format']):errors.append('invalid metric format')
+        if 'format' in row and not valid_format(row['format']):errors.append('invalid metric format; at most 15 decimal places')
     for key,fields in [('actions',['id','finding_id','proposal','owner','due_date','status']),('qa',['id','check','result','evidence'])]:
         if key not in data:continue
         if not isinstance(data[key],list):
@@ -173,6 +261,7 @@ def case_errors(data, complete=False):
             errors.append('non-finite numeric value')
         elif isinstance(value,str):
             if re.search(r'[\x00-\x08\x0b\x0c\x0e-\x1f]',value):errors.append('unsupported control character')
+            if re.search(r'[\ud800-\udfff\ufffe\uffff]',value):errors.append('unsupported XML Unicode code point')
         elif isinstance(value,list):
             for item in value:visit(item)
         elif isinstance(value,dict):
@@ -220,10 +309,10 @@ for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['
         border.getparent().remove(border)
 
 def text(value):
-    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+    return 'Not provided' if value is None else str(value).lower() if isinstance(value,bool) else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
 
 def formatted(value, fmt):
-    if not isinstance(value, (int,float)) or not fmt:
+    if type(value) not in (int,float) or not fmt:
         return text(value)
     if fmt == '0.0%':
         return f'{value:.1%}'
@@ -249,7 +338,8 @@ def table(headers, rows, keep_together=False, widths=None):
         for i,v in enumerate(values):
             cells[i].text=text(v)
     for row_index,row in enumerate(t.rows):
-        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        if row_index==0 or max(len(cell.text) for cell in row.cells)<=1200:
+            row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
         for cell_index,cell in enumerate(row.cells):
             if widths:cell.width=Inches(widths[cell_index])
             shading=OxmlElement('w:shd')
@@ -286,13 +376,19 @@ for index, heading in enumerate(DATA['report_sections']):
             doc.add_paragraph(f['detail'])
             doc.add_paragraph('Proposed action: '+f['recommendation'])
     elif index in (3,4):
-        # Wide data stay readable as vertical records; workbook retains tabular schema.
-        source = DATA['domain_tables'][index-3]
-        doc.add_paragraph(source['name'])
-        for row in source['rows']:
-            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
-        missing = sum(value is None for row in source['rows'] for value in row)
-        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+        for position,source in enumerate(DATA['domain_tables']):
+            if source.get('report_section',4 if position==0 else 5)!=index+1:continue
+            doc.add_heading(source['name'],level=2)
+            if source.get('grain'):doc.add_paragraph('Record grain: '+source['grain'])
+            if not source['rows']:
+                doc.add_paragraph('No records supplied. Declared columns: '+', '.join(source['columns'])+'. An empty register does not establish a clean population.')
+            for number,row in enumerate(source['rows'],1):
+                label=doc.add_paragraph(f"{source['name']} / record {number} of {len(source['rows'])}")
+                label.paragraph_format.keep_with_next=True
+                # Long records may continue between field rows instead of overflowing a page.
+                table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=False,widths=[2.0,5.0])
+            missing = sum(value is None for row in source['rows'] for value in row)
+            doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
     elif index == 5:
         table(['Evidence ID','Source or fixture','Exact locator','Claim class'], [[e['id'],e['title'],e['locator'],e['claim_class']] for e in DATA['evidence']],widths=[1.0,2.0,2.8,1.2])
     elif index == 6:
@@ -301,7 +397,7 @@ for index, heading in enumerate(DATA['report_sections']):
     elif index == 7:
         for value in DATA['limitations']:
             doc.add_paragraph(value, style='List Bullet')
-        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+        table(['Check ID','Check','Result','Evidence'], [[q['id'],q['check'],q['result'],q['evidence']] for q in DATA['qa']])
 footer = section.footer.paragraphs[0]
 footer.add_run('Draft for human review | Page ')
 field=OxmlElement('w:fldSimple')

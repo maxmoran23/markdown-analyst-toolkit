@@ -8,6 +8,7 @@ GROUPS = {
  'Research and customer understanding': ['osint-research','adverse-media','entity-due-diligence','ownership-analysis','customer-risk-review','source-wealth-funds'],
  'Exposure and service relationships': ['sanctions-review','digital-asset-review','jurisdiction-risk','correspondent-banking','third-party-risk','new-product-risk'],
  'Controls and assurance': ['control-testing','data-quality','monitoring-tuning','regulatory-change','sampling-assurance','issue-remediation'],
+ 'Monitoring process': ['scenario-design','tm-data-lineage','monitoring-validation','lookback-review','network-flow-review','alert-qa'],
 }
 INPUTS = {
  'transaction-monitoring':'Activity rows, customer context, scenario criteria and alert details.',
@@ -34,6 +35,12 @@ INPUTS = {
  'regulatory-change':'Source instruments, jurisdiction, applicability, dates and mapped obligations.',
  'sampling-assurance':'Population frame, test objective, selection design and observed exceptions.',
  'issue-remediation':'Finding, root-cause evidence, corrective actions, retest results and closure criteria.',
+ 'scenario-design':'Risk hypothesis, eligible activity, temporal predicates, exclusions and boundary test events.',
+ 'tm-data-lineage':'Source manifests, transformation specifications, canonical records, exceptions and control totals.',
+ 'monitoring-validation':'System classification, design specification, data lineage, independent tests and outcome evidence.',
+ 'lookback-review':'Defect timeline, historical retrieval manifests, canonical case units, review history and scope criteria.',
+ 'network-flow-review':'Canonical transfers, node identity evidence, account balances, fees and allocation assumptions.',
+ 'alert-qa':'Completed case packets, explicit review criteria, independent review votes and defect evidence.',
 }
 
 def payload():
