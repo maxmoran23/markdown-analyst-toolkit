@@ -1,0 +1,181 @@
+# Trade Surveillance Review — fixed report template
+
+Version 1.0.0. This file is part of the ten instructional attachments. It contains the full report structure and an optional in-session Python renderer. No terminal is required.
+
+## Delivery path
+
+Use the available approved file-creation capability in the current chat. If Python with `python-docx` is available, execute the complete block below in that session after substituting validated case data. Do not install packages or ask the user to run shell commands. If direct Word authoring is available, reproduce this contract exactly. If neither route works, return the completed report as Markdown with the same headings and tables; label it **copy-ready text; DOCX not created**. A Markdown response is not a downloadable Word file.
+
+## Fixed section order
+
+1. **Surveillance leads and review priorities**
+2. **Scope, sequence reconstruction, and benchmarks**
+3. **Findings and alternative explanations**
+4. **Order lifecycle reconciliation**
+5. **Scenario observations and denominator checks**
+6. **Evidence and rule applicability**
+7. **Proposed surveillance-review actions**
+8. **Limitations, negative controls, and human decision**
+
+Keep all eight sections, including a specific limitation if a section cannot be assessed. Within section 1 state the answer, decision implication and unresolved gate before background. Section 2 records jurisdiction, as-of date, population, exclusions and method version. Section 3 carries each finding with class, severity, confidence, evidence, counterevidence and proposed action. Sections 4–5 preserve the domain registers in file 05. Section 6 contains exact evidence locators. Section 7 records proposed actions. Section 8 contains limitations, QA outcomes and the named human disposition.
+
+The code's prose is a complete **synthetic specimen**, not boilerplate conclusions for later cases. Replace each `report_narrative` paragraph with case-specific analysis. Do not publish sample judgments as real results. Retain the data label while any synthetic records remain.
+
+## Word and PDF style contract
+
+| Element | Fixed treatment |
+| --- | --- |
+| Page | Portrait report; 0.75-inch left/right and 0.70-inch top/bottom margins |
+| Typeface | Arial 10.5 pt body; 24 pt title; 16 pt first-level and 12 pt second-level headings; sans-serif fallback |
+| Color | Ink `#243641`; headings `#344E5F`; neutral table shading; black title |
+| Paragraph | 1.12 line spacing; 7 pt after; headings keep with following paragraph |
+| Tables | 9 pt minimum; repeat header rows; long domain registers shown as field/value records to avoid tiny columns |
+| Figures | No decorative graphics; every quantitative visual needs its unit, scope, denominator and source |
+| Footer | Draft for human review; automatic page number |
+| PDF | Export the verified Word document or print the HTML template; do not merely rename the extension |
+| Dates and money | Archive/field dates `YYYY-MM-DD`; narrative dates `MMM DD, YYYY`; times `h:mm AM/PM ET`; currency symbol and comma separators |
+
+The workbook retains every domain column in order; the report may present the same records vertically for readability. Do not merge duplicate-looking records unless the method supports deduplication. Never hide counterevidence, omit an unresolved record, or replace a null with a favorable sentence.
+
+## Required content review
+
+- Trace each material sentence to its source span, row, calculation or explicit inference. A URL alone is not evidence of retrieval.
+- Preserve the distinction between a source allegation and an adjudicated fact. Add the source's date and procedural status where relevant.
+- Tie totals and exclusions to the worked population or supplied control totals. When unknown, state the resulting limitation.
+- Keep a proposed action distinct from the human disposition and from execution. This renderer records no approval.
+- Reopen the actual deliverable. Check page breaks, repeated headers, complete rows, dates, metadata and citations. If visual review is unavailable, say so.
+
+## Complete in-session renderer
+
+The code block is self-contained. Its only runtime dependency is an already available `python-docx`. `DATA` includes all synthetic inputs needed to render the specimen; neither this repository nor a local path is needed in the user's session. Replace data values, not section order or column identifiers. Add evidence and case-specific narrative before calling the result complete.
+
+```python
+from pathlib import Path
+from docx import Document
+from docx.shared import Inches, Pt, RGBColor
+from docx.oxml import OxmlElement
+from docx.oxml.ns import qn
+
+DATA = {'slug': 'trade-surveillance', 'title': 'Trade Surveillance Review', 'summary': 'Reconstruct order lifecycles, distinguish cancellations from executions, compare activity with aligned market benchmarks, and evaluate manipulation indicators as leads for human review.', 'audience': 'Trade-surveillance analysts, market-conduct reviewers, and surveillance-control testers', 'decision': 'Which order or execution patterns warrant further human review after sequence, ownership, market context, and denominator checks?', 'palette': 'slate', 'report_sections': ['Surveillance leads and review priorities', 'Scope, sequence reconstruction, and benchmarks', 'Findings and alternative explanations', 'Order lifecycle reconciliation', 'Scenario observations and denominator checks', 'Evidence and rule applicability', 'Proposed surveillance-review actions', 'Limitations, negative controls, and human decision'], 'domain_tables': [{'name': 'OrderLifecycle', 'columns': ['order_id', 'group_id', 'instrument_id', 'side', 'new_quantity', 'filled_quantity', 'cancelled_quantity', 'remaining_quantity', 'lifetime_ms', 'cancel_quantity_ratio', 'evidence_ids'], 'rows': [['O1', 'A', 'FICT-A', 'BUY', 1000, 200, 800, 0, 500, 0.8, 'SYN-001'], ['O2', 'A', 'FICT-A', 'SELL', 100, 100, 0, 0, 50, 0.0, 'SYN-001'], ['O3', 'B', 'FICT-B', 'BUY', 500, 0, 500, 0, 100, 1.0, 'SYN-002'], ['O4', 'C', 'FICT-C', 'BUY', 100, 100, 0, 0, 100, 0.0, 'SYN-003;SYN-004'], ['O5', 'C', 'FICT-C', 'SELL', 100, 100, 0, 0, 50, 0.0, 'SYN-003;SYN-004']], 'formats': {'new_quantity': '#,##0', 'filled_quantity': '#,##0', 'cancelled_quantity': '#,##0', 'remaining_quantity': '#,##0', 'lifetime_ms': '0.0', 'cancel_quantity_ratio': '0.0%'}}, {'name': 'SurveillanceObservations', 'columns': ['observation_id', 'group_id', 'scenario_id', 'state', 'measured_value', 'unit', 'criterion', 'review_priority', 'confidence', 'evidence_ids'], 'rows': [['TS-O1', 'A', 'TS-01', 'MATCH', 300, 'milliseconds', 'cancel<=500ms after opposite fill; cancelled/new>=0.80', 'MEDIUM', 'MODERATE', 'SYN-001;SYN-005'], ['TS-O2', 'A', 'TS-02', 'NO_MATCH', 1, 'simultaneous_price_levels', 'at least 3 same-side price levels', 'LOW', 'HIGH', 'SYN-001'], ['TS-O3', 'B', 'TS-01', 'NO_MATCH', None, 'milliseconds', 'opposite-side execution required', 'LOW', 'HIGH', 'SYN-002;SYN-006'], ['TS-O4', 'C', 'TS-03', 'MATCH', 100, 'unique_executed_shares', 'execution between confirmed same-owner accounts', 'MEDIUM', 'MODERATE', 'SYN-003;SYN-004']]}], 'findings': [{'id': 'TS-F01', 'title': 'A cancellation follows an opposite-side fill and warrants review', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-001', 'SYN-005'], 'detail': 'O1 cancels 800 of 1000 shares 300 ms after O2 fills 100 shares on the opposite side. The authored screen matches; intent and causation are not established.', 'recommendation': 'Review broader patterns, market context, and strategy rationale through the authorized surveillance process.'}, {'id': 'TS-F02', 'title': 'A high cancellation ratio has a supported context and no opposite fill', 'severity': 'LOW', 'confidence': 'HIGH', 'claim_class': 'Observed', 'evidence_ids': ['SYN-002', 'SYN-006'], 'detail': 'O3 cancels 500 shares after a documented quote change. No opposite-side execution exists in the complete supplied window.', 'recommendation': 'Retain the negative scenario result and bounded ordinary explanation; do not infer manipulation from cancellation alone.'}, {'id': 'TS-F03', 'title': 'One same-owner execution requires control and strategy context', 'severity': 'MEDIUM', 'confidence': 'MODERATE', 'claim_class': 'Inferred', 'evidence_ids': ['SYN-003', 'SYN-004'], 'detail': 'O4 and O5 represent two account-side legs of one 100-share execution between confirmed same-owner accounts. No intent or broader pattern is established.', 'recommendation': 'Review strategy independence, controls, repetition, and beneficial-ownership evidence; do not call the observation illegal wash trading.'}], 'evidence': [{'id': 'SYN-001', 'title': 'Fictional A order-event extract', 'locator': '10-worked-example.md, M01–M05 and duplicate M12', 'claim_class': 'Observed'}, {'id': 'SYN-002', 'title': 'Fictional B order-event extract', 'locator': '10-worked-example.md, M06–M07', 'claim_class': 'Observed'}, {'id': 'SYN-003', 'title': 'Fictional C matched-execution extract', 'locator': '10-worked-example.md, M08–M11', 'claim_class': 'Observed'}, {'id': 'SYN-004', 'title': 'Fictional same-owner mapping', 'locator': '10-worked-example.md, context record C', 'claim_class': 'Observed'}, {'id': 'SYN-005', 'title': 'Fictional A market benchmark', 'locator': '10-worked-example.md, benchmark register A', 'claim_class': 'Observed'}, {'id': 'SYN-006', 'title': 'Fictional B quote and risk-log context', 'locator': '10-worked-example.md, context record B', 'claim_class': 'Observed'}], 'metrics': [{'label': 'Accepted orders', 'value': 5, 'method': 'Unique O1–O5 accepted order IDs', 'format': '#,##0'}, {'label': 'Canonical event messages', 'value': 11, 'method': '12 raw messages minus exact duplicate M12', 'format': '#,##0'}, {'label': 'Unique executions', 'value': 3, 'method': 'X-A1, X-A2, X-C1; X-C1 has two account-side legs', 'format': '#,##0'}, {'label': 'Matched review leads', 'value': 2, 'method': 'TS-O1 and TS-O4; no legal conclusion implied', 'format': '#,##0'}], 'limitations': ['Illustrative thresholds are authored screens, not legal definitions or approved production parameters.', 'Single short windows cannot establish intent, manipulation, repeated behavior, or strategy effectiveness.', 'Account-side execution legs and unique market executions have different denominators.'], 'conclusion': 'Two surveillance leads warrant contextual human review: A has a cancellation following an opposite-side fill, and C has one same-owner execution. B is a complete negative for the sequence screen; the example establishes no manipulation, intent, or illegal wash trading.', 'report_narrative': [['Two surveillance leads warrant contextual human review: A has a cancellation following an opposite-side fill, and C has one same-owner execution. B is a complete negative for the sequence screen; the example establishes no manipulation, intent, or illegal wash trading.'], ['Five accepted orders reconcile to eleven canonical event messages and three unique executions. The reconstruction preserves message sequence, order-state transitions, linked fill legs and benchmark coverage before applying fictional screens.'], ['TS-F01: O1 cancels 800 of 1000 shares 300 ms after O2 fills 100 shares on the opposite side. The authored screen matches; intent and causation are not established.', 'TS-F02: O3 cancels 500 shares after a documented quote change. No opposite-side execution exists in the complete supplied window.', 'TS-F03: O4 and O5 represent two account-side legs of one 100-share execution between confirmed same-owner accounts. No intent or broader pattern is established.'], ['Every order lifecycle reconciles accepted quantity to filled, cancelled and residual quantities as specified in file 10. Duplicate message captures do not create additional orders, and two sides of one execution do not create two executions.'], ['Account A has a cancellation following an opposite-side fill; C has one same-owner execution. These are two contextual review leads. B is a complete negative for the sequence screen; none of the screens establishes intent, manipulation or illegal wash trading.'], ['The fictional event ledger, execution links and scenario criteria provide the calculation basis. FINRA, CFTC and SEC references retain their market and jurisdictional scope rather than converting the example screen into a legal test.'], ['Obtain relevant strategy, ownership, communications and market context through the authorized surveillance process. Challenge legitimate explanations and benchmark gaps before any reviewer disposition.'], ['Illustrative thresholds are authored screens, not legal definitions or approved production parameters.', 'Single short windows cannot establish intent, manipulation, repeated behavior, or strategy effectiveness.', 'Account-side execution legs and unique market executions have different denominators.', 'QA remains pending and no authorized human disposition is recorded.']], 'suite_id': 'trade-surveillance', 'version': '1.0.0', 'as_of': '2026-10-09', 'notice': 'Synthetic worked example. Fictional records. Not a completed operational review.', 'scope': 'Only the complete fictional inputs printed in file 10 are in scope. Public guidance supplies method context and is not evidence about the fictional subjects.', 'methods': ['Confirm the question, authorized scope, period, population and available capabilities.', 'Preserve evidence identifiers and reconcile received, excluded, duplicate and unresolved records.', 'Apply the suite method and decision rules; test competing explanations and missing inputs.', 'Populate the fixed domain registers without inventing fields, facts or approvals.', 'Review calculations and citations; record exceptions and seek the named human disposition.'], 'actions': [{'id': 'A-001', 'finding_id': 'TS-F01', 'proposal': 'Review broader patterns, market context, and strategy rationale through the authorized surveillance process.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-002', 'finding_id': 'TS-F02', 'proposal': 'Retain the negative scenario result and bounded ordinary explanation; do not infer manipulation from cancellation alone.', 'owner': None, 'due_date': None, 'status': 'Proposed'}, {'id': 'A-003', 'finding_id': 'TS-F03', 'proposal': 'Review strategy independence, controls, repetition, and beneficial-ownership evidence; do not call the observation illegal wash trading.', 'owner': None, 'due_date': None, 'status': 'Proposed'}], 'qa': [{'id': 'QA-01', 'check': 'Synthetic fixture calculations', 'result': 'REVIEW REQUIRED', 'evidence': 'Reproduce the arithmetic in file 10.'}, {'id': 'QA-02', 'check': 'Evidence support and competing explanations', 'result': 'REVIEW REQUIRED', 'evidence': 'Compare findings to the exact fixture locators and file 04.'}, {'id': 'QA-03', 'check': 'Authorized human disposition', 'result': 'NOT RECORDED', 'evidence': 'No reviewer identity, decision or approval has been supplied.'}]}
+OUTPUT = Path(DATA['suite_id'] + '-report.docx')
+doc = Document()
+doc.core_properties.author = 'Markdown Analyst Toolkit'
+doc.core_properties.title = DATA['title']
+doc.core_properties.subject = DATA['notice']
+section = doc.sections[0]
+section.top_margin = section.bottom_margin = Inches(0.7)
+section.left_margin = section.right_margin = Inches(0.75)
+normal = doc.styles['Normal']
+normal.font.name = 'Arial'
+normal.font.size = Pt(10.5)
+normal.font.color.rgb = RGBColor.from_string('243641')
+normal.paragraph_format.space_after = Pt(7)
+normal.paragraph_format.line_spacing = 1.12
+for name, size in [('Title',24), ('Heading 1',16), ('Heading 2',12)]:
+    style = doc.styles[name]
+    style.font.name = 'Arial'
+    style.font.size = Pt(size)
+    style.font.color.rgb = RGBColor.from_string('000000' if name=='Title' else '344E5F')
+    style.paragraph_format.keep_with_next = True
+    style.paragraph_format.space_before = Pt(14)
+    style.paragraph_format.space_after = Pt(7)
+for style in [normal, doc.styles['Title'], doc.styles['Heading 1'], doc.styles['Heading 2'], doc.styles['List Bullet']]:
+    style.font.name = 'Arial'
+    fonts = style.element.get_or_add_rPr().rFonts
+    if fonts is not None:
+        for key in list(fonts.attrib):
+            if 'theme' in key.lower():
+                del fonts.attrib[key]
+    for border in list(style.element.iter(qn('w:pBdr'))):
+        border.getparent().remove(border)
+
+def text(value):
+    return 'Not provided' if value is None else '; '.join(map(str,value)) if isinstance(value,list) else str(value)
+
+def formatted(value, fmt):
+    if not isinstance(value, (int,float)) or not fmt:
+        return text(value)
+    if fmt == '0.0%':
+        return f'{value:.1%}'
+    if fmt == '0.0"%"':
+        return f'{value:.1f}%'
+    places = 2 if '.00' in fmt else 1 if '.0' in fmt else 0
+    return ('$' if '$' in fmt else '') + f'{value:,.{places}f}'
+
+def table(headers, rows, keep_together=False):
+    t = doc.add_table(rows=1, cols=len(headers))
+    t.style = 'Table Grid'
+    for i,h in enumerate(headers):
+        t.rows[0].cells[i].text = h
+    repeat = OxmlElement('w:tblHeader')
+    t.rows[0]._tr.get_or_add_trPr().append(repeat)
+    for values in rows:
+        cells=t.add_row().cells
+        for i,v in enumerate(values):
+            cells[i].text=text(v)
+    for row_index,row in enumerate(t.rows):
+        row._tr.get_or_add_trPr().append(OxmlElement('w:cantSplit'))
+        for cell in row.cells:
+            shading=OxmlElement('w:shd')
+            shading.set(qn('w:fill'),'344E5F' if row_index==0 else 'E2E8E9' if row_index%2 else 'F1F2EF')
+            cell._tc.get_or_add_tcPr().append(shading)
+            for p in cell.paragraphs:
+                p.paragraph_format.space_after=Pt(4)
+                if keep_together and row_index<len(t.rows)-1:
+                    p.paragraph_format.keep_with_next=True
+                for run in p.runs:
+                    run.font.name='Arial'
+                    run.font.size=Pt(9)
+                    run.font.color.rgb=RGBColor.from_string('FFFFFF' if row_index==0 else '243641')
+                    run.font.bold=row_index==0
+    doc.add_paragraph()
+    return t
+
+doc.add_paragraph(DATA['title'], 'Title')
+doc.add_paragraph(f"Version {DATA['version']} | As of {DATA['as_of']} | Draft for human review")
+doc.add_paragraph(DATA['notice'])
+doc.add_paragraph(DATA['summary'])
+doc.add_paragraph('Decision supported: '+DATA['decision'])
+for index, heading in enumerate(DATA['report_sections']):
+    doc.add_heading(heading, level=1)
+    for paragraph in DATA['report_narrative'][index]:
+        doc.add_paragraph(paragraph)
+    if index == 0:
+        table(['Measure','Value','Calculation or limit'], [[m['label'],formatted(m['value'],m.get('format')),m['method']] for m in DATA['metrics']])
+    elif index == 2:
+        for f in DATA['findings']:
+            doc.add_heading(f["id"]+' '+f['title'], level=2)
+            meta=doc.add_paragraph(f"{f['severity']} severity | {f['confidence']} confidence | {f['claim_class']} | Evidence: {', '.join(f['evidence_ids'])}")
+            meta.paragraph_format.keep_with_next=True
+            doc.add_paragraph(f['detail'])
+            doc.add_paragraph('Proposed action: '+f['recommendation'])
+    elif index in (3,4):
+        # Wide data stay readable as vertical records; workbook retains tabular schema.
+        source = DATA['domain_tables'][index-3]
+        doc.add_paragraph(source['name'])
+        for row in source['rows']:
+            table(['Field','Value'], [(key,formatted(value,source.get('formats',{}).get(key))) for key,value in zip(source['columns'],row)],keep_together=True)
+        missing = sum(value is None for row in source['rows'] for value in row)
+        doc.add_paragraph(f"Domain record count: {len(source['rows'])}. Missing (null) cells: {missing}. Empty text follows the field-specific contract.")
+    elif index == 5:
+        table(['Evidence ID','Source or fixture','Exact locator'], [[e['id'],e['title'],e['locator']] for e in DATA['evidence']])
+    elif index == 6:
+        for a in DATA['actions']:
+            doc.add_paragraph(f"{a['id']} / {a['finding_id']}: {a['proposal']} Owner: {text(a['owner'])}. Due: {text(a['due_date'])}. State: {a['status']}")
+    elif index == 7:
+        for value in DATA['limitations']:
+            doc.add_paragraph(value, style='List Bullet')
+        table(['Check','Result','Evidence'], [[q['check'],q['result'],q['evidence']] for q in DATA['qa']])
+footer = section.footer.paragraphs[0]
+footer.add_run('Draft for human review | Page ')
+field=OxmlElement('w:fldSimple')
+field.set(qn('w:instr'),'PAGE')
+footer._p.append(field)
+doc.save(OUTPUT)
+print(str(OUTPUT))
+
+```
+
+## Recovery and acceptance
+
+If generation fails, preserve the completed analytical text and the exact error category. Retry only the failed render step after checking the capability; do not redo source judgments to obtain a prettier report. Never claim DOCX or PDF export succeeded unless an openable file exists. A successful renderer run proves file creation, not truth, regulatory compliance, or institutional approval.

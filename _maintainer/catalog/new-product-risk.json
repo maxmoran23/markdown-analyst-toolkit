@@ -1,0 +1,248 @@
+{
+  "slug": "new-product-risk",
+  "title": "New Product Risk and Launch Readiness",
+  "summary": "Map a proposed product\u2019s funds, data, and service flows to control dependencies and testable launch conditions.",
+  "audience": "Product reviewers, control owners, and launch decision forums",
+  "decision": "Does the supplied evidence support consideration of launch, and which conditions remain unresolved?",
+  "palette": "slate",
+  "report_sections": [
+    "Launch recommendation and unresolved conditions",
+    "Product scope flow and assessment method",
+    "Material readiness findings",
+    "Funds data and service flow map",
+    "Launch condition verification",
+    "Evidence and dependency limitations",
+    "Remediation pilot and exit proposals",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "FlowMap",
+      "columns": [
+        "flow_id",
+        "flow_type",
+        "from_role",
+        "to_role",
+        "asset_or_data",
+        "control_dependency",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "FL01",
+          "DATA",
+          "Applicant",
+          "Enrollment service",
+          "Identity attributes",
+          "Enrollment review",
+          "SYN-001"
+        ],
+        [
+          "FL02",
+          "SERVICE",
+          "User channel",
+          "Request service",
+          "Payment instruction",
+          "Authentication and limits",
+          "SYN-001"
+        ],
+        [
+          "FL03",
+          "DATA",
+          "Request service",
+          "Review queue",
+          "Instruction and risk fields",
+          "Screening and monitoring",
+          "SYN-001"
+        ],
+        [
+          "FL04",
+          "FUNDS",
+          "Payment provider",
+          "Recipient institution",
+          "Illustrative payment value",
+          "Approved instruction and settlement",
+          "SYN-001"
+        ],
+        [
+          "FL05",
+          "DATA",
+          "Payment provider",
+          "Reconciliation service",
+          "Status and ledger events",
+          "Reconciliation and exception handling",
+          "SYN-001"
+        ]
+      ]
+    },
+    {
+      "name": "LaunchConditions",
+      "columns": [
+        "condition_id",
+        "flow_id",
+        "condition",
+        "critical",
+        "status",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "LC01",
+          "FL04",
+          "Document primary funds and instruction flow",
+          true,
+          "SATISFIED",
+          "SYN-001"
+        ],
+        [
+          "LC02",
+          "FL03",
+          "Evidence screening configuration and fixture tests",
+          true,
+          "SATISFIED",
+          "SYN-001"
+        ],
+        [
+          "LC03",
+          "FL03",
+          "Evidence monitoring exception test",
+          true,
+          "NOT VERIFIABLE",
+          "SYN-001"
+        ],
+        [
+          "LC04",
+          "FL05",
+          "Resolve reconciliation timing exception",
+          true,
+          "PARTIAL",
+          "SYN-001"
+        ],
+        [
+          "LC05",
+          "FL02",
+          "Train all four pilot operators",
+          false,
+          "SATISFIED",
+          "SYN-001"
+        ],
+        [
+          "LC06",
+          "FL04",
+          "Rehearse controlled exit and recovery",
+          true,
+          "NOT SATISFIED",
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "NP-F01",
+      "title": "Primary monitoring dependency lacks test evidence",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "LC03 is supported by a build-complete assertion but no accessible monitoring exception test.",
+      "recommendation": "Obtain and review a scenario-specific test before supporting a launch decision."
+    },
+    {
+      "id": "NP-F02",
+      "title": "Reconciliation test retains an unresolved timing exception",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "One $50.00 payment remains pending at 60 minutes against an illustrative 30-minute resolution criterion; conservation of value alone passes.",
+      "recommendation": "Resolve the timing failure mechanism and retest normal and delayed paths."
+    },
+    {
+      "id": "NP-F03",
+      "title": "Exit design has not been rehearsed",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "LC06 has a written recovery plan but no executed rehearsal record.",
+      "recommendation": "Rehearse access withdrawal, pending-item reconciliation, and recovery evidence before approval consideration."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional payment workflow flow map and launch-condition evidence",
+      "locator": "10-worked-example.md, complete flow, ledger, and condition records",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "OCC 2017-43 New, Modified, or Expanded Bank Products and Services",
+      "locator": "https://www.occ.gov/news-issuances/bulletins/2017/bulletin-2017-43.html",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "Federal Reserve SR 23-4 Third-Party Relationships",
+      "locator": "https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Mapped flow legs",
+      "value": "5",
+      "method": "Count separate data, service, and funds legs; no value summation across leg types."
+    },
+    {
+      "label": "Satisfied launch conditions",
+      "value": "3 of 6 (50.0%)",
+      "method": "SATISFIED conditions / all six required conditions; no readiness average overrides critical gaps."
+    },
+    {
+      "label": "Unresolved critical conditions",
+      "value": "3 of 5 (60.0%)",
+      "method": "LC03,LC04,LC06 / five conditions flagged critical in fictional approval criteria."
+    }
+  ],
+  "limitations": [
+    "The product, approval criteria, roles, amounts, and tests are fictional.",
+    "Passing fixture tests does not establish full control coverage or production readiness.",
+    "No actual launch, pilot, or risk exception is approved.",
+    "The missing monitoring test is an evidence gap, not proof that the control was absent."
+  ],
+  "conclusion": "Three critical launch conditions remain unresolved in the fictional review, so the evidence does not support launch consideration yet. Obtain the monitoring test, resolve the reconciliation exception, and rehearse exit before an authorized human decision.",
+  "report_narrative": [
+    [
+      "Three critical conditions remain unresolved, so the fixture evidence does not support launch consideration yet. Monitoring test evidence, reconciliation timing, and exit rehearsal require resolution before an authorized launch decision."
+    ],
+    [
+      "The fictional payment-request product has five principal flow legs and six approval conditions. Instructions, data, and funds are mapped separately; the provider executes funds transfers while the request service handles instructions."
+    ],
+    [
+      "LC03 lacks an inspectable monitoring exception test, LC04 has an unresolved timing exception, and LC06 lacks a performed exit rehearsal. These are different evidence states and remain distinct in the recommendation."
+    ],
+    [
+      "FlowMap shows enrollment data, instruction service, review data, funds execution, and reconciliation data. Repeated representations of the same payment value must not be summed as separate economic exposure."
+    ],
+    [
+      "Three conditions are SATISFIED, one PARTIAL, one NOT VERIFIABLE, and one NOT SATISFIED. Five conditions are critical; three remain unresolved. The $100.00 test instruction total equals $50.00 posted plus $50.00 pending, but the pending item is 60 minutes old against a 30-minute criterion."
+    ],
+    [
+      "SYN-001 supplies the product version, flow map, six conditions, three payment records, and four-operator training evidence. Successful fixture screening tests support only their defined cases, not complete production control coverage."
+    ],
+    [
+      "Propose obtaining LC03\u2019s actual test evidence, resolving and retesting the delayed reconciliation path, and rehearsing exit with pending activity. Any narrower pilot needs enforceable scope, capacity, stop criteria, and a human-approved decision."
+    ],
+    [
+      "QA preserves all six conditions and prevents minor passes from cancelling critical gaps. No launch, pilot, limit change, waiver, or funds movement is authorized by this review."
+    ]
+  ]
+}

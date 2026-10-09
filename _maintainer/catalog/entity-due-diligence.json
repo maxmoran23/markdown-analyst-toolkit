@@ -1,0 +1,273 @@
+{
+  "slug": "entity-due-diligence",
+  "title": "Entity Due Diligence",
+  "summary": "Build an identity-resolved entity profile with ownership, permissions, business purpose, and explicit evidence gaps.",
+  "audience": "Analysts conducting generic public-source entity diligence",
+  "decision": "Is the profile sufficiently supported for the stated research purpose, or what evidence and specialist review are needed?",
+  "palette": "umber",
+  "report_sections": [
+    "Entity decision brief",
+    "Scope and review method",
+    "Material findings",
+    "Ownership assessment",
+    "Profile and evidence gaps",
+    "Evidence record",
+    "Recommended diligence actions",
+    "Limitations and human review"
+  ],
+  "domain_tables": [
+    {
+      "name": "Ownership",
+      "columns": [
+        "edge_id",
+        "owner_id",
+        "owned_entity_id",
+        "interest_pct",
+        "interest_basis",
+        "effective_date",
+        "source_status",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "O-01",
+          "PERSON-A",
+          "HOLDCO-A",
+          60,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "REPORTED",
+          "SYN-001",
+          "Fictional ownership schedule"
+        ],
+        [
+          "O-02",
+          "PERSON-B",
+          "HOLDCO-A",
+          40,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "REPORTED",
+          "SYN-001",
+          "Fictional ownership schedule"
+        ],
+        [
+          "O-03",
+          "HOLDCO-A",
+          "ENTITY-Q",
+          70,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "REPORTED",
+          "SYN-001",
+          "Do not confuse with sanctions propagation"
+        ],
+        [
+          "O-04",
+          "PERSON-C",
+          "ENTITY-Q",
+          20,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "REPORTED",
+          "SYN-001",
+          "Direct interest"
+        ],
+        [
+          "O-05",
+          "UNKNOWN-POOL",
+          "ENTITY-Q",
+          10,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "UNKNOWN",
+          "SYN-001",
+          "Underlying holders not supplied"
+        ]
+      ],
+      "formats": {
+        "interest_pct": "0.0\"%\""
+      }
+    },
+    {
+      "name": "ProfileGaps",
+      "columns": [
+        "item_id",
+        "dimension",
+        "expected_evidence",
+        "observed_state",
+        "materiality",
+        "assessment",
+        "evidence_ids",
+        "next_step"
+      ],
+      "rows": [
+        [
+          "P-01",
+          "Legal identity",
+          "Registry identifier and status",
+          "ENTITY-Q active in supplied fictional extract",
+          "HIGH",
+          "SUPPORTED",
+          "SYN-001",
+          "Refresh for actual decision date"
+        ],
+        [
+          "P-02",
+          "Ownership",
+          "Complete dated ownership schedule",
+          "10 percent terminal ownership unresolved",
+          "HIGH",
+          "INCOMPLETE",
+          "SYN-001",
+          "Identify underlying holders and control rights"
+        ],
+        [
+          "P-03",
+          "Business purpose",
+          "Product and expected-activity description",
+          "Company reports monthly receipts of $600,000.00",
+          "MEDIUM",
+          "REPORTED",
+          "SYN-001",
+          "Corroborate business model and expected counterparties"
+        ],
+        [
+          "P-04",
+          "License",
+          "Entity-specific permission for proposed service",
+          "Group license belongs to separate ENTITY-R",
+          "HIGH",
+          "UNRESOLVED",
+          "SYN-001",
+          "Obtain target entity permission or scope rationale"
+        ],
+        [
+          "P-05",
+          "Adverse event",
+          "Underlying order and current procedural status",
+          "Article references a proceeding; order absent",
+          "MEDIUM",
+          "NOT ASSESSED",
+          "SYN-001",
+          "Obtain public underlying record"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "Terminal ownership remains incomplete",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.",
+      "recommendation": "Obtain missing holder details and separate control-right evidence."
+    },
+    {
+      "id": "F-02",
+      "title": "Target permission has not been demonstrated",
+      "severity": "HIGH",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.",
+      "recommendation": "Resolve target-entity scope and applicable permission requirements."
+    },
+    {
+      "id": "F-03",
+      "title": "Receipts annualization is assumption-dependent",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "$7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts.",
+      "recommendation": "Seek comparable financial evidence before relying on capacity claims."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional entity diligence case",
+      "locator": "10-worked-example.md, ownership and profile records",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-CDD",
+      "title": "FinCEN CDD overview",
+      "locator": "https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-CDD-2026",
+      "title": "FinCEN FIN-2026-R001",
+      "locator": "https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Resolved terminal economic interest",
+      "value": "90.0%",
+      "method": "42.0% Person A + 28.0% Person B + 20.0% Person C under stated comparable-equity assumptions."
+    },
+    {
+      "label": "Unresolved terminal interest",
+      "value": "10.0%",
+      "method": "100.0% less 90.0% known terminal interests."
+    },
+    {
+      "label": "Annualized receipts scenario",
+      "value": "$7,200,000.00",
+      "method": "Reported $600,000.00 monthly receipts × 12; constant-month assumption, not annual revenue."
+    }
+  ],
+  "limitations": [
+    "All facts are fictional and ownership assertions are not independently verified.",
+    "Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.",
+    "Control rights, target permission, and underlying adverse-event record are absent."
+  ],
+  "metadata": {
+    "conclusion": "The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario."
+  },
+  "report_narrative": [
+    [
+      "The fictional profile resolves 90.0% of comparable terminal economic ownership, leaving 10.0% unidentified. Target-entity permission, control rights, and the underlying adverse-event record remain unresolved; the receipts annualization is only a scenario."
+    ],
+    [
+      "The review concerns fictional ENTITY-Q, the dated ownership schedule, reported business profile and supplied group license. The legal identity, economic ownership, control rights, activity expectations and entity-specific permission are assessed separately."
+    ],
+    [
+      "F-01: 10.0% of comparable economic ownership has no identified underlying holder in the fictional schedule.",
+      "F-02: The supplied group license names ENTITY-R while the contemplated service concerns ENTITY-Q.",
+      "F-03: $7,200,000.00 is a constant-month scenario from reported $600,000.00 monthly receipts."
+    ],
+    [
+      "PERSON-A has a 42.0% proportional economic interest through HOLDCO-A; PERSON-B has 28.0%; PERSON-C holds 20.0% directly. The remaining 10.0% is unresolved, and these calculations do not identify control rights or determine sanctions status."
+    ],
+    [
+      "The group license names ENTITY-R, so permission for ENTITY-Q is unproven. Reported monthly receipts of $600,000.00 imply a $7,200,000.00 constant-month annualized scenario, not verified annual revenue. The underlying adverse-event order is absent."
+    ],
+    [
+      "SYN-001 supplies the fictional registry, schedule and profile assertions. The group license and news reference retain their entity and procedural limits; public methodology references do not corroborate fictional subject facts."
+    ],
+    [
+      "Obtain the missing holders, rights instruments, target-specific permission and underlying public order before accepting the unresolved dimensions. Corroborate receipts with comparable financial evidence."
+    ],
+    [
+      "All facts are fictional and ownership assertions are not independently verified.",
+      "Economic equity multiplication does not determine sanctions blocking or legal beneficial-owner status.",
+      "Control rights, target permission, and underlying adverse-event record are absent.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

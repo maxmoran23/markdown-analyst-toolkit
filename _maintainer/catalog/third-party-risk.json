@@ -1,0 +1,254 @@
+{
+  "slug": "third-party-risk",
+  "title": "Third-Party Service and Assurance Review",
+  "summary": "Assess a defined service relationship, trace outsourced dependencies, and test whether supplied assurance supports the controls being relied upon.",
+  "audience": "Third-party reviewers, service owners, and risk decision forums",
+  "decision": "Does the evidence support reliance on the proposed service, and what must be resolved before a human acceptance decision?",
+  "palette": "teal",
+  "report_sections": [
+    "Service reliance recommendation and restrictions",
+    "Relationship scope and assessment method",
+    "Material assurance findings",
+    "Service and fourth-party dependencies",
+    "Assurance evidence and test outcomes",
+    "Source provenance and coverage limitations",
+    "Remediation exit and review proposals",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "ServiceDependencies",
+      "columns": [
+        "service_id",
+        "provider_role",
+        "service_function",
+        "data_access",
+        "dependency_id",
+        "substitutability",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "SV01",
+          "Primary provider",
+          "Review decision service",
+          "Customer attributes",
+          "SV02;SV03",
+          "No immediate substitute",
+          "SYN-001"
+        ],
+        [
+          "SV02",
+          "Storage subcontractor",
+          "Hosted records",
+          "Stored customer attributes",
+          null,
+          "Shared dependency",
+          "SYN-001"
+        ],
+        [
+          "SV03",
+          "Reference supplier",
+          "Reference data feed",
+          "Reference dataset",
+          null,
+          "Alternative untested",
+          "SYN-001"
+        ],
+        [
+          "SV04",
+          "Support subcontractor",
+          "Incident support",
+          "Privileged support access",
+          "SV01",
+          "Alternative untested",
+          "SYN-001"
+        ],
+        [
+          "SV05",
+          "Proposed fallback provider",
+          "Fallback review service",
+          "Customer attributes",
+          "SV02",
+          "Shares storage dependency",
+          "SYN-001"
+        ]
+      ]
+    },
+    {
+      "name": "AssuranceReview",
+      "columns": [
+        "review_id",
+        "domain",
+        "criterion",
+        "critical",
+        "result",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "AR01",
+          "Service scope",
+          "Confirm service boundaries and accountable roles",
+          false,
+          "SUPPORTED",
+          "SYN-001"
+        ],
+        [
+          "AR02",
+          "Assurance coverage",
+          "Evidence required controls for relevant period and subcontractor",
+          true,
+          "PARTIAL",
+          "SYN-001"
+        ],
+        [
+          "AR03",
+          "Recovery",
+          "Demonstrate recovery within 4 hours and lag<=15 minutes",
+          true,
+          "FAILED",
+          "SYN-001"
+        ],
+        [
+          "AR04",
+          "Exit",
+          "Reconcile complete export of 1000 test records",
+          true,
+          "FAILED",
+          "SYN-001"
+        ],
+        [
+          "AR05",
+          "User controls",
+          "Evidence required customer-side access review",
+          true,
+          "UNVERIFIED",
+          "SYN-001"
+        ],
+        [
+          "AR06",
+          "Contract",
+          "Confirm executed incident-notification terms",
+          true,
+          "PARTIAL",
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "TP-F01",
+      "title": "Assurance scope does not cover the entire relied-on service",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "The supplied report ends 2025-12-31 and excludes the storage subcontractor; a provider assertion does not extend independent testing.",
+      "recommendation": "Obtain current and subcontractor-relevant evidence or propose an explicitly restricted reliance decision."
+    },
+    {
+      "id": "TP-F02",
+      "title": "Recovery rehearsal misses the illustrative service criteria",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "Recovery takes6 hours against 4; observed replication lag20 minutes exceeds 15.",
+      "recommendation": "Address the failure mechanism and retest service, data, and dependent controls."
+    },
+    {
+      "id": "TP-F03",
+      "title": "Exit export has an unexplained record shortfall",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "985 of 1000 fixture records are returned;15 remain unexplained.",
+      "recommendation": "Reconcile missing IDs and repeat an end-to-end exit test before relying on portability."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional service relationship and six assurance checks",
+      "locator": "10-worked-example.md, dependency inventory and assurance evidence",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "Federal Reserve SR 23-4 Interagency Guidance on Third-Party Relationships",
+      "locator": "https://www.federalreserve.gov/supervisionreg/srletters/sr2304.htm",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "OCC 2024-11 Third-Party Relationships: A Guide for Community Banks",
+      "locator": "https://www.occ.gov/news-issuances/bulletins/2024/bulletin-2024-11.html",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-003",
+      "title": "OCC 2026-46 Proposed Third-Party Risk Management Guidance",
+      "locator": "https://occ.gov/news-issuances/bulletins/2026/bulletin-2026-46.html",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Mapped service dependencies",
+      "value": "5",
+      "method": "Count SV01\u2013SV05; fallback and primary share SV02."
+    },
+    {
+      "label": "Supported review criteria",
+      "value": "1 of 6 (16.7%)",
+      "method": "SUPPORTED / six specified fixture criteria; no weighted acceptance score."
+    },
+    {
+      "label": "Exit record return",
+      "value": "985 of 1000 (98.5%)",
+      "method": "Returned records / expected fixture population;15 unreconciled prevents completeness claim."
+    }
+  ],
+  "limitations": [
+    "All providers, service facts, records, contract clauses, and tests are fictional.",
+    "An assurance report is limited by scope, period, exceptions, and user responsibilities.",
+    "A report period ending does not by itself mean the report has expired.",
+    "No onboarding, contracting, termination, or data transfer is authorized."
+  ],
+  "conclusion": "The fictional service review has unresolved assurance, recovery, exit, user-control, and contract conditions. The evidence does not support unrestricted reliance; remediation, retest, and an authorized human disposition are required.",
+  "report_narrative": [
+    [
+      "The fixture does not support unrestricted reliance on the service. Assurance coverage, recovery, exit completeness, user-control evidence, and contract support remain unresolved and require human disposition."
+    ],
+    [
+      "The unit of review is a fictional decision service and its five mapped dependencies. The six review criteria include five critical reliance conditions; targets are illustrative and tailored to this fixture."
+    ],
+    [
+      "The assurance report leaves a later coverage interval and excludes storage. Recovery and data-lag tests miss their criteria, while the exit export omits fifteen expected records. Missing user-control evidence and unsigned contract terms remain additional conditions."
+    ],
+    [
+      "The primary provider SV01 and proposed fallback SV05 share storage dependency SV02. The fallback therefore cannot be treated as independent protection from that storage failure without further architecture and recovery evidence."
+    ],
+    [
+      "AssuranceReview contains one SUPPORTED, two PARTIAL, two FAILED, and one UNVERIFIED result. Recovery takes six hours against four, data lag is twenty minutes against fifteen, and export returns 985 of 1,000 expected records, or 98.5%."
+    ],
+    [
+      "SYN-001 defines the complete fictional service and test package. A report period ending is not an invented expiry, and a management bridge assertion is not independent testing. The September 2026 third-party guidance source is a proposal, separately labelled from existing final references."
+    ],
+    [
+      "Propose relevant assurance coverage, a recovery retest including shared storage, full exit reconciliation, inspection of customer-side access review, and executed-term verification. Any conditional reliance requires feasible interim measures and authorized acceptance."
+    ],
+    [
+      "QA rejects unsupported permanent-loss claims, blanket certification reliance, and averaging away critical failures. No onboarding, renewal, contract acceptance, termination, or data transfer occurred."
+    ]
+  ]
+}

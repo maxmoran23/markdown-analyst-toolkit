@@ -1,0 +1,287 @@
+{
+  "slug": "ownership-analysis",
+  "title": "Ownership Analysis",
+  "summary": "Trace dated ownership edges, economic paths, unresolved branches, and control rights with separate legal overlays.",
+  "audience": "Analysts reviewing layered ownership structures and public ownership disclosures",
+  "decision": "Which ultimate economic interests are supported by the dated graph, and what evidence or interpretation remains missing?",
+  "palette": "indigo",
+  "report_sections": [
+    "Ownership decision brief",
+    "Scope and graph method",
+    "Material findings",
+    "Direct ownership assessment",
+    "Ultimate interests and unresolved branches",
+    "Evidence record",
+    "Recommended ownership review actions",
+    "Limitations and human review"
+  ],
+  "domain_tables": [
+    {
+      "name": "OwnershipEdges",
+      "columns": [
+        "edge_id",
+        "owner_id",
+        "owned_entity_id",
+        "interest_pct",
+        "interest_basis",
+        "effective_date",
+        "evidence_ids",
+        "notes"
+      ],
+      "formats": {
+        "interest_pct": "0.0\"%\""
+      },
+      "rows": [
+        [
+          "OW-01",
+          "PERSON-A",
+          "HOLDCO",
+          60,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Fictional supplied schedule"
+        ],
+        [
+          "OW-02",
+          "PERSON-B",
+          "HOLDCO",
+          40,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Fictional supplied schedule"
+        ],
+        [
+          "OW-03",
+          "HOLDCO",
+          "TARGET",
+          50,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Intermediate holding"
+        ],
+        [
+          "OW-04",
+          "PERSON-A",
+          "TARGET",
+          10,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Separate direct holding"
+        ],
+        [
+          "OW-05",
+          "PERSON-C",
+          "TARGET",
+          25,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Reported veto right assessed separately"
+        ],
+        [
+          "OW-06",
+          "UNKNOWN-POOL",
+          "TARGET",
+          15,
+          "Ordinary economic equity",
+          "2026-09-30",
+          "SYN-001",
+          "Amount known; holders unresolved"
+        ]
+      ]
+    },
+    {
+      "name": "UltimateInterests",
+      "columns": [
+        "ultimate_id",
+        "target_id",
+        "economic_interest_pct",
+        "path_ids",
+        "resolution_state",
+        "control_state",
+        "claim_class",
+        "evidence_ids",
+        "notes"
+      ],
+      "formats": {
+        "economic_interest_pct": "0.0\"%\""
+      },
+      "rows": [
+        [
+          "PERSON-A",
+          "TARGET",
+          40,
+          "OW-01>OW-03;OW-04",
+          "RESOLVED ON SUPPLIED GRAPH",
+          "NOT ASSESSED",
+          "Estimated",
+          "SYN-001",
+          "60 percent × 50 percent + 10 percent"
+        ],
+        [
+          "PERSON-B",
+          "TARGET",
+          20,
+          "OW-02>OW-03",
+          "RESOLVED ON SUPPLIED GRAPH",
+          "NOT ASSESSED",
+          "Estimated",
+          "SYN-001",
+          "40 percent × 50 percent"
+        ],
+        [
+          "PERSON-C",
+          "TARGET",
+          25,
+          "OW-05",
+          "RESOLVED ON SUPPLIED GRAPH",
+          "REPORTED RIGHTS",
+          "Reported",
+          "SYN-001",
+          "Veto scope and legal effect not established"
+        ],
+        [
+          "UNKNOWN-POOL",
+          "TARGET",
+          15,
+          "OW-06",
+          "UNRESOLVED",
+          "NOT ASSESSED",
+          "Reported",
+          "SYN-001",
+          "Do not allocate residual to known holders"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "Unidentified holders account for 15.0%",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.",
+      "recommendation": "Obtain the missing holder schedule and effective-date evidence."
+    },
+    {
+      "id": "F-02",
+      "title": "Known terminal economic interests total 85.0%",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.",
+      "recommendation": "Preserve path arithmetic, reported-source status, and separate legal questions."
+    },
+    {
+      "id": "F-03",
+      "title": "Reported veto right lacks supporting instrument",
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "claim_class": "Reported",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "Person C reportedly has a veto over certain asset sales; scope and governing document are absent.",
+      "recommendation": "Obtain rights evidence before drawing a control conclusion."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional ownership graph",
+      "locator": "10-worked-example.md, OW-01 through OW-06",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-CDD",
+      "title": "FinCEN CDD overview",
+      "locator": "https://www.fincen.gov/resources/statutes-and-regulations/cdd-final-rule",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-CDD-2026",
+      "title": "FinCEN FIN-2026-R001",
+      "locator": "https://www.fincen.gov/system/files/2026-02/FinCEN-Order-CCDExceptiveRelief.pdf",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-401",
+      "title": "OFAC FAQ 401",
+      "locator": "https://ofac.treasury.gov/faqs/401",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-398",
+      "title": "OFAC FAQ 398",
+      "locator": "https://ofac.treasury.gov/faqs/398",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Known terminal economic interests",
+      "value": "85.0%",
+      "method": "40.0% Person A + 20.0% Person B + 25.0% Person C."
+    },
+    {
+      "label": "Unresolved economic interest",
+      "value": "15.0%",
+      "method": "100.0% less 85.0% known terminal interests."
+    },
+    {
+      "label": "Direct edges",
+      "value": "6",
+      "method": "Count distinct OW-01 through OW-06; no graph-wide percentage sum."
+    }
+  ],
+  "limitations": [
+    "All holdings and rights are fictional reported inputs.",
+    "Simple path multiplication requires comparable proportional rights and no cycles or overlap.",
+    "Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions."
+  ],
+  "metadata": {
+    "conclusion": "The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion."
+  },
+  "report_narrative": [
+    [
+      "The fictional graph supports estimated economic interests of 40.0% for Person A, 20.0% for Person B, and a reported 25.0% for Person C. A further 15.0% remains unresolved, and the reported veto right requires evidence before any control conclusion."
+    ],
+    [
+      "The review uses six dated direct ownership edges for an acyclic, proportional economic-equity graph. It assesses path arithmetic and unresolved branches separately from control, legal beneficial ownership and sanctions propagation."
+    ],
+    [
+      "F-01: UNKNOWN-POOL holds a reported 15.0% direct target interest without identified underlying holders.",
+      "F-02: Person A 40.0% + Person B 20.0% + Person C 25.0% under proportional acyclic assumptions.",
+      "F-03: Person C reportedly has a veto over certain asset sales; scope and governing document are absent."
+    ],
+    [
+      "HOLDCO is owned 60.0% by PERSON-A and 40.0% by PERSON-B. TARGET is held 50.0% by HOLDCO, 10.0% directly by PERSON-A, 25.0% by PERSON-C and 15.0% by unidentified holders. Distinct direct and indirect holdings are retained."
+    ],
+    [
+      "PERSON-A has 60.0% × 50.0% + 10.0% = 40.0%; PERSON-B has 40.0% × 50.0% = 20.0%; PERSON-C has 25.0%. Resolved terminal interests total 85.0%; the 15.0% residual is not reallocated. The reported veto right lacks its supporting instrument."
+    ],
+    [
+      "SYN-001 supplies the fictional reported schedule and rights assertion. The arithmetic is conditional on comparable proportional rights and no overlapping or circular interests; source verification remains distinct from calculation."
+    ],
+    [
+      "Obtain the missing holder schedule and rights instrument. Reassess effective dates, share classes and path overlap before carrying these economic results into any separate legal test."
+    ],
+    [
+      "All holdings and rights are fictional reported inputs.",
+      "Simple path multiplication requires comparable proportional rights and no cycles or overlap.",
+      "Economic interest, control, legal beneficial ownership, and sanctions propagation are distinct questions.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

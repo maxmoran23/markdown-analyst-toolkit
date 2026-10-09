@@ -1,0 +1,259 @@
+{
+  "slug": "osint-research",
+  "title": "OSINT Research",
+  "summary": "Assess public claims with identity resolution, source lineage, contradictions, and bounded search coverage.",
+  "audience": "Researchers and analysts preparing evidence-backed public-source briefs",
+  "decision": "Which claims are sufficiently supported to cite, and what must be resolved first?",
+  "palette": "slate",
+  "report_sections": [
+    "Research decision brief",
+    "Scope and coverage method",
+    "Material findings",
+    "Claim assessment",
+    "Search coverage and contradictions",
+    "Evidence record",
+    "Recommended research actions",
+    "Limitations and human review"
+  ],
+  "domain_tables": [
+    {
+      "name": "Claims",
+      "columns": [
+        "claim_id",
+        "proposition",
+        "claim_class",
+        "status",
+        "confidence",
+        "support_families",
+        "contradiction_ids",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "C-01",
+          "Aster Quay Research is recorded active in the fictional registry",
+          "Observed",
+          "SUPPORTED",
+          "HIGH",
+          1,
+          "",
+          "SYN-001",
+          "Registry status only; does not establish operating activity"
+        ],
+        [
+          "C-02",
+          "Aster Quay Research has a current research-services license",
+          "Reported",
+          "CONTRADICTED",
+          "MODERATE",
+          1,
+          "D-03",
+          "SYN-001",
+          "Company page says current; fictional regulator extract shows expired"
+        ],
+        [
+          "C-03",
+          "Aster Quay Research has 240 employees",
+          "Reported",
+          "UNRESOLVED",
+          "LOW",
+          1,
+          "",
+          "SYN-001",
+          "Two publications repeat the same company statement"
+        ],
+        [
+          "C-04",
+          "The alleged award was granted to the subject",
+          "Reported",
+          "IDENTITY UNRESOLVED",
+          "NOT ASSESSABLE",
+          0,
+          "",
+          "SYN-001",
+          "Award names a similarly named entity with a different registration ID"
+        ]
+      ]
+    },
+    {
+      "name": "SearchCoverage",
+      "columns": [
+        "query_id",
+        "question",
+        "source_family",
+        "scope",
+        "review_status",
+        "items_reviewed",
+        "eligible_items",
+        "evidence_ids",
+        "limitation"
+      ],
+      "rows": [
+        [
+          "Q-01",
+          "Legal identity",
+          "F-REG",
+          "Fictional registry extract",
+          "REVIEWED",
+          1,
+          1,
+          "SYN-001",
+          "Supplied snapshot only"
+        ],
+        [
+          "Q-02",
+          "Current license",
+          "F-LIC",
+          "Fictional license extract",
+          "REVIEWED",
+          1,
+          1,
+          "SYN-001",
+          "Status at snapshot date only"
+        ],
+        [
+          "Q-03",
+          "Employee count",
+          "F-COMPANY",
+          "Company page plus two repeated stories",
+          "REVIEWED",
+          3,
+          3,
+          "SYN-001",
+          "One upstream assertion"
+        ],
+        [
+          "Q-04",
+          "Award identity",
+          "F-AWARD",
+          "Fictional award register",
+          "REVIEWED",
+          1,
+          0,
+          "SYN-001",
+          "Different registration identifier"
+        ],
+        [
+          "Q-05",
+          "Court outcome",
+          "F-COURT",
+          "Requested fictional docket",
+          "ACCESS LIMITED",
+          0,
+          0,
+          "SYN-001",
+          "No docket supplied"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "License claim conflicts with supplied register",
+      "severity": "HIGH",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "Fictional D-02 claims a current license while D-03 records expiration for AQ-104.",
+      "recommendation": "Obtain current licensing and renewal evidence before relying on the claim."
+    },
+    {
+      "id": "F-02",
+      "title": "Staffing reports share one origin",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "D-02, D-04, and D-05 repeat one company assertion of 240 employees.",
+      "recommendation": "Attribute the figure or seek independent measurement."
+    },
+    {
+      "id": "F-03",
+      "title": "Award record identifies a different entity",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "D-06 names AQ-901 rather than target AQ-104.",
+      "recommendation": "Exclude from support unless identity linkage is evidenced."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional OSINT case",
+      "locator": "10-worked-example.md, D-01 through D-06 and Q-05 gap",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-PROV",
+      "title": "W3C PROV Overview",
+      "locator": "https://www.w3.org/TR/prov-overview/",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Material claims",
+      "value": "4",
+      "method": "Count distinct C-01 through C-04."
+    },
+    {
+      "label": "Planned-search completion",
+      "value": "80.0%",
+      "method": "4 REVIEWED planned searches / 5 planned searches × 100."
+    },
+    {
+      "label": "Eligible source items",
+      "value": "5 of 6",
+      "method": "Six reviewed items less D-06 different-identifier item."
+    }
+  ],
+  "limitations": [
+    "All case data are fictional; no operational validation is implied.",
+    "Five planned searches do not represent the entire public information universe.",
+    "A register status is bounded to its date, identity, and scope."
+  ],
+  "metadata": {
+    "conclusion": "One of four fictional claims is supported within the supplied registry scope. The license claim is contradicted, the staffing claim has one upstream origin, and the award identity is unresolved; one planned search remains access-limited."
+  },
+  "report_narrative": [
+    [
+      "One of four fictional claims is supported within the supplied registry scope. The license claim is contradicted, the staffing claim has one upstream origin, and the award identity is unresolved; one planned search remains access-limited."
+    ],
+    [
+      "The review tests four propositions about fictional AQ-104 against six supplied items and five planned searches. Four searches were completed; the absent court docket remains a coverage gap."
+    ],
+    [
+      "F-01: Fictional D-02 claims a current license while D-03 records expiration for AQ-104.",
+      "F-02: D-02, D-04, and D-05 repeat one company assertion of 240 employees.",
+      "F-03: D-06 names AQ-901 rather than target AQ-104."
+    ],
+    [
+      "The active registry entry supports legal status at its cutoff only. The licensing statement is contradicted, the 240-employee assertion has only one upstream origin, and the award cannot be attributed across different registration identifiers."
+    ],
+    [
+      "Five of six reviewed items are eligible for the subject. Three staffing publications count as one source family. Completing four of five searches gives 80.0% planned-search completion, with no claim about the completeness of the public record."
+    ],
+    [
+      "SYN-001 resolves to D-01 through D-06 and the search plan in file 10. D-03 contradicts the licensing claim; D-06 identifies AQ-901 rather than AQ-104. No court outcome is evidenced."
+    ],
+    [
+      "Prioritize current licensing evidence, independent staffing support, and the missing docket. Keep the award excluded unless identity linkage is demonstrated."
+    ],
+    [
+      "All case data are fictional; no operational validation is implied.",
+      "Five planned searches do not represent the entire public information universe.",
+      "A register status is bounded to its date, identity, and scope.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

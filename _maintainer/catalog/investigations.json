@@ -1,0 +1,283 @@
+{
+  "slug": "investigations",
+  "title": "Investigation Case Review",
+  "summary": "Build an evidence-led chronology, reconcile funds movements, test competing explanations, and prepare a bounded case assessment for a human decision-maker.",
+  "audience": "Investigators, case reviewers, and quality-assurance analysts",
+  "decision": "Which case propositions are supported, contradicted, or unresolved, and what specific evidence or human decision is needed next?",
+  "palette": "indigo",
+  "report_sections": [
+    "Decision questions and current assessment",
+    "Scope, chronology method, and coverage",
+    "Findings and contradictions",
+    "Chronology and funds movement",
+    "Competing hypothesis tests",
+    "Evidence inventory and provenance",
+    "Proposed investigative actions",
+    "Limitations, quality checks, and reviewer decision"
+  ],
+  "domain_tables": [
+    {
+      "name": "CaseTimeline",
+      "columns": [
+        "event_id",
+        "event_time",
+        "event_type",
+        "amount",
+        "currency",
+        "evidence_id",
+        "claim_class",
+        "detail"
+      ],
+      "rows": [
+        [
+          "EV-01",
+          "2026-09-01T09:00:00-04:00",
+          "PROFILE",
+          null,
+          null,
+          "SYN-001",
+          "Reported",
+          "Profile states equipment trading"
+        ],
+        [
+          "EV-02",
+          "2026-09-02T10:00:00-04:00",
+          "CREDIT",
+          12000,
+          "USD",
+          "SYN-002",
+          "Observed",
+          "Posted receipt from Payer-P"
+        ],
+        [
+          "EV-03",
+          "2026-09-02T11:00:00-04:00",
+          "DEBIT",
+          11000,
+          "USD",
+          "SYN-003",
+          "Observed",
+          "Posted payment to Supplier-Q"
+        ],
+        [
+          "EV-04",
+          "2026-09-03T09:00:00-04:00",
+          "EXPLANATION",
+          null,
+          null,
+          "SYN-004",
+          "Reported",
+          "Customer says EV-03 paid for equipment"
+        ],
+        [
+          "EV-05",
+          "2026-09-03T10:00:00-04:00",
+          "DOCUMENT",
+          null,
+          null,
+          "SYN-005",
+          "Observed",
+          "Invoice face amount 10000 USD names Supplier-R"
+        ],
+        [
+          "EV-06",
+          "2026-09-04T09:00:00-04:00",
+          "RETURN",
+          2000,
+          "USD",
+          "SYN-006",
+          "Observed",
+          "Posted return explicitly linked to EV-03"
+        ]
+      ],
+      "formats": {
+        "amount": "#,##0.00"
+      }
+    },
+    {
+      "name": "HypothesisTests",
+      "columns": [
+        "hypothesis_id",
+        "hypothesis",
+        "supporting_evidence",
+        "conflicting_evidence",
+        "missing_evidence",
+        "assessment",
+        "confidence",
+        "next_step"
+      ],
+      "rows": [
+        [
+          "H-01",
+          "Payment was ordinary equipment settlement",
+          "SYN-001;SYN-004;SYN-005",
+          "SYN-003;SYN-005",
+          "Supplier identity bridge and contract",
+          "UNRESOLVED",
+          "LOW",
+          "Match beneficiary and full invoiced amount"
+        ],
+        [
+          "H-02",
+          "Onward movement lacks a supported purpose",
+          "SYN-002;SYN-003;SYN-005",
+          "SYN-004",
+          "Purpose and beneficiary corroboration",
+          "PATTERN_SUPPORTED",
+          "MODERATE",
+          "Obtain discriminating source documents"
+        ],
+        [
+          "H-03",
+          "Return fully reversed the payment",
+          "SYN-006",
+          "SYN-003;SYN-006",
+          "None for arithmetic",
+          "CONTRADICTED",
+          "HIGH",
+          "Record $9,000.00 net unreversed amount"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "INV-F01",
+      "title": "Invoice does not fully reconcile to the payment",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-003",
+        "SYN-005"
+      ],
+      "detail": "The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.",
+      "recommendation": "Obtain beneficiary identity linkage and documentation for the full amount."
+    },
+    {
+      "id": "INV-F02",
+      "title": "Rapid onward movement has an unresolved economic purpose",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-002",
+        "SYN-003",
+        "SYN-004",
+        "SYN-005"
+      ],
+      "detail": "$11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.",
+      "recommendation": "Refer the bounded evidence package for authorized investigative review."
+    },
+    {
+      "id": "INV-F03",
+      "title": "Partial return leaves $9,000.00 unreversed",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-003",
+        "SYN-006"
+      ],
+      "detail": "$11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount.",
+      "recommendation": "Preserve the gross debit and return separately and avoid presenting the payment as fully reversed."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional profile",
+      "locator": "10-worked-example.md, source I01",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional incoming posting",
+      "locator": "10-worked-example.md, source I02",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional outgoing posting",
+      "locator": "10-worked-example.md, source I03",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional customer explanation",
+      "locator": "10-worked-example.md, source I04",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional invoice",
+      "locator": "10-worked-example.md, source I05",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional return posting",
+      "locator": "10-worked-example.md, source I06",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Source items received",
+      "value": 8,
+      "method": "I01–I08, including one duplicate and one inaccessible contract"
+    },
+    {
+      "label": "Chronology events",
+      "value": 6,
+      "method": "Six canonical processed sources support EV-01–EV-06"
+    },
+    {
+      "label": "Gross debit USD",
+      "value": 11000,
+      "method": "EV-03 only; invoice is not a posted transaction"
+    },
+    {
+      "label": "Net unreversed debit USD",
+      "value": 9000,
+      "method": "EV-03 11000 minus EV-06 linked return 2000"
+    }
+  ],
+  "limitations": [
+    "All records are fictional; no filing or legal determination is made.",
+    "The contract is inaccessible and supplier identity linkage is unresolved.",
+    "Net unreversed value is neither proven loss nor an automatically reportable amount."
+  ],
+  "conclusion": "The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss.",
+  "report_narrative": [
+    [
+      "The supplied invoice does not reconcile to the $11,000.00 payment in amount or beneficiary identity. A $2,000.00 linked return leaves $9,000.00 unreversed; purpose remains unresolved and that amount is not a proven loss."
+    ],
+    [
+      "Eight source items support six chronology events. The review separates the invoice, payment instruction, executed debit and linked return so multiple documents about one event do not inflate monetary totals."
+    ],
+    [
+      "INV-F01: The debit is $11,000.00; the supplied invoice face amount is $10,000.00 and names a different supplier. The amount difference is $1.00,000.00.",
+      "INV-F02: $11,000.00 left one hour after a $12,000.00 receipt. A reported equipment explanation is not fully corroborated.",
+      "INV-F03: $11,000.00 debit minus $2,000.00 linked posted return equals $9,000.00; this is not a proven loss or suspicious amount."
+    ],
+    [
+      "The $11,000.00 gross debit and $2,000.00 linked return leave $9,000.00 unreversed. The supplied invoice differs in amount and beneficiary identity; invoice face value is not another payment, and unreversed value is not proven loss."
+    ],
+    [
+      "The business-purpose explanation remains unresolved because the invoice does not reconcile to the payment. The linked return is relevant counterevidence but does not by itself establish purpose or disprove another hypothesis."
+    ],
+    [
+      "Each chronology event retains its source locator and event-versus-record distinction. The synthetic evidence inventory includes contradictory records and does not treat an absent explanation as affirmative proof of misconduct."
+    ],
+    [
+      "Obtain the missing reconciliation of purpose, beneficiary and amount. Preserve the linked return and test both supporting and contradictory evidence before a reviewer accepts a case disposition."
+    ],
+    [
+      "All records are fictional; no filing or legal determination is made.",
+      "The contract is inaccessible and supplier identity linkage is unresolved.",
+      "Net unreversed value is neither proven loss nor an automatically reportable amount.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

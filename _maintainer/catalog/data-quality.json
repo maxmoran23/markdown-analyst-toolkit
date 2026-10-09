@@ -1,0 +1,258 @@
+{
+  "slug": "data-quality",
+  "title": "Data Quality and Fitness for Use",
+  "summary": "Assess whether a defined dataset can support a specific analytical or control purpose, with record-level defects and explicit release restrictions.",
+  "audience": "Data stewards, control analysts, and review teams",
+  "decision": "Is the supplied dataset sufficiently supported for the stated use, and which defects require human resolution?",
+  "palette": "teal",
+  "report_sections": [
+    "Fitness recommendation and restrictions",
+    "Scope data contract and method",
+    "Material defects and findings",
+    "Record population and lineage",
+    "Rule outcomes and hard gates",
+    "Evidence and source limitations",
+    "Remediation reconciliation and retest",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "DataRecords",
+      "columns": [
+        "record_id",
+        "customer_id",
+        "entity_type",
+        "full_name",
+        "date_of_birth",
+        "country_code",
+        "last_refresh"
+      ],
+      "rows": [
+        [
+          "D01",
+          "P001",
+          "INDIVIDUAL",
+          "Aster Vale",
+          "1985-04-12",
+          "US",
+          "2026-09-20"
+        ],
+        [
+          "D02",
+          "P002",
+          "INDIVIDUAL",
+          null,
+          "1990-02-30",
+          "CA",
+          "2026-09-20"
+        ],
+        [
+          "D03",
+          "P003",
+          "INDIVIDUAL",
+          "Briar Lake",
+          "1977-08-03",
+          "ZZ",
+          "2024-09-30"
+        ],
+        [
+          "D04",
+          "P004",
+          "ENTITY",
+          "Cedar Sample Ltd",
+          null,
+          "GB",
+          "2026-09-20"
+        ],
+        [
+          "D05",
+          "P005",
+          "INDIVIDUAL",
+          "Dune Rowan",
+          "1988-06-11",
+          "US",
+          "2026-09-20"
+        ],
+        [
+          "D06",
+          "P005",
+          "INDIVIDUAL",
+          "Dune Rowan",
+          "1988-06-11",
+          "US",
+          "2026-09-20"
+        ]
+      ]
+    },
+    {
+      "name": "RuleResults",
+      "columns": [
+        "rule_id",
+        "dimension",
+        "eligible_count",
+        "defect_count",
+        "defect_rate",
+        "critical",
+        "gate_result"
+      ],
+      "rows": [
+        [
+          "DQ01",
+          "Completeness",
+          6,
+          1,
+          0.16666666666666666,
+          true,
+          "RESTRICT"
+        ],
+        [
+          "DQ02",
+          "Validity",
+          6,
+          1,
+          0.16666666666666666,
+          true,
+          "RESTRICT"
+        ],
+        [
+          "DQ03",
+          "Validity",
+          5,
+          1,
+          0.2,
+          true,
+          "RESTRICT"
+        ],
+        [
+          "DQ04",
+          "Uniqueness",
+          6,
+          2,
+          0.3333333333333333,
+          true,
+          "RESTRICT"
+        ],
+        [
+          "DQ05",
+          "Timeliness",
+          6,
+          1,
+          0.16666666666666666,
+          false,
+          "REVIEW"
+        ]
+      ],
+      "formats": {
+        "defect_rate": "0.0%"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "DQ-F01",
+      "title": "Critical validity and completeness defects prevent an unrestricted recommendation",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "D02 has a blank name and impossible date; D03 has a code outside the fictional approved set.",
+      "recommendation": "Propose restricted use pending source-owner correction and record-level retest."
+    },
+    {
+      "id": "DQ-F02",
+      "title": "Duplicated customer key affects two supplied records",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "P005 appears on D05 and D06 where the contract requires one row per customer. Two affected rows form one duplicate group and one excess row.",
+      "recommendation": "Resolve source lineage before any merge or removal; reconcile corrected counts."
+    },
+    {
+      "id": "DQ-F03",
+      "title": "One refresh date exceeds the illustrative freshness horizon",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "D03 is 730 days old at 2026-09-30 against a 365-day illustration.",
+      "recommendation": "Obtain current evidence or document a permitted limitation for the intended use."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional six-record customer extract and rule contract",
+      "locator": "10-worked-example.md, complete input and rule outcomes",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "BCBS Principles for effective risk data aggregation and risk reporting",
+      "locator": "https://www.bis.org/publ/bcbs239.pdf",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "BCBS 239 implementation newsletter, 2026",
+      "locator": "https://www.bis.org/publications/implementation-principles-effective-risk-data-aggregation-and-risk-reporting-bcbs-239-principles",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Supplied rows",
+      "value": "6",
+      "method": "Count all original record IDs, retaining both duplicate-group members."
+    },
+    {
+      "label": "Critical-affected rows",
+      "value": "4 of 6 (66.7%)",
+      "method": "Distinct union D02,D03,D05,D06 / all six records."
+    },
+    {
+      "label": "Passing rule checks",
+      "value": "23 of 29 (79.3%)",
+      "method": "Eligible rule checks29 minus six failures; diagnostic only, no release authority."
+    }
+  ],
+  "limitations": [
+    "The allowed codes and 365-day horizon are fictional contractual examples.",
+    "The check inventory cannot detect every possible data defect.",
+    "Duplicate keys establish a contract breach, not authority to merge records.",
+    "No source-system correction or feed restriction was executed."
+  ],
+  "conclusion": "Four of six fictional records are affected by critical defects, so the evidence supports a restricted-use recommendation. The 79.3% diagnostic check-pass rate cannot override critical gates; correction and acceptance remain human decisions.",
+  "report_narrative": [
+    [
+      "Four of six fictional records are affected by critical defects. The draft recommendation is restricted use pending source-confirmed correction and human acceptance; a 79.3% diagnostic check-pass rate cannot override the critical gates."
+    ],
+    [
+      "The extract has six active rows, five distinct customer keys, and a one-row-per-customer contract. The fixture uses five rules, a limited US/CA/GB code set, and a 365-day freshness horizon; these are illustrative contractual choices."
+    ],
+    [
+      "D02 has a blank name and impossible birth date; D03 has an unapproved code and stale refresh date; D05 and D06 share the same customer key. Duplicate keys breach this contract but do not authorize a merge or deletion."
+    ],
+    [
+      "DataRecords preserves all six original rows, including nulls and invalid date text. There are no exclusions. The key P005 forms one duplicate group, two affected rows, and one excess row; these counts describe different aspects of the defect."
+    ],
+    [
+      "Rule eligibility totals 6 + 6 + 5 + 6 + 6 = 29 checks; six fail and 23 pass. The ENTITY row D04 is outside the individual birth-date denominator. Critical affected IDs are the distinct union D02, D03, D05, D06, or 4/6 = 66.7%."
+    ],
+    [
+      "SYN-001 supports the record-level arithmetic and rule outcomes. The public BCBS sources provide method context only; they do not prescribe the fictional code list, freshness horizon, or zero-failure gates. Upstream real-world accuracy is outside this fixture."
+    ],
+    [
+      "Propose source-owner correction for D02 and D03, lineage resolution for P005, and current refresh evidence. Retest the corrected extract and reconcile any approved removal to the original six records; do not improve rates by silently dropping defects."
+    ],
+    [
+      "QA checks calendar validity, conditional eligibility, duplicate accounting, and distinct affected-row totals. Actual feed acceptance, source correction, or use restrictions require an authorized human decision; no production action occurred."
+    ]
+  ]
+}

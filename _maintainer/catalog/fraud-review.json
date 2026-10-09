@@ -1,0 +1,300 @@
+{
+  "slug": "fraud-review",
+  "title": "Fraud Incident Review",
+  "summary": "Separate payment instructions from actual execution, verify authorization evidence, reconcile returns, and prepare proportionate incident actions for an authorized human responder.",
+  "audience": "Fraud analysts, payment-control reviewers, incident coordinators, and quality reviewers",
+  "decision": "What is known about authorization, execution, and remaining exposure, and which time-sensitive actions should an authorized responder consider?",
+  "palette": "umber",
+  "report_sections": [
+    "Incident priorities and known exposure",
+    "Scope, incident population, and amount method",
+    "Findings and verification gaps",
+    "Requested, executed, and returned amounts",
+    "Authorization and incident-response review",
+    "Evidence and source provenance",
+    "Proposed actions for authorized responders",
+    "Limitations, quality checks, and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "IncidentAmounts",
+      "columns": [
+        "case_id",
+        "currency",
+        "requested_amount",
+        "executed_amount",
+        "confirmed_return_amount",
+        "net_unreturned_amount",
+        "amount_status",
+        "review_state"
+      ],
+      "rows": [
+        [
+          "F01",
+          "USD",
+          40000,
+          40000,
+          10000,
+          30000,
+          "CONFIRMED",
+          "SUSPECTED_FRAUD"
+        ],
+        [
+          "F02",
+          "USD",
+          15000,
+          0,
+          0,
+          0,
+          "CONFIRMED",
+          "PREVENTED_REQUEST"
+        ],
+        [
+          "F03",
+          "USD",
+          12000,
+          null,
+          null,
+          null,
+          "EXECUTION_UNKNOWN",
+          "OPEN_ALLEGATION"
+        ],
+        [
+          "F04",
+          "USD",
+          5000,
+          5000,
+          0,
+          5000,
+          "CONFIRMED",
+          "BENIGN_SUPPORTED"
+        ]
+      ],
+      "formats": {
+        "requested_amount": "#,##0.00",
+        "executed_amount": "#,##0.00",
+        "confirmed_return_amount": "#,##0.00",
+        "net_unreturned_amount": "#,##0.00"
+      }
+    },
+    {
+      "name": "VerificationReview",
+      "columns": [
+        "case_id",
+        "authorization_basis",
+        "detail_change",
+        "independent_verification",
+        "payment_status",
+        "time_sensitivity",
+        "proposed_action",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "F01",
+          "Impersonated supplier instruction reported",
+          "New beneficiary",
+          "Known-channel supplier denial documented",
+          "EXECUTED_PARTIAL_RETURN",
+          "HIGH",
+          "Authorized fraud responder review and recovery assessment",
+          "SYN-001;SYN-002"
+        ],
+        [
+          "F02",
+          "Suspicious instruction identified before execution",
+          "New beneficiary",
+          "Request failed established verification",
+          "NOT_EXECUTED",
+          "MEDIUM",
+          "Preserve instruction and verify cancellation state",
+          "SYN-003;SYN-004"
+        ],
+        [
+          "F03",
+          "Employee reports unauthorized payroll change",
+          "Payroll destination changed",
+          "No independent logs or ledger supplied",
+          "UNKNOWN",
+          "HIGH",
+          "Obtain ledger and access logs through approved incident process",
+          "SYN-005;SYN-006"
+        ],
+        [
+          "F04",
+          "Amended contract and approved instruction",
+          "New beneficiary",
+          "Preexisting trusted-channel confirmation documented",
+          "EXECUTED",
+          "LOW",
+          "Document supported ordinary change and human disposition",
+          "SYN-007;SYN-008"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "FR-F01",
+      "title": "Suspected supplier impersonation has $30,000.00 unreturned",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002"
+      ],
+      "detail": "F01 has a $40,000.00 posted payment and $10,000.00 confirmed linked return. The supplier denial is documented; ultimate loss and liability remain undecided.",
+      "recommendation": "Route to the authorized fraud responder for time-sensitive review and permitted recovery assessment."
+    },
+    {
+      "id": "FR-F02",
+      "title": "A prevented request must not be counted as executed loss",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-003",
+        "SYN-004"
+      ],
+      "detail": "F02 requested $15,000.00 but the supplied instruction and ledger status confirm no execution.",
+      "recommendation": "Retain the attempted request and verify the cancellation remains effective; do not claim an actual loss or proven savings."
+    },
+    {
+      "id": "FR-F03",
+      "title": "Payroll allegation has unknown execution status",
+      "severity": "HIGH",
+      "confidence": "LOW",
+      "claim_class": "Reported",
+      "evidence_ids": [
+        "SYN-005",
+        "SYN-006"
+      ],
+      "detail": "F03 reports $12,000.00 at issue, but neither posting records nor access logs are supplied.",
+      "recommendation": "Obtain execution and authorization evidence urgently through the approved human process; keep exposure null."
+    },
+    {
+      "id": "FR-F04",
+      "title": "A beneficiary change has a supported ordinary explanation",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-007",
+        "SYN-008"
+      ],
+      "detail": "F04 has a $5,000.00 ordinary payment supported by an amended contract and trusted-channel confirmation.",
+      "recommendation": "Document the evidence and seek human disposition; exclude this payment from suspected-fraud exposure totals."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional supplier instruction and denial record",
+      "locator": "10-worked-example.md, source R01",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional F01 ledger and return",
+      "locator": "10-worked-example.md, source R02",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional suspicious request",
+      "locator": "10-worked-example.md, source R03",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional rejected-instruction ledger state",
+      "locator": "10-worked-example.md, source R04",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional payroll complaint",
+      "locator": "10-worked-example.md, source R05",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional missing-source inventory",
+      "locator": "10-worked-example.md, source R06",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-007",
+      "title": "Fictional amended contract and confirmation",
+      "locator": "10-worked-example.md, source R07",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-008",
+      "title": "Fictional ordinary payment ledger",
+      "locator": "10-worked-example.md, source R08",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Requests reviewed",
+      "value": 4,
+      "method": "Distinct cases F01–F04"
+    },
+    {
+      "label": "Known requested amount USD",
+      "value": 72000,
+      "method": "40000+15000+12000+5000; includes alleged and ordinary requests, not loss"
+    },
+    {
+      "label": "Known suspected-fraud unreturned USD",
+      "value": 30000,
+      "method": "F01 executed40000-return10000; F02 zero; F03 unknown; F04 excluded as ordinary"
+    },
+    {
+      "label": "Confirmed unexecuted request USD",
+      "value": 15000,
+      "method": "F02 request amount with confirmed nonexecution; not measured savings"
+    }
+  ],
+  "limitations": [
+    "The example does not establish legal liability, customer reimbursement, or final fraud loss.",
+    "F03 execution and recovery are unknown; its $12,000.00 request is not imputed as loss or zero exposure.",
+    "No recovery request, account restriction, external contact, or filing is executed by this suite."
+  ],
+  "conclusion": "Known suspected-fraud unreturned value is $30,000.00, with one payroll allegation still lacking execution evidence. A $15,000.00 request did not execute, and a supported ordinary $5,000.00 payment is excluded from the suspected-fraud subtotal.",
+  "report_narrative": [
+    [
+      "Known suspected-fraud unreturned value is $30,000.00, with one payroll allegation still lacking execution evidence. A $15,000.00 request did not execute, and a supported ordinary $5,000.00 payment is excluded from the suspected-fraud subtotal."
+    ],
+    [
+      "Four requests are reviewed using separate requested, executed, returned and unresolved amount states. The example contains one unexecuted request, one supported ordinary payment and one allegation without execution evidence."
+    ],
+    [
+      "FR-F01: F01 has a $40,000.00 posted payment and $10,000.00 confirmed linked return. The supplier denial is documented; ultimate loss and liability remain undecided.",
+      "FR-F02: F02 requested $15,000.00 but the supplied instruction and ledger status confirm no execution.",
+      "FR-F03: F03 reports $12,000.00 at issue, but neither posting records nor access logs are supplied.",
+      "FR-F04: F04 has a $5,000.00 ordinary payment supported by an amended contract and trusted-channel confirmation."
+    ],
+    [
+      "Known requested value is $72,000.00. Known suspected-fraud unreturned value is $30,000.00; the $15,000.00 unexecuted request is excluded from that subtotal, as is the supported ordinary $5,000.00 payment."
+    ],
+    [
+      "The payroll allegation remains unresolved because execution evidence is missing. Verification and response steps remain proposed for authorized responders; the analytical record does not claim that funds were frozen, recalled or recovered."
+    ],
+    [
+      "The fictional request, execution and return records in file 10 support distinct amount fields. Reported authorization and fraud allegations remain attributed; no assumption converts missing execution into a confirmed loss."
+    ],
+    [
+      "Prioritize verification and the documented time-sensitive response options through authorized channels. Obtain payroll execution evidence and maintain the separation between suspected-fraud exposure, ordinary payments and unexecuted attempts."
+    ],
+    [
+      "The example does not establish legal liability, customer reimbursement, or final fraud loss.",
+      "F03 execution and recovery are unknown; its $12,000.00 request is not imputed as loss or zero exposure.",
+      "No recovery request, account restriction, external contact, or filing is executed by this suite.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

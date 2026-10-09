@@ -1,0 +1,314 @@
+{
+  "slug": "trade-surveillance",
+  "title": "Trade Surveillance Review",
+  "summary": "Reconstruct order lifecycles, distinguish cancellations from executions, compare activity with aligned market benchmarks, and evaluate manipulation indicators as leads for human review.",
+  "audience": "Trade-surveillance analysts, market-conduct reviewers, and surveillance-control testers",
+  "decision": "Which order or execution patterns warrant further human review after sequence, ownership, market context, and denominator checks?",
+  "palette": "slate",
+  "report_sections": [
+    "Surveillance leads and review priorities",
+    "Scope, sequence reconstruction, and benchmarks",
+    "Findings and alternative explanations",
+    "Order lifecycle reconciliation",
+    "Scenario observations and denominator checks",
+    "Evidence and rule applicability",
+    "Proposed surveillance-review actions",
+    "Limitations, negative controls, and human decision"
+  ],
+  "domain_tables": [
+    {
+      "name": "OrderLifecycle",
+      "columns": [
+        "order_id",
+        "group_id",
+        "instrument_id",
+        "side",
+        "new_quantity",
+        "filled_quantity",
+        "cancelled_quantity",
+        "remaining_quantity",
+        "lifetime_ms",
+        "cancel_quantity_ratio",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "O1",
+          "A",
+          "FICT-A",
+          "BUY",
+          1000,
+          200,
+          800,
+          0,
+          500,
+          0.8,
+          "SYN-001"
+        ],
+        [
+          "O2",
+          "A",
+          "FICT-A",
+          "SELL",
+          100,
+          100,
+          0,
+          0,
+          50,
+          0.0,
+          "SYN-001"
+        ],
+        [
+          "O3",
+          "B",
+          "FICT-B",
+          "BUY",
+          500,
+          0,
+          500,
+          0,
+          100,
+          1.0,
+          "SYN-002"
+        ],
+        [
+          "O4",
+          "C",
+          "FICT-C",
+          "BUY",
+          100,
+          100,
+          0,
+          0,
+          100,
+          0.0,
+          "SYN-003;SYN-004"
+        ],
+        [
+          "O5",
+          "C",
+          "FICT-C",
+          "SELL",
+          100,
+          100,
+          0,
+          0,
+          50,
+          0.0,
+          "SYN-003;SYN-004"
+        ]
+      ],
+      "formats": {
+        "new_quantity": "#,##0",
+        "filled_quantity": "#,##0",
+        "cancelled_quantity": "#,##0",
+        "remaining_quantity": "#,##0",
+        "lifetime_ms": "0.0",
+        "cancel_quantity_ratio": "0.0%"
+      }
+    },
+    {
+      "name": "SurveillanceObservations",
+      "columns": [
+        "observation_id",
+        "group_id",
+        "scenario_id",
+        "state",
+        "measured_value",
+        "unit",
+        "criterion",
+        "review_priority",
+        "confidence",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "TS-O1",
+          "A",
+          "TS-01",
+          "MATCH",
+          300,
+          "milliseconds",
+          "cancel<=500ms after opposite fill; cancelled/new>=0.80",
+          "MEDIUM",
+          "MODERATE",
+          "SYN-001;SYN-005"
+        ],
+        [
+          "TS-O2",
+          "A",
+          "TS-02",
+          "NO_MATCH",
+          1,
+          "simultaneous_price_levels",
+          "at least 3 same-side price levels",
+          "LOW",
+          "HIGH",
+          "SYN-001"
+        ],
+        [
+          "TS-O3",
+          "B",
+          "TS-01",
+          "NO_MATCH",
+          null,
+          "milliseconds",
+          "opposite-side execution required",
+          "LOW",
+          "HIGH",
+          "SYN-002;SYN-006"
+        ],
+        [
+          "TS-O4",
+          "C",
+          "TS-03",
+          "MATCH",
+          100,
+          "unique_executed_shares",
+          "execution between confirmed same-owner accounts",
+          "MEDIUM",
+          "MODERATE",
+          "SYN-003;SYN-004"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "TS-F01",
+      "title": "A cancellation follows an opposite-side fill and warrants review",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-005"
+      ],
+      "detail": "O1 cancels 800 of 1000 shares 300 ms after O2 fills 100 shares on the opposite side. The authored screen matches; intent and causation are not established.",
+      "recommendation": "Review broader patterns, market context, and strategy rationale through the authorized surveillance process."
+    },
+    {
+      "id": "TS-F02",
+      "title": "A high cancellation ratio has a supported context and no opposite fill",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-002",
+        "SYN-006"
+      ],
+      "detail": "O3 cancels 500 shares after a documented quote change. No opposite-side execution exists in the complete supplied window.",
+      "recommendation": "Retain the negative scenario result and bounded ordinary explanation; do not infer manipulation from cancellation alone."
+    },
+    {
+      "id": "TS-F03",
+      "title": "One same-owner execution requires control and strategy context",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-003",
+        "SYN-004"
+      ],
+      "detail": "O4 and O5 represent two account-side legs of one 100-share execution between confirmed same-owner accounts. No intent or broader pattern is established.",
+      "recommendation": "Review strategy independence, controls, repetition, and beneficial-ownership evidence; do not call the observation illegal wash trading."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional A order-event extract",
+      "locator": "10-worked-example.md, M01–M05 and duplicate M12",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional B order-event extract",
+      "locator": "10-worked-example.md, M06–M07",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional C matched-execution extract",
+      "locator": "10-worked-example.md, M08–M11",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional same-owner mapping",
+      "locator": "10-worked-example.md, context record C",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional A market benchmark",
+      "locator": "10-worked-example.md, benchmark register A",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-006",
+      "title": "Fictional B quote and risk-log context",
+      "locator": "10-worked-example.md, context record B",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Accepted orders",
+      "value": 5,
+      "method": "Unique O1–O5 accepted order IDs"
+    },
+    {
+      "label": "Canonical event messages",
+      "value": 11,
+      "method": "12 raw messages minus exact duplicate M12"
+    },
+    {
+      "label": "Unique executions",
+      "value": 3,
+      "method": "X-A1, X-A2, X-C1; X-C1 has two account-side legs"
+    },
+    {
+      "label": "Matched review leads",
+      "value": 2,
+      "method": "TS-O1 and TS-O4; no legal conclusion implied"
+    }
+  ],
+  "limitations": [
+    "Illustrative thresholds are authored screens, not legal definitions or approved production parameters.",
+    "Single short windows cannot establish intent, manipulation, repeated behavior, or strategy effectiveness.",
+    "Account-side execution legs and unique market executions have different denominators."
+  ],
+  "conclusion": "Two surveillance leads warrant contextual human review: A has a cancellation following an opposite-side fill, and C has one same-owner execution. B is a complete negative for the sequence screen; the example establishes no manipulation, intent, or illegal wash trading.",
+  "report_narrative": [
+    [
+      "Two surveillance leads warrant contextual human review: A has a cancellation following an opposite-side fill, and C has one same-owner execution. B is a complete negative for the sequence screen; the example establishes no manipulation, intent, or illegal wash trading."
+    ],
+    [
+      "Five accepted orders reconcile to eleven canonical event messages and three unique executions. The reconstruction preserves message sequence, order-state transitions, linked fill legs and benchmark coverage before applying fictional screens."
+    ],
+    [
+      "TS-F01: O1 cancels 800 of 1000 shares 300 ms after O2 fills 100 shares on the opposite side. The authored screen matches; intent and causation are not established.",
+      "TS-F02: O3 cancels 500 shares after a documented quote change. No opposite-side execution exists in the complete supplied window.",
+      "TS-F03: O4 and O5 represent two account-side legs of one 100-share execution between confirmed same-owner accounts. No intent or broader pattern is established."
+    ],
+    [
+      "Every order lifecycle reconciles accepted quantity to filled, cancelled and residual quantities as specified in file 10. Duplicate message captures do not create additional orders, and two sides of one execution do not create two executions."
+    ],
+    [
+      "Account A has a cancellation following an opposite-side fill; C has one same-owner execution. These are two contextual review leads. B is a complete negative for the sequence screen; none of the screens establishes intent, manipulation or illegal wash trading."
+    ],
+    [
+      "The fictional event ledger, execution links and scenario criteria provide the calculation basis. FINRA, CFTC and SEC references retain their market and jurisdictional scope rather than converting the example screen into a legal test."
+    ],
+    [
+      "Obtain relevant strategy, ownership, communications and market context through the authorized surveillance process. Challenge legitimate explanations and benchmark gaps before any reviewer disposition."
+    ],
+    [
+      "Illustrative thresholds are authored screens, not legal definitions or approved production parameters.",
+      "Single short windows cannot establish intent, manipulation, repeated behavior, or strategy effectiveness.",
+      "Account-side execution legs and unique market executions have different denominators.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

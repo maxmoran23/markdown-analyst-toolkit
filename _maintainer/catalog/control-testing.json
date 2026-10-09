@@ -1,0 +1,226 @@
+{
+  "slug": "control-testing",
+  "title": "Control Testing and Evidence Review",
+  "summary": "Build a traceable control-testing workpaper from a defined population, explicit criteria, and inspectable evidence.",
+  "audience": "Control testers, quality reviewers, and process owners",
+  "decision": "What conclusions does the tested evidence support, and what must a reviewer resolve?",
+  "palette": "slate",
+  "report_sections": [
+    "Review conclusion and restrictions",
+    "Scope and testing method",
+    "Findings and deviations",
+    "Control design and coverage",
+    "Selected instance results",
+    "Evidence and alternative explanations",
+    "Remediation and retest plan",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "ControlSummary",
+      "columns": [
+        "control_id",
+        "population_count",
+        "selected_count",
+        "pass_count",
+        "fail_count",
+        "unassessed_count",
+        "design_result",
+        "conclusion"
+      ],
+      "rows": [
+        [
+          "C01",
+          4,
+          2,
+          1,
+          1,
+          0,
+          "Adequate for stated objective",
+          "Sample deviation"
+        ],
+        [
+          "C02",
+          3,
+          2,
+          1,
+          0,
+          1,
+          "Adequate for stated objective",
+          "Unable to conclude"
+        ],
+        [
+          "C03",
+          1,
+          1,
+          0,
+          1,
+          0,
+          "Inadequate",
+          "Design and operation gap"
+        ]
+      ]
+    },
+    {
+      "name": "TestResults",
+      "columns": [
+        "test_id",
+        "control_id",
+        "population_id",
+        "selection_basis",
+        "result",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "T01",
+          "C01",
+          "R01",
+          "Judgmental ordinary case",
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "T02",
+          "C01",
+          "R03",
+          "Judgmental elevated risk",
+          "FAIL",
+          "SYN-001"
+        ],
+        [
+          "T03",
+          "C02",
+          "R05",
+          "Judgmental ordinary case",
+          "PASS",
+          "SYN-001"
+        ],
+        [
+          "T04",
+          "C02",
+          "R06",
+          "Judgmental missing archive",
+          "UNABLE TO CONCLUDE",
+          "SYN-001"
+        ],
+        [
+          "T05",
+          "C03",
+          "R08",
+          "Census of one event",
+          "FAIL",
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "CT-F01",
+      "title": "Required review occurred after the test criterion deadline",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "R03 was reviewed two fictional business days after receipt against an illustrative one-business-day criterion. One of two selected C01 records failed.",
+      "recommendation": "Investigate delay, assess affected records, and submit a retest plan for human approval."
+    },
+    {
+      "id": "CT-F02",
+      "title": "Missing review evidence prevents an operating conclusion",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "R06 has no accessible execution evidence. Absence of evidence is recorded separately from a demonstrated missed review.",
+      "recommendation": "Obtain the archive record or document why it cannot be recovered; retain the restriction."
+    },
+    {
+      "id": "CT-F03",
+      "title": "Release approval lacks separation from the preparer",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "C03 permits the preparer to approve release; R08 used that design.",
+      "recommendation": "Propose a distinct reviewer control and test implementation before closure."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional control population, criteria, and execution log",
+      "locator": "10-worked-example.md, complete population and evidence ledger",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "FFIEC BSA/AML Independent Testing",
+      "locator": "https://bsaaml.ffiec.gov/manual/AssessingTheBSAAMLComplianceProgram/03",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "FFIEC Risk-Focused BSA/AML Supervision",
+      "locator": "https://bsaaml.ffiec.gov/manual/ScopingAndPlanning/02",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Selection coverage",
+      "value": "5 of 8 (62.5%)",
+      "method": "Selected population IDs / supplied population IDs; not statistical assurance."
+    },
+    {
+      "label": "Confirmed sample deviations",
+      "value": "2 of 5 (40.0%)",
+      "method": "FAIL / selected; one additional selected record is unable to conclude."
+    },
+    {
+      "label": "Unassessed selected records",
+      "value": "1 of 5 (20.0%)",
+      "method": "UNABLE TO CONCLUDE / selected."
+    }
+  ],
+  "limitations": [
+    "Judgmental selection does not support a population deviation estimate.",
+    "Eight records are the complete fictional input population, not a live operational population.",
+    "The assistant is not an independent organizational reviewer.",
+    "One missing execution record prevents a C02 operating conclusion."
+  ],
+  "conclusion": "Two confirmed deviations and one unresolved evidence gap were identified among five selected instances from eight fictional opportunities. C03 has a design gap; judgmental selection does not support a population deviation estimate, and human review remains pending.",
+  "report_narrative": [
+    [
+      "Two confirmed deviations and one unresolved evidence gap were identified in five selected instances from eight fictional opportunities. The evidence supports a restricted workpaper conclusion; it does not estimate the population deviation rate."
+    ],
+    [
+      "The fixture contains four C01 opportunities, three C02 opportunities, and one C03 opportunity. Five records were selected: two C01, two C02, and the sole C03 event. Criteria and the fictional business-day calendar were defined before interpreting outcomes."
+    ],
+    [
+      "R03 missed the illustrative timing criterion, R06 lacks accessible execution evidence, and R08 lacks a separate approver. C03 also has a design gap because its procedure permits preparer self-approval. Missing R06 evidence does not prove nonperformance."
+    ],
+    [
+      "C01 and C02 designs are adequate for their stated fictional objectives; C03 is inadequate. C01 and C02 selections are judgmental, including a targeted archive concern, while C03 is a census of one event. The fixture does not establish an independent organizational reviewer, and the assistant cannot supply that independence."
+    ],
+    [
+      "TestResults contains two PASS, two FAIL, and one UNABLE TO CONCLUDE result. Selection coverage is 5/8 = 62.5%; confirmed deviations among selected records are 2/5 = 40.0%. The conclusive-only rate of 2/4 = 50.0% must be shown with the missing record retained in the original denominator."
+    ],
+    [
+      "SYN-001 contains the full fictional population, criteria, and execution log. R06 may reflect an archive failure or an execution failure; recovering contemporaneous evidence would distinguish those explanations. Public FFIEC references support method context, not the synthetic findings."
+    ],
+    [
+      "Proposed actions are to investigate R03 timing, obtain or resolve R06 evidence, and redesign C03 approval separation. Retest should use fresh post-change instances and retain the original deviations; a corrected historical record alone does not demonstrate sustained operation."
+    ],
+    [
+      "QA must reconcile 5 = 2 + 2 + 1 and reject population inference from the judgmental selection. Human review remains pending for severity, scope expansion, independence, remediation, and closure."
+    ]
+  ]
+}

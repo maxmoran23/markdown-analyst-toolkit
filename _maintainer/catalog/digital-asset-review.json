@@ -1,0 +1,307 @@
+{
+  "slug": "digital-asset-review",
+  "title": "Digital Asset Review",
+  "summary": "Reconcile public-ledger events and token units while separating transaction facts from real-world attribution.",
+  "audience": "Analysts reviewing public blockchain evidence and data-quality limitations",
+  "decision": "What activity is supported by the supplied capture, and what attribution or completeness gaps remain?",
+  "palette": "teal",
+  "report_sections": [
+    "Digital asset review brief",
+    "Scope and ledger method",
+    "Material findings",
+    "Event reconciliation",
+    "Counterparty and attribution assessment",
+    "Evidence record",
+    "Recommended review actions",
+    "Limitations and human review"
+  ],
+  "domain_tables": [
+    {
+      "name": "LedgerEvents",
+      "columns": [
+        "event_id",
+        "chain_id",
+        "tx_id",
+        "event_index",
+        "asset_id",
+        "raw_amount",
+        "decimals",
+        "display_units",
+        "direction",
+        "execution_state",
+        "included",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "EV-01",
+          "FICTIONAL-EVM",
+          "TX-01",
+          0,
+          "PAPER-CONTRACT",
+          "100000000",
+          6,
+          "100.000000",
+          "IN",
+          "SUCCESS",
+          true,
+          "SYN-001",
+          "Duplicate raw capture R-06 linked and removed once"
+        ],
+        [
+          "EV-02",
+          "FICTIONAL-EVM",
+          "TX-02",
+          0,
+          "PAPER-CONTRACT",
+          "40000000",
+          6,
+          "40.000000",
+          "OUT",
+          "SUCCESS",
+          true,
+          "SYN-001",
+          "Transfer to CP-B"
+        ],
+        [
+          "EV-03",
+          "FICTIONAL-EVM",
+          "TX-03",
+          0,
+          "PAPER-CONTRACT",
+          "5000000",
+          6,
+          "5.000000",
+          "SELF",
+          "SUCCESS",
+          true,
+          "SYN-001",
+          "Separate self activity; excluded from directional totals"
+        ],
+        [
+          "EV-04",
+          "FICTIONAL-EVM",
+          "TX-04",
+          0,
+          "PAPER-CONTRACT",
+          "1",
+          6,
+          "0.000001",
+          "IN",
+          "SUCCESS",
+          true,
+          "SYN-001",
+          "Small unsolicited transfer; no attribution inference"
+        ],
+        [
+          "EV-05",
+          "FICTIONAL-EVM",
+          "TX-05",
+          null,
+          "PAPER-CONTRACT",
+          "20000000",
+          6,
+          "20.000000",
+          "OUT",
+          "FAILED",
+          false,
+          "SYN-001",
+          "Attempted amount from supplied record; no successful event log"
+        ]
+      ]
+    },
+    {
+      "name": "Counterparties",
+      "columns": [
+        "counterparty_id",
+        "asset_id",
+        "in_units",
+        "out_units",
+        "self_units",
+        "eligible_event_count",
+        "attribution_state",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "CP-A",
+          "PAPER-CONTRACT",
+          "100.000000",
+          "0.000000",
+          "0.000000",
+          1,
+          "UNATTRIBUTED",
+          "SYN-001",
+          "Raw duplicate not counted twice"
+        ],
+        [
+          "CP-B",
+          "PAPER-CONTRACT",
+          "0.000000",
+          "40.000000",
+          "0.000000",
+          1,
+          "UNVERIFIED LABEL",
+          "SYN-001",
+          "Supplied explorer label not identity evidence"
+        ],
+        [
+          "SUBJECT",
+          "PAPER-CONTRACT",
+          "0.000000",
+          "0.000000",
+          "5.000000",
+          1,
+          "SELF ADDRESS",
+          "SYN-001",
+          "Same exact fictional address; no separate counterparty"
+        ],
+        [
+          "CP-C",
+          "PAPER-CONTRACT",
+          "0.000001",
+          "0.000000",
+          "0.000000",
+          1,
+          "UNATTRIBUTED",
+          "SYN-001",
+          "Unsolicited small inbound amount retained"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "Duplicate and failed records need distinct treatment",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "Six raw rows reconcile to five unique records and four eligible successful events.",
+      "recommendation": "Preserve duplicate lineage and failed-attempt exclusion."
+    },
+    {
+      "id": "F-02",
+      "title": "Counterparty identity is not established by the label",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "CP-B has an explorer-style label without supporting identity evidence.",
+      "recommendation": "Obtain independent attribution evidence before consequential reliance."
+    },
+    {
+      "id": "F-03",
+      "title": "Captured net flow is not an ending balance",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Estimated",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method.",
+      "recommendation": "Keep balance, fiat value, and completeness limitations explicit."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional digital asset capture",
+      "locator": "10-worked-example.md, R-01 through R-06",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-ETH-TX",
+      "title": "Ethereum transactions documentation",
+      "locator": "https://ethereum.org/developers/docs/transactions/",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-ETH-RPC",
+      "title": "Ethereum JSON-RPC documentation",
+      "locator": "https://ethereum.org/developers/docs/apis/json-rpc/",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-ERC20",
+      "title": "ERC-20 standard",
+      "locator": "https://eips.ethereum.org/EIPS/eip-20",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-BTC",
+      "title": "Bitcoin transactions developer guide",
+      "locator": "https://developer.bitcoin.org/devguide/transactions.html",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-FATF-VA",
+      "title": "FATF virtual asset guidance",
+      "locator": "https://www.fatf-gafi.org/en/publications/Fatfrecommendations/Guidance-rba-virtual-assets-2021.html",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Raw to unique records",
+      "value": "6 to 5",
+      "method": "Six capture rows less one proven repeated event."
+    },
+    {
+      "label": "Eligible successful events",
+      "value": "4",
+      "method": "Five unique records less one failed attempt."
+    },
+    {
+      "label": "Captured net directional flow",
+      "value": "60.000001 PAPER",
+      "method": "(100000000 + 1 - 40000000) / 10^6; excludes SELF and FAILED."
+    }
+  ],
+  "limitations": [
+    "All network and address labels are fictional; no live-chain validation is implied.",
+    "No opening balance, fiat price, or complete native-fee accounting is supplied.",
+    "Explorer-style labels do not establish identity, intent, or legal status."
+  ],
+  "metadata": {
+    "conclusion": "Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity."
+  },
+  "report_narrative": [
+    [
+      "Six fictional capture rows reconcile to five unique records and four eligible successful events. Captured net directional flow is 60.000001 PAPER; it is not an ending balance, fiat value, or evidence of counterparty identity."
+    ],
+    [
+      "The fictional EVM-style capture contains six raw rows for one token with six decimal places. Records are reconciled by event identity and execution status before directional amounts are summed; exact atomic values remain text."
+    ],
+    [
+      "F-01: Six raw rows reconcile to five unique records and four eligible successful events.",
+      "F-02: CP-B has an explorer-style label without supporting identity evidence.",
+      "F-03: 100.000001 PAPER in less 40.000000 PAPER out equals 60.000001 PAPER under the stipulated method."
+    ],
+    [
+      "One duplicate leaves five unique records. Four are successful eligible events; the failed 20.000000 PAPER attempt is excluded. The 5.000000 PAPER self transfer remains visible but does not inflate directional totals."
+    ],
+    [
+      "Inbound 100.000001 PAPER less outbound 40.000000 PAPER produces captured net flow of 60.000001 PAPER. CP-B remains an unverified label; the tiny CP-C inbound transfer provides no identity or intent inference."
+    ],
+    [
+      "SYN-001 supplies the raw captures, event identities and label assertion. No opening balance, fiat price, complete native-fee ledger or independent attribution evidence is supplied."
+    ],
+    [
+      "Preserve duplicate lineage and exact units, obtain independent attribution before consequential reliance, and keep net captured flow separate from ending balance and fiat exposure."
+    ],
+    [
+      "All network and address labels are fictional; no live-chain validation is implied.",
+      "No opening balance, fiat price, or complete native-fee accounting is supplied.",
+      "Explorer-style labels do not establish identity, intent, or legal status.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

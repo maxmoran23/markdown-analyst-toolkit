@@ -1,0 +1,268 @@
+{
+  "slug": "regulatory-change",
+  "title": "Regulatory Change and Obligation Mapping",
+  "summary": "Translate a supplied public-source change set into provision-level applicability, readiness, and evidence questions without turning proposals into current obligations.",
+  "audience": "Regulatory analysts, control owners, and legal reviewers",
+  "decision": "Which changes require verified applicability and implementation action, and which remain watch or research items?",
+  "palette": "umber",
+  "report_sections": [
+    "Change priorities and restricted conclusion",
+    "Scope status and applicability method",
+    "Material readiness findings",
+    "Instrument register and date status",
+    "Obligation mapping and readiness",
+    "Source evidence and unresolved authority",
+    "Implementation and verification proposals",
+    "Limitations quality review and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "ChangeRegister",
+      "columns": [
+        "change_id",
+        "instrument_status",
+        "applicability",
+        "effective_date",
+        "compliance_date",
+        "owner_role",
+        "priority",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "CH01",
+          "PROPOSED",
+          "Conditional",
+          null,
+          null,
+          "Regulatory analysis",
+          "MEDIUM",
+          "SYN-001"
+        ],
+        [
+          "CH02",
+          "FINAL_NOT_EFFECTIVE",
+          "In scope",
+          "2026-11-01",
+          "2026-12-01",
+          "Records owner",
+          "MEDIUM",
+          "SYN-001"
+        ],
+        [
+          "CH03",
+          "EFFECTIVE",
+          "In scope",
+          "2026-09-01",
+          "2026-10-01",
+          "Review owner",
+          "HIGH",
+          "SYN-001"
+        ],
+        [
+          "CH04",
+          "GUIDANCE",
+          "Reference only",
+          null,
+          null,
+          "Governance owner",
+          "LOW",
+          "SYN-001"
+        ],
+        [
+          "CH05",
+          "WITHDRAWN",
+          "Not current",
+          null,
+          null,
+          "Regulatory analysis",
+          "LOW",
+          "SYN-001"
+        ],
+        [
+          "CH06",
+          "STATUS_UNVERIFIED",
+          "Unresolved",
+          null,
+          null,
+          "Legal review",
+          "HIGH",
+          "SYN-001"
+        ]
+      ]
+    },
+    {
+      "name": "ObligationMap",
+      "columns": [
+        "obligation_id",
+        "change_id",
+        "requirement_summary",
+        "control_id",
+        "readiness",
+        "compliance_date",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "OB01",
+          "CH02",
+          "Retain a review log under fictional provision2",
+          "CTRL-LOG",
+          "BUILD",
+          "2026-12-01",
+          "SYN-001"
+        ],
+        [
+          "OB02",
+          "CH03",
+          "Evidence escalation review under fictional provision3a",
+          "CTRL-REV",
+          "EVIDENCE GAP",
+          "2026-10-01",
+          "SYN-001"
+        ],
+        [
+          "OB03",
+          "CH03",
+          "Complete role training under fictional provision3b",
+          "CTRL-TRN",
+          "VERIFIED FOR FIXTURE",
+          "2026-10-01",
+          "SYN-001"
+        ],
+        [
+          "OB04",
+          "CH01",
+          "Potential reporting field under proposed provision1",
+          "CTRL-PROP",
+          "SCENARIO ONLY",
+          null,
+          "SYN-001"
+        ],
+        [
+          "OB05",
+          "CH04",
+          "Consider governance review practice",
+          "CTRL-GOV",
+          "REFERENCE ONLY",
+          null,
+          "SYN-001"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "RC-F01",
+      "title": "Evidence for an effective fictional requirement remains missing",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "OB02 has no retained review evidence as of 2026-10-09; the fictional compliance date is 2026-10-01. A legal breach is not established by missing evidence alone.",
+      "recommendation": "Obtain execution evidence and route the applicability and consequence assessment to an authorized reviewer."
+    },
+    {
+      "id": "RC-F02",
+      "title": "A near-term claimed change lacks primary-source status confirmation",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "CH06 is supported only by a fictional secondary summary. Its claimed date is not copied into confirmed deadline fields.",
+      "recommendation": "Retrieve primary material or keep status unverified and document interim review needs."
+    },
+    {
+      "id": "RC-F03",
+      "title": "Future final requirement needs implementation evidence",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "OB01 remains in build status ahead of the fictional 2026-12-01 compliance date. Readiness has not been evidenced.",
+      "recommendation": "Define accountable milestones and acceptance tests for human approval."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional six-instrument change set and implementation evidence",
+      "locator": "10-worked-example.md, source cards and obligation mapping",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-001",
+      "title": "National Archives Federal Register Tutorial",
+      "locator": "https://www.archives.gov/federal-register/tutorial/text",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-002",
+      "title": "Administrative Procedure Act,5 U.S.C. 553",
+      "locator": "https://www.archives.gov/federal-register/laws/administrative-procedure/553.html",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "REF-003",
+      "title": "National Archives Office of the Federal Register FAQs",
+      "locator": "https://www.archives.gov/federal-register/faqs",
+      "claim_class": "Reported"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Tracked instruments",
+      "value": "6",
+      "method": "Distinct CH01\u2013CH06 source cards, preserving proposed, withdrawn, and unverified states."
+    },
+    {
+      "label": "Confirmed final in-scope instruments",
+      "value": "2",
+      "method": "CH02 final-not-effective plus CH03 effective; excludes guidance and proposals."
+    },
+    {
+      "label": "Effective mapped evidence coverage",
+      "value": "1 of 2 (50.0%)",
+      "method": "OB03 verified / OB02 and OB03 effective mapped requirements; not a compliance score."
+    }
+  ],
+  "limitations": [
+    "All six change instruments and organization facts are fictional.",
+    "A proposal, guidance item, or secondary report is not a verified current legal obligation.",
+    "Missing execution evidence does not alone prove legal noncompliance.",
+    "Readiness counts do not measure the completeness of all applicable legal obligations."
+  ],
+  "conclusion": "Prioritize the missing evidence for OB02 and primary-source confirmation for CH06 while planning the future CH02 requirement. One of two effective mapped fixture requirements has verified evidence; this is evidence coverage, not a compliance score.",
+  "report_narrative": [
+    [
+      "Prioritize OB02\u2019s evidence gap and CH06\u2019s missing primary-source confirmation, while planning CH02\u2019s future requirement. One of two effective mapped fixture requirements has verified evidence; this is not a compliance score."
+    ],
+    [
+      "The review is as of Oct 09, 2026 and covers six invented instruments for a fictional Type A entity carrying Activity Q. Status, applicability, dates, and readiness are assessed separately using the complete source cards in SYN-001."
+    ],
+    [
+      "OB02 lacks execution evidence after its explicit fictional compliance date. CH06 has only a secondary claim and no confirmed deadline. OB01 remains in build status ahead of its future compliance date; that supports a readiness concern, not a prediction of missed implementation."
+    ],
+    [
+      "ChangeRegister preserves one proposed, one final-not-effective, one effective, one guidance, one withdrawn, and one unverified item. Only CH02 and CH03 have confirmed effective and compliance dates in the fixture."
+    ],
+    [
+      "ObligationMap has five rows: one future requirement, two effective requirements, one proposal scenario, and one reference item. The effective evidence denominator is OB02 and OB03; only OB03 is verified for the fixture, giving 1/2 = 50.0%."
+    ],
+    [
+      "SYN-001 contains fictional source cards and implementation evidence. CH06\u2019s claimed Oct 15 date remains in the evidence narrative rather than confirmed deadline fields. The National Archives references support research method, not the invented legal requirements."
+    ],
+    [
+      "Propose retrieval of OB02 evidence, primary verification for CH06, and accountable acceptance milestones for OB01. Keep CH01 as scenario planning, CH04 as reference context, and CH05 as historical withdrawal."
+    ],
+    [
+      "QA rejects proposal-to-obligation conversion, comment-date substitution, and breach conclusions from missing evidence alone. Human reviewers retain legal interpretation, applicability, commitments, and final readiness decisions."
+    ]
+  ]
+}

@@ -1,0 +1,270 @@
+{
+  "slug": "typology-red-flags",
+  "title": "Typology and Red-Flag Review",
+  "summary": "Translate evidence into explicit indicator observations, test ordinary explanations, and build a defensible inquiry plan without treating a red flag as proof of misconduct.",
+  "audience": "Financial-crime analysts, typology researchers, and control-design reviewers",
+  "decision": "Which indicators are actually supported, which remain indeterminate, and what additional evidence would distinguish a concerning explanation from an ordinary one?",
+  "palette": "teal",
+  "report_sections": [
+    "Review priorities and indicator counts",
+    "Scope and indicator methodology",
+    "Findings and alternative explanations",
+    "Indicator observations",
+    "Competing hypotheses by case",
+    "Evidence and source applicability",
+    "Proposed inquiry actions",
+    "Limitations, quality checks, and human review"
+  ],
+  "domain_tables": [
+    {
+      "name": "IndicatorObservations",
+      "columns": [
+        "observation_id",
+        "case_id",
+        "indicator_id",
+        "state",
+        "measured_value",
+        "unit",
+        "criterion",
+        "evidence_ids",
+        "interpretation"
+      ],
+      "rows": [
+        [
+          "O-01",
+          "A",
+          "RF-01",
+          "PRESENT",
+          0.95,
+          "ratio",
+          "credit>=5000 USD; ratio>=0.90; elapsed<=24h",
+          "SYN-001",
+          "Rapid movement pattern; purpose unresolved"
+        ],
+        [
+          "O-02",
+          "A",
+          "RF-02",
+          "ABSENT",
+          2,
+          "distinct_payers",
+          "at least 3 distinct payers",
+          "SYN-001",
+          "Two payers; criterion not met"
+        ],
+        [
+          "O-03",
+          "B",
+          "RF-01",
+          "NOT_APPLICABLE",
+          null,
+          "ratio",
+          "exclude confirmed own transfers",
+          "SYN-002",
+          "Ownership evidence supports limited exclusion"
+        ],
+        [
+          "O-04",
+          "C",
+          "RF-03",
+          "INDETERMINATE",
+          null,
+          "posted_events",
+          "at least 3 posted events in 24h",
+          "SYN-003",
+          "Reported events lack transaction corroboration"
+        ],
+        [
+          "O-05",
+          "D",
+          "RF-04",
+          "ABSENT",
+          1,
+          "distinct_payees",
+          "at least 3 distinct payees in 24h",
+          "SYN-004",
+          "One visible payment; complete stated window"
+        ]
+      ]
+    },
+    {
+      "name": "HypothesisReview",
+      "columns": [
+        "case_id",
+        "concern_hypothesis",
+        "benign_hypothesis",
+        "support_state",
+        "next_evidence",
+        "priority",
+        "confidence",
+        "proposed_outcome"
+      ],
+      "rows": [
+        [
+          "A",
+          "Unexplained rapid onward movement",
+          "Ordinary consolidated supplier settlement",
+          "PATTERN_ONLY",
+          "Purpose and counterparty records",
+          "MEDIUM",
+          "MODERATE",
+          "FURTHER_REVIEW"
+        ],
+        [
+          "B",
+          "Concealed onward transfer",
+          "Movement between confirmed owned accounts",
+          "BENIGN_SUPPORTED",
+          "No extra inquiry for RF-01 on supplied facts",
+          "LOW",
+          "HIGH",
+          "DOCUMENT_LIMITED_EXCLUSION"
+        ],
+        [
+          "C",
+          "Repeated related payments",
+          "Duplicate descriptions of one event",
+          "INSUFFICIENT_EVIDENCE",
+          "Original ledger and timestamps",
+          "MEDIUM",
+          "LOW",
+          "OBTAIN_SOURCE"
+        ],
+        [
+          "D",
+          "Distribution across multiple beneficiaries",
+          "One ordinary invoice payment",
+          "PATTERN_NOT_MET",
+          "None for RF-04 within stated scope",
+          "LOW",
+          "HIGH",
+          "RECORD_NEGATIVE"
+        ]
+      ]
+    }
+  ],
+  "findings": [
+    {
+      "id": "RF-F01",
+      "title": "One observed rapid-movement indicator requires context",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "A has a 95.0% outward-to-inward ratio within two hours, but the distinct-payer indicator is absent.",
+      "recommendation": "Seek purpose and counterparty evidence without converting the indicator into a criminal conclusion."
+    },
+    {
+      "id": "RF-F02",
+      "title": "A narrative-only repetition claim is indeterminate",
+      "severity": "MEDIUM",
+      "confidence": "LOW",
+      "claim_class": "Reported",
+      "evidence_ids": [
+        "SYN-003"
+      ],
+      "detail": "C is reported to have three payments, but no original ledger or event times are supplied.",
+      "recommendation": "Obtain original events and test whether the descriptions refer to unique posted payments."
+    },
+    {
+      "id": "RF-F03",
+      "title": "Own transfers and a single payee provide negative controls",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-002",
+        "SYN-004"
+      ],
+      "detail": "B is excluded from RF-01 on confirmed ownership; D does not meet the three-payee criterion.",
+      "recommendation": "Retain these limited results without declaring either relationship universally low risk."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional case A ledger",
+      "locator": "10-worked-example.md, events E01–E03",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional case B ledger and ownership record",
+      "locator": "10-worked-example.md, events E04–E05 and ownership note",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional uncorroborated case C referral",
+      "locator": "10-worked-example.md, record N01",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional case D ledger",
+      "locator": "10-worked-example.md, event E06",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Indicator observations",
+      "value": 5,
+      "method": "Count O-01 through O-05"
+    },
+    {
+      "label": "Present indicators",
+      "value": 1,
+      "method": "O-01 only; count states independently of case count"
+    },
+    {
+      "label": "Indeterminate indicators",
+      "value": 1,
+      "method": "O-04 lacks original transaction evidence"
+    },
+    {
+      "label": "Known gross movement USD",
+      "value": 27500,
+      "method": "Sum E01–E06; excludes reported amount in N01"
+    }
+  ],
+  "limitations": [
+    "Indicator thresholds are authored illustrations rather than regulatory criteria.",
+    "Case C has a referral narrative but no transaction ledger.",
+    "No indicator establishes intent, beneficial ownership, or underlying criminal conduct."
+  ],
+  "conclusion": "One of five planned observations is present, two are absent, one is indeterminate, and one is not applicable. The supported pattern warrants a targeted inquiry; no indicator establishes criminal conduct.",
+  "report_narrative": [
+    [
+      "One of five planned observations is present, two are absent, one is indeterminate, and one is not applicable. The supported pattern warrants a targeted inquiry; no indicator establishes criminal conduct."
+    ],
+    [
+      "The review covers five planned indicator observations and their explicit applicability tests. The fictional thresholds support reproducible method checks; they are not universal reporting or risk-acceptance criteria."
+    ],
+    [
+      "RF-F01: A has a 95.0% outward-to-inward ratio within two hours, but the distinct-payer indicator is absent.",
+      "RF-F02: C is reported to have three payments, but no original ledger or event times are supplied.",
+      "RF-F03: B is excluded from RF-01 on confirmed ownership; D does not meet the three-payee criterion."
+    ],
+    [
+      "Of five observations, one is present, two absent, one indeterminate and one not applicable. Known gross movement is $27,500.00. These states retain separate denominators, and the amount is not a measure of illicit proceeds."
+    ],
+    [
+      "The present pattern supports a targeted inquiry alongside the documented competing explanation. Missing evidence leaves one observation indeterminate; lack of applicability is not a favorable test result."
+    ],
+    [
+      "File 10 supplies the complete synthetic observations, case hypotheses and evidence IDs. Public typology sources inform the review vocabulary, while their indicator descriptions do not establish subject-specific facts."
+    ],
+    [
+      "Seek the evidence that distinguishes the competing hypotheses and resolves the indeterminate observation. Escalate only through the authorized review process; retain all absent and inapplicable observations in the population."
+    ],
+    [
+      "Indicator thresholds are authored illustrations rather than regulatory criteria.",
+      "Case C has a referral narrative but no transaction ledger.",
+      "No indicator establishes intent, beneficial ownership, or underlying criminal conduct.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

@@ -1,0 +1,283 @@
+{
+  "slug": "sanctions-review",
+  "title": "Sanctions Review",
+  "summary": "Separate identity matching, authority scope, ownership propagation, other nexus, and human disposition.",
+  "audience": "Analysts preparing sanctions evidence for authorized human review",
+  "decision": "What does the identified authority imply on the supplied facts, and which questions require further review?",
+  "palette": "slate",
+  "report_sections": [
+    "Sanctions review brief",
+    "Scope and applicable authority",
+    "Material findings",
+    "Ownership propagation assessment",
+    "Identity and nexus assessment",
+    "Evidence record",
+    "Recommended review actions",
+    "Limitations and human disposition"
+  ],
+  "domain_tables": [
+    {
+      "name": "OwnershipEdges",
+      "columns": [
+        "edge_id",
+        "owner_id",
+        "owned_entity_id",
+        "interest_pct",
+        "basis",
+        "effective_date",
+        "evidence_ids",
+        "notes"
+      ],
+      "rows": [
+        [
+          "S-01",
+          "BLOCKED-A",
+          "ENTITY-A",
+          60,
+          "Ordinary ownership",
+          "2026-09-30",
+          "SYN-001",
+          "Blocked status stipulated for fictional example"
+        ],
+        [
+          "S-02",
+          "ENTITY-A",
+          "ENTITY-B",
+          55,
+          "Ordinary ownership",
+          "2026-09-30",
+          "SYN-001",
+          "ENTITY-A becomes a propagation source"
+        ],
+        [
+          "S-03",
+          "BLOCKED-B",
+          "ENTITY-C",
+          20,
+          "Ordinary ownership",
+          "2026-09-30",
+          "SYN-001",
+          "Independent blocked holder"
+        ],
+        [
+          "S-04",
+          "ENTITY-A",
+          "ENTITY-C",
+          30,
+          "Ordinary ownership",
+          "2026-09-30",
+          "SYN-001",
+          "Distinct direct stake; no double counting"
+        ],
+        [
+          "S-05",
+          "BLOCKED-A",
+          "ENTITY-D",
+          49,
+          "Ordinary ownership",
+          "2026-09-30",
+          "SYN-001",
+          "Other ownership stipulated nonblocked; control unassessed"
+        ]
+      ],
+      "formats": {
+        "interest_pct": "0.0\"%\""
+      }
+    },
+    {
+      "name": "ReviewDecisions",
+      "columns": [
+        "subject_id",
+        "identity_state",
+        "authority_scope",
+        "known_blocked_pct",
+        "ownership_result",
+        "other_nexus",
+        "review_state",
+        "evidence_ids",
+        "rationale"
+      ],
+      "rows": [
+        [
+          "ENTITY-A",
+          "RESOLVED IN FIXTURE",
+          "Illustrative OFAC ownership only",
+          60,
+          "THRESHOLD MET",
+          "NOT ASSESSED",
+          "HUMAN REVIEW REQUIRED",
+          "SYN-001",
+          "60 percent direct ownership by stipulated blocked holder"
+        ],
+        [
+          "ENTITY-B",
+          "RESOLVED IN FIXTURE",
+          "Illustrative OFAC ownership only",
+          55,
+          "THRESHOLD MET",
+          "NOT ASSESSED",
+          "HUMAN REVIEW REQUIRED",
+          "SYN-001",
+          "ENTITY-A is a blocked propagation source; economic product is not the test"
+        ],
+        [
+          "ENTITY-C",
+          "RESOLVED IN FIXTURE",
+          "Illustrative OFAC ownership only",
+          50,
+          "THRESHOLD MET",
+          "NOT ASSESSED",
+          "HUMAN REVIEW REQUIRED",
+          "SYN-001",
+          "20 percent BLOCKED-B plus 30 percent ENTITY-A"
+        ],
+        [
+          "ENTITY-D",
+          "RESOLVED IN FIXTURE",
+          "Illustrative OFAC ownership only",
+          49,
+          "THRESHOLD NOT MET ON SUPPLIED FACTS",
+          "NOT ASSESSED",
+          "HUMAN REVIEW REQUIRED",
+          "SYN-001",
+          "No all-sanctions clearance; control and other restrictions not assessed"
+        ]
+      ],
+      "formats": {
+        "known_blocked_pct": "0.0\"%\""
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "F-01",
+      "title": "Three entities meet the scoped ownership condition",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.",
+      "recommendation": "Present the scoped result and assumptions for human sanctions review."
+    },
+    {
+      "id": "F-02",
+      "title": "Other nexus and authorization are unassessed",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "All four entity rows retain NOT ASSESSED for other sanctions nexus.",
+      "recommendation": "Obtain actual activity, authority, parties, and authorization evidence."
+    },
+    {
+      "id": "F-03",
+      "title": "Below-threshold result depends on complete stipulated ownership",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001"
+      ],
+      "detail": "ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked.",
+      "recommendation": "Preserve assumptions and avoid describing the result as clearance."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional sanctions ownership case",
+      "locator": "10-worked-example.md, S-01 through S-05",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-401",
+      "title": "OFAC FAQ 401",
+      "locator": "https://ofac.treasury.gov/faqs/401",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-398",
+      "title": "OFAC FAQ 398",
+      "locator": "https://ofac.treasury.gov/faqs/398",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-5",
+      "title": "OFAC FAQ 5",
+      "locator": "https://ofac.treasury.gov/faqs/5",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-OFAC-402",
+      "title": "OFAC FAQ 402",
+      "locator": "https://ofac.treasury.gov/faqs/402",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "REF-SLS",
+      "title": "OFAC Sanctions List Service",
+      "locator": "https://ofac.treasury.gov/sanctions-list-service",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Direct ownership edges",
+      "value": "5",
+      "method": "Count distinct S-01 through S-05."
+    },
+    {
+      "label": "Scoped threshold-met entities",
+      "value": "3 of 4",
+      "method": "ENTITY-A, ENTITY-B, and ENTITY-C meet the illustrated condition."
+    },
+    {
+      "label": "Other-nexus reviews complete",
+      "value": "0 of 4",
+      "method": "All four rows are explicitly NOT ASSESSED for other nexus."
+    }
+  ],
+  "limitations": [
+    "Fictional blocked seeds and simplified comparable ownership are stipulated.",
+    "The OFAC ownership illustration is not a global ownership/control rule.",
+    "No real identity, transaction, authorization, or operational disposition has been assessed."
+  ],
+  "metadata": {
+    "conclusion": "Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four."
+  },
+  "report_narrative": [
+    [
+      "Three of four fictional entities meet the narrowly scoped ownership condition under the supplied propagation assumptions. The fourth is below that condition on stipulated complete facts, while other sanctions nexuses and authorization remain unassessed for all four."
+    ],
+    [
+      "The calculation is limited to a stipulated OFAC ownership illustration with five direct edges and four subjects. Initial blocked status, comparable ownership, complete relevant holdings and the as-of date are assumptions of this fictional example."
+    ],
+    [
+      "F-01: ENTITY-A 60.0%, ENTITY-B 55.0%, ENTITY-C 50.0% under the fictional propagation worksheet.",
+      "F-02: All four entity rows retain NOT ASSESSED for other sanctions nexus.",
+      "F-03: ENTITY-D has 49.0% known blocked ownership; remaining holders are stipulated nonblocked."
+    ],
+    [
+      "BLOCKED-A owns 60.0% of ENTITY-A. ENTITY-A therefore becomes a propagation source for its 55.0% holding in ENTITY-B. ENTITY-C reaches 50.0% through distinct 20.0% and 30.0% blocked-source holdings. Multiplying the first chain to 33.0% would apply the wrong test."
+    ],
+    [
+      "ENTITY-D has 49.0% known blocked ownership on stipulated complete facts, below this ownership condition alone. Other sanctions nexuses, applicable restrictions, transaction facts and authorization remain unassessed for all four subjects."
+    ],
+    [
+      "SYN-001 contains the fictional seed status and complete edges. Authority references explain the scoped method; no real list search, identity resolution, license assessment or operational disposition is evidenced."
+    ],
+    [
+      "Present the propagation calculation for human sanctions review. Require actual identity, applicable authority, activity and authorization evidence before any operational decision, including for ENTITY-D."
+    ],
+    [
+      "Fictional blocked seeds and simplified comparable ownership are stipulated.",
+      "The OFAC ownership illustration is not a global ownership/control rule.",
+      "No real identity, transaction, authorization, or operational disposition has been assessed.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

@@ -1,0 +1,277 @@
+{
+  "slug": "transaction-monitoring",
+  "title": "Transaction Monitoring Review",
+  "summary": "Reconcile a transaction extract, calculate transparent monitoring scenarios, and turn rule matches into reviewable observations with explicit benign explanations.",
+  "audience": "Monitoring analysts, scenario owners, and independent control reviewers",
+  "decision": "Which scenario matches merit further review, which have supported explanations, and which cannot be assessed because the inputs are incomplete?",
+  "palette": "slate",
+  "report_sections": [
+    "Review priorities and known movement",
+    "Scope, population, and scenario method",
+    "Findings and benign explanations",
+    "Account flow calculations",
+    "Scenario matches and review outcomes",
+    "Evidence and criterion provenance",
+    "Proposed review and data-repair actions",
+    "Limitations, quality checks, and human decision"
+  ],
+  "domain_tables": [
+    {
+      "name": "AccountFlows",
+      "columns": [
+        "account_id",
+        "currency",
+        "processed_tx_count",
+        "credit_total",
+        "debit_total",
+        "eligible_credit_total",
+        "eligible_debit_total",
+        "out_in_ratio",
+        "population_status"
+      ],
+      "rows": [
+        [
+          "A",
+          "USD",
+          3,
+          10000,
+          9500,
+          10000,
+          9500,
+          0.95,
+          "COMPLETE"
+        ],
+        [
+          "B",
+          "USD",
+          2,
+          5000,
+          4800,
+          5000,
+          4800,
+          0.96,
+          "COMPLETE"
+        ],
+        [
+          "C",
+          "USD",
+          2,
+          3000,
+          3000,
+          0,
+          0,
+          null,
+          "OWN_TRANSFER_EXCLUDED"
+        ],
+        [
+          "D",
+          "USD",
+          1,
+          0,
+          1000,
+          0,
+          1000,
+          null,
+          "UNPARSED_AMOUNT"
+        ]
+      ],
+      "formats": {
+        "credit_total": "#,##0.00",
+        "debit_total": "#,##0.00",
+        "eligible_credit_total": "#,##0.00",
+        "eligible_debit_total": "#,##0.00",
+        "out_in_ratio": "0.0%"
+      }
+    },
+    {
+      "name": "ScenarioResults",
+      "columns": [
+        "scenario_result_id",
+        "account_id",
+        "scenario_id",
+        "eligible",
+        "rule_result",
+        "first_credit_to_debit_hours",
+        "review_outcome",
+        "evidence_ids"
+      ],
+      "rows": [
+        [
+          "SR-001",
+          "A",
+          "TM-01",
+          true,
+          "MATCH",
+          2,
+          "ESCALATE_FOR_REVIEW",
+          "SYN-001;SYN-002"
+        ],
+        [
+          "SR-002",
+          "B",
+          "TM-01",
+          true,
+          "MATCH",
+          3,
+          "EXPLANATION_SUPPORTED",
+          "SYN-001;SYN-003"
+        ],
+        [
+          "SR-003",
+          "C",
+          "TM-01",
+          false,
+          "EXCLUDED",
+          null,
+          "OWN_TRANSFER_CONFIRMED",
+          "SYN-001;SYN-004"
+        ],
+        [
+          "SR-004",
+          "D",
+          "TM-01",
+          false,
+          "NOT_ASSESSABLE",
+          null,
+          "DATA_REPAIR_REQUIRED",
+          "SYN-001;SYN-005"
+        ]
+      ],
+      "formats": {
+        "first_credit_to_debit_hours": "0.0"
+      }
+    }
+  ],
+  "findings": [
+    {
+      "id": "TM-F01",
+      "title": "Account A meets the illustrative rapid-movement rule",
+      "severity": "MEDIUM",
+      "confidence": "MODERATE",
+      "claim_class": "Inferred",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-002"
+      ],
+      "detail": "Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.",
+      "recommendation": "Obtain payment purpose and counterparties; refer to the authorized reviewer."
+    },
+    {
+      "id": "TM-F02",
+      "title": "Account B has a supported ordinary-business explanation",
+      "severity": "LOW",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-003"
+      ],
+      "detail": "The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.",
+      "recommendation": "Document the explanation and seek human disposition; retain the rule hit."
+    },
+    {
+      "id": "TM-F03",
+      "title": "Account D cannot be fully assessed",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "claim_class": "Observed",
+      "evidence_ids": [
+        "SYN-001",
+        "SYN-005"
+      ],
+      "detail": "One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit.",
+      "recommendation": "Repair the source extract and recompute D before making an account conclusion."
+    }
+  ],
+  "evidence": [
+    {
+      "id": "SYN-001",
+      "title": "Fictional transaction extract",
+      "locator": "10-worked-example.md, raw population R01–R10",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-002",
+      "title": "Fictional account A profile",
+      "locator": "10-worked-example.md, context register A",
+      "claim_class": "Reported"
+    },
+    {
+      "id": "SYN-003",
+      "title": "Fictional invoice and matching confirmation",
+      "locator": "10-worked-example.md, context register B",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-004",
+      "title": "Fictional ownership confirmation",
+      "locator": "10-worked-example.md, context register C",
+      "claim_class": "Observed"
+    },
+    {
+      "id": "SYN-005",
+      "title": "Fictional extract defect",
+      "locator": "10-worked-example.md, raw row R10",
+      "claim_class": "Observed"
+    }
+  ],
+  "metrics": [
+    {
+      "label": "Raw rows",
+      "value": 10,
+      "method": "Count R01–R10 before deduplication"
+    },
+    {
+      "label": "Processed transactions",
+      "value": 8,
+      "method": "10 raw minus 1 duplicate minus 1 unparsed"
+    },
+    {
+      "label": "Known gross movement USD",
+      "value": 36300,
+      "method": "$18,000.00 credits plus $18,300.00 debits; excludes unknown R10 amount"
+    },
+    {
+      "label": "Rule matches",
+      "value": 2,
+      "method": "A and B match TM-01; C excluded; D not assessable"
+    }
+  ],
+  "limitations": [
+    "Synthetic rules are illustrative and are not regulatory thresholds.",
+    "Account D has an unknown amount; total monetary completeness is not established.",
+    "No opening balances or complete external flow paths are supplied."
+  ],
+  "conclusion": "Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable.",
+  "report_narrative": [
+    [
+      "Two accounts match the illustrative rapid-movement rule. One has a supported invoice explanation; the other needs further review. A separate account remains not assessable because an amount is unreadable."
+    ],
+    [
+      "The ten raw rows reconcile to eight processed transactions after the documented duplicate and exclusion decisions. The fictional scenario uses explicit amount, ratio and timing criteria; unreadable amounts remain outside assessable sums."
+    ],
+    [
+      "TM-F01: Account A received $10,000.00 and sent $9,500.00 within two hours of the first receipt; the 95.0% ratio meets TM-01. Purpose remains unsupported.",
+      "TM-F02: The 96.0% rule match is retained; a matched supplier invoice supports the $4,800.00 payment.",
+      "TM-F03: One unreadable amount prevents account-level completeness; $1,000.00 is only the known posted debit."
+    ],
+    [
+      "Known gross movement is $36,300.00 within the captured records. Account totals retain the relationship between incoming and outgoing activity; gross movement is not net loss, customer income or suspicious value."
+    ],
+    [
+      "Two accounts meet the raw illustrative rapid-movement criterion. One has a supported invoice explanation, while the other remains a review lead. An additional account is not assessable because an amount is unreadable; it cannot be scored as a negative."
+    ],
+    [
+      "The synthetic source rows and criterion definitions in file 10 support the arithmetic and matches. The public typology references do not supply a regulatory threshold or evidence of wrongdoing for these fictional accounts."
+    ],
+    [
+      "Review the unexplained match, preserve the invoice explanation without deleting the raw match, and repair the unreadable amount before rerunning the affected account."
+    ],
+    [
+      "Synthetic rules are illustrative and are not regulatory thresholds.",
+      "Account D has an unknown amount; total monetary completeness is not established.",
+      "No opening balances or complete external flow paths are supplied.",
+      "QA remains pending and no authorized human disposition is recorded."
+    ]
+  ]
+}

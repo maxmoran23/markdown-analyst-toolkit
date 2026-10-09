@@ -1,0 +1,13 @@
+build/
+__pycache__/
+*.pyc
+.DS_Store
+.venv/
+node_modules/
+
+.env
+.env.*
+*.pem
+*.key
+private/
+case-data/
